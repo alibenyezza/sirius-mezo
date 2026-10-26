@@ -56,6 +56,12 @@ const config: HardhatUserConfig = {
     // par défaut ne suffisent pas sur une machine froide.
     timeout: 180_000,
   },
+  // Vérification du code source : Sourcify (l'explorateur Blockscout de Mezo la lit et l'affiche).
+  sourcify: {
+    enabled: false,
+    apiUrl: "https://sourcify.dev/server",
+    browserUrl: "https://repo.sourcify.dev",
+  },
   etherscan: {
     // Blockscout accepte n'importe quelle clé ; la vérification passe par son endpoint.
     apiKey: {
@@ -67,7 +73,7 @@ const config: HardhatUserConfig = {
         network: "mezoTestnet",
         chainId: 31611,
         urls: {
-          apiURL: "https://explorer.test.mezo.org/api",
+          apiURL: "https://api.explorer.test.mezo.org/api",
           browserURL: "https://explorer.test.mezo.org",
         },
       },
@@ -75,7 +81,7 @@ const config: HardhatUserConfig = {
         network: "mezoMainnet",
         chainId: 31612,
         urls: {
-          apiURL: "https://explorer.mezo.org/api",
+          apiURL: "https://api.explorer.mezo.org/api",
           browserURL: "https://explorer.mezo.org",
         },
       },
