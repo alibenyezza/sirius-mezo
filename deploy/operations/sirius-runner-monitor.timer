@@ -1,0 +1,11 @@
+[Unit]
+Description=Collecte minute du budget runner Sirius staging
+
+[Timer]
+OnBootSec=30
+OnUnitActiveSec=60
+AccuracySec=1
+Unit=sirius-runner-monitor.service
+
+[Install]
+WantedBy=timers.target

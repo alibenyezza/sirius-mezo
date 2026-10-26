@@ -1,0 +1,97 @@
+{
+  "version": 1,
+  "status": "proposed",
+  "preparedAt": "2026-09-24",
+  "preparedBy": "Ali",
+  "costPlan": "deploy/operations/testnet-plan.json",
+  "sources": [
+    "docs/BUSINESS-PLAN.md#52-grille-de-travail-à-tester-commercialement",
+    "docs/BUSINESS-PLAN.md#32-budget-mensuel-de-référence-pour-un-petit-pilote",
+    "docs/OPERATIONS-PREPARATION.md#benchmarks-locaux",
+    "src/lib/billing/config.ts"
+  ],
+  "approval": {
+    "approvedBy": [],
+    "approvedAt": null,
+    "validUntil": null,
+    "note": "Deux signatures (Ali et Ali) requises avant de produire une politique utilisable par le runner."
+  },
+  "currency": {
+    "priceUnit": "MUSD",
+    "usdcDecimalsSource": "Lues sur le contrat du token au moment de la politique ; 18 observées sur le USDC testnet le 24 septembre 2026, jamais une constante supposée.",
+    "usdPerUsdcLowerBoundMicros": "990000",
+    "usdPerUsdcUpperBoundMicros": "1010000",
+    "note": "Bornes prudentes de conversion pour la comptabilité : revenus convertis au plancher, coûts au plafond. Hypothèse à confirmer, pas un taux observé."
+  },
+  "fixedCostCoverage": {
+    "monthlyFixedUsdMicros": "150000000",
+    "variableUsdMicrosPerAttempt": "100000",
+    "successesPerMonth": 30,
+    "attemptsPerMonth": 34,
+    "bufferPercent": 25,
+    "note": "Hypothèses du business plan (base 150 USD, 30 réussites, 34 tentatives à 0,10 USD, coussin 25 %). Fréquentation non observée."
+  },
+  "minimumComputeUsdMicros": "7000000",
+  "profiles": {
+    "linear_regression": {
+      "maxExecutionMs": 30000,
+      "localBenchmarkMaxMs": 333,
+      "phalaCalibrated": false
+    },
+    "logistic_regression": {
+      "maxExecutionMs": 30000,
+      "localBenchmarkMaxMs": 282,
+      "phalaCalibrated": false
+    }
+  },
+  "failurePolicy": {
+    "rule": "consumed-execution-only",
+    "rateBasis": "Tarif de calcul Phala du plan de coûts, sans marge ni frais fixes.",
+    "rounding": "floor",
+    "note": "Arrondi vers le bas : la retenue ne dépasse jamais le coût mesuré. Avec un token à 18 décimales, le tarif à la milliseconde s'arrondit à 0 et aucune retenue n'a lieu."
+  },
+  "trialFunding": {
+    "proposedEnvelopeUsdMicros": "5000000",
+    "fundingSource": null,
+    "fundingSourceNote": "À désigner : apport ou crédits prépayés. Un apport finance la dépense mais n'est jamais une marge acquise.",
+    "approved": false,
+    "providerEnforced": false
+  },
+  "stopScenarios": [
+    {
+      "trigger": "Échéance de session atteinte",
+      "automatic": true,
+      "mechanism": "Superviseur extérieur (ops:watchdog --apply-stop), une fois installé",
+      "owner": "Ali",
+      "residualCost": "Disque Phala facturé tant qu'il est conservé"
+    },
+    {
+      "trigger": "API Phala injoignable pour le superviseur",
+      "automatic": false,
+      "mechanism": "Échec visible du superviseur ; arrêt manuel depuis la console Phala",
+      "owner": "Opérateur de permanence",
+      "residualCost": "Calcul facturé jusqu'à l'arrêt manuel"
+    },
+    {
+      "trigger": "Coupe-circuit ou budget runner épuisé (runner:budget check non nul)",
+      "automatic": true,
+      "mechanism": "Le runner refuse les nouvelles admissions",
+      "owner": "Runner",
+      "residualCost": "La CVM reste allumée et facturée : arrêt de session à demander"
+    },
+    {
+      "trigger": "80 % de l'enveloppe d'essai consommée d'après les factures",
+      "automatic": false,
+      "mechanism": "Aucune nouvelle session planifiée ; décision explicite pour continuer",
+      "owner": "Ali",
+      "residualCost": "Sessions en cours jusqu'à leur échéance"
+    },
+    {
+      "trigger": "Fin de la période d'essai",
+      "automatic": false,
+      "mechanism": "Décision explicite sur le disque : conserver (facturé) ou supprimer (irréversible)",
+      "owner": "Ali et Ali",
+      "residualCost": "0,002780 USD/h pour 20 Go tant que le disque existe"
+    }
+  ]
+}

@@ -1,0 +1,179 @@
+{
+  "version": 1,
+  "generatedAtMs": 1790276247355,
+  "chainId": 31611,
+  "wallet": "0x1212121212121212121212121212121212121212",
+  "accountingReference": "fixture-synthetic-not-revenue",
+  "totals": {
+    "allocatedUsdMicros": "4465",
+    "allocatedWei": "800000000000",
+    "remainingUsdMicros": "95435",
+    "remainingWei": "9200000000000",
+    "failures": 1
+  },
+  "pendingTransactions": [
+    {
+      "id": "failure:31611:0xe7e7e7e7e7e7e7e7e7e7e7e7e7e7e7e7e7e7e7e7:0xf1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1",
+      "hash": "0x0000000000000000000000000000000000000000000000000000000000000003",
+      "nonce": 8,
+      "ageMs": 0,
+      "attempts": 0,
+      "journalAvailable": false,
+      "recovery": "journal-missing"
+    }
+  ],
+  "operations": [
+    {
+      "id": "request:standalone",
+      "fingerprint": "public-read",
+      "kind": "request",
+      "state": "succeeded",
+      "createdAtMs": 1790276247464,
+      "workflowId": null,
+      "budgetUsdMicros": "1",
+      "budgetWei": "0",
+      "transactionHash": null,
+      "nonce": null,
+      "broadcastAttempts": null
+    },
+    {
+      "id": "training:success",
+      "fingerprint": "input-success",
+      "kind": "training",
+      "state": "succeeded",
+      "createdAtMs": 1790276247500,
+      "workflowId": "loan:31611:0xe7e7e7e7e7e7e7e7e7e7e7e7e7e7e7e7e7e7e7e7:0x5151515151515151515151515151515151515151515151515151515151515151",
+      "budgetUsdMicros": "100",
+      "budgetWei": "0",
+      "transactionHash": null,
+      "nonce": null,
+      "broadcastAttempts": null
+    },
+    {
+      "id": "release:31611:0xe7e7e7e7e7e7e7e7e7e7e7e7e7e7e7e7e7e7e7e7:0x5151515151515151515151515151515151515151515151515151515151515151",
+      "fingerprint": "data-success",
+      "kind": "transaction",
+      "state": "succeeded",
+      "createdAtMs": 1790276247514,
+      "workflowId": "loan:31611:0xe7e7e7e7e7e7e7e7e7e7e7e7e7e7e7e7e7e7e7e7:0x5151515151515151515151515151515151515151515151515151515151515151",
+      "budgetUsdMicros": "500",
+      "budgetWei": "100000000000",
+      "transactionHash": "0x0000000000000000000000000000000000000000000000000000000000000001",
+      "nonce": 7,
+      "broadcastAttempts": 1
+    },
+    {
+      "id": "training:failure",
+      "fingerprint": "input-failure",
+      "kind": "training",
+      "state": "failed",
+      "createdAtMs": 1790276247549,
+      "workflowId": "loan:31611:0xe7e7e7e7e7e7e7e7e7e7e7e7e7e7e7e7e7e7e7e7:0xf1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1",
+      "budgetUsdMicros": "100",
+      "budgetWei": "0",
+      "transactionHash": null,
+      "nonce": null,
+      "broadcastAttempts": null
+    },
+    {
+      "id": "failure:31611:0xe7e7e7e7e7e7e7e7e7e7e7e7e7e7e7e7e7e7e7e7:0xf1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1",
+      "fingerprint": "data-failure",
+      "kind": "transaction",
+      "state": "reserved",
+      "createdAtMs": 1790276247569,
+      "workflowId": "loan:31611:0xe7e7e7e7e7e7e7e7e7e7e7e7e7e7e7e7e7e7e7e7:0xf1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1",
+      "budgetUsdMicros": "500",
+      "budgetWei": "100000000000",
+      "transactionHash": "0x0000000000000000000000000000000000000000000000000000000000000003",
+      "nonce": 8,
+      "broadcastAttempts": null
+    },
+    {
+      "id": "training:uncertain",
+      "fingerprint": "input-uncertain",
+      "kind": "training",
+      "state": "reserved",
+      "createdAtMs": 1790276247594,
+      "workflowId": "loan:31611:0xe7e7e7e7e7e7e7e7e7e7e7e7e7e7e7e7e7e7e7e7:0x0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c",
+      "budgetUsdMicros": "100",
+      "budgetWei": "0",
+      "transactionHash": null,
+      "nonce": null,
+      "broadcastAttempts": null
+    }
+  ],
+  "workflows": [
+    {
+      "id": "loan:31611:0xe7e7e7e7e7e7e7e7e7e7e7e7e7e7e7e7e7e7e7e7:0x0505050505050505050505050505050505050505050505050505050505050505",
+      "fingerprint": "quote-not-started",
+      "validUntilMs": 1790279847356,
+      "budgetUsdMicros": "1116",
+      "budgetWei": "200000000000",
+      "remaining": {
+        "requests": 16,
+        "training": 1,
+        "transactions": 2
+      },
+      "checkpoint": "not-started",
+      "measurement": null,
+      "failureClaim": null
+    },
+    {
+      "id": "loan:31611:0xe7e7e7e7e7e7e7e7e7e7e7e7e7e7e7e7e7e7e7e7:0x0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c",
+      "fingerprint": "quote-uncertain",
+      "validUntilMs": 1790279847356,
+      "budgetUsdMicros": "1116",
+      "budgetWei": "200000000000",
+      "remaining": {
+        "requests": 16,
+        "training": 0,
+        "transactions": 2
+      },
+      "checkpoint": "uncertain",
+      "measurement": null,
+      "failureClaim": null
+    },
+    {
+      "id": "loan:31611:0xe7e7e7e7e7e7e7e7e7e7e7e7e7e7e7e7e7e7e7e7:0x5151515151515151515151515151515151515151515151515151515151515151",
+      "fingerprint": "quote-success",
+      "validUntilMs": 1790279847356,
+      "budgetUsdMicros": "1116",
+      "budgetWei": "200000000000",
+      "remaining": {
+        "requests": 16,
+        "training": 0,
+        "transactions": 1
+      },
+      "checkpoint": "result-durable",
+      "measurement": {
+        "elapsedMs": 1200,
+        "startedAtMs": 1790276187355,
+        "success": true
+      },
+      "failureClaim": null
+    },
+    {
+      "id": "loan:31611:0xe7e7e7e7e7e7e7e7e7e7e7e7e7e7e7e7e7e7e7e7:0xf1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1",
+      "fingerprint": "quote-failure",
+      "validUntilMs": 1790279847356,
+      "budgetUsdMicros": "1116",
+      "budgetWei": "200000000000",
+      "remaining": {
+        "requests": 16,
+        "training": 0,
+        "transactions": 1
+      },
+      "checkpoint": "failure-measured",
+      "measurement": {
+        "elapsedMs": 800,
+        "startedAtMs": 1790276197355,
+        "success": false
+      },
+      "failureClaim": {
+        "consumedComputeAtomic": "250000",
+        "evidenceHash": "0x0000000000000000000000000000000000000000000000000000000000000002",
+        "observedAtSeconds": 1790276198
+      }
+    }
+  ]
+}

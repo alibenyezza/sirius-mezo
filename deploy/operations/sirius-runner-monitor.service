@@ -1,0 +1,26 @@
+[Unit]
+Description=Collecte attestée du budget runner Sirius staging
+After=network-online.target
+Wants=network-online.target
+ConditionPathExists=/etc/sirius/operations/runner-monitor.env
+
+[Service]
+Type=oneshot
+User=sirius-ops
+WorkingDirectory=/opt/sirius
+EnvironmentFile=/etc/sirius/operations/runner-monitor.env
+ExecStart=/usr/bin/node --conditions=react-server --import tsx /opt/sirius/scripts/operations/runner-monitor.ts /var/lib/sirius-ops/budget-check.json
+TimeoutStartSec=60
+UMask=0077
+NoNewPrivileges=true
+PrivateTmp=true
+PrivateDevices=true
+ProtectSystem=strict
+ProtectHome=true
+ReadWritePaths=/var/lib/sirius-ops
+ProtectKernelTunables=true
+ProtectKernelModules=true
+ProtectControlGroups=true
+RestrictSUIDSGID=true
+CapabilityBoundingSet=
+RestrictAddressFamilies=AF_INET AF_INET6 AF_UNIX

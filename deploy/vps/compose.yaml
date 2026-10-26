@@ -1,0 +1,85 @@
+# Ce qui tourne sur le VPS.
+#
+# Un seul service pour l'instant : le reaper. C'est délibéré. Le VPS n'héberge ni le
+# front — il est sur Vercel, sous un vrai domaine — ni le runner confidentiel, qui
+# exige un processeur Intel TDX qu'aucun VPS standard n'expose. Ce que le VPS apporte
+# est précisément ce que le serverless ne sait pas faire : un processus qui vit.
+#
+#   docker compose --env-file .env.vps up --detach --pull always
+#
+# L'image est désignée par digest et non par tag. Un tag est mutable : `:latest` peut
+# pointer sur autre chose demain sans que rien ne le signale, et on redéploie alors un
+# contenu qu'on n'a pas relu. Le pipeline écrit le digest exact dans .env.vps.
+
+# Nom de projet explicite : le VPS héberge d'autres piles Compose, et ce nom
+# garantit qu'aucune commande Sirius n'atteigne leurs conteneurs.
+name: sirius
+
+services:
+  reaper:
+    image: ${SIRIUS_WORKER_IMAGE:?SIRIUS_WORKER_IMAGE requis, épinglé par digest}
+    restart: unless-stopped
+    environment:
+      NODE_ENV: production
+      DATABASE_URL: ${DATABASE_URL:?DATABASE_URL requise}
+      DATABASE_POOL_MAX: ${DATABASE_POOL_MAX:-5}
+      SIRIUS_REAPER_INTERVAL_MS: ${SIRIUS_REAPER_INTERVAL_MS:-30000}
+      EVM_NETWORK: ${EVM_NETWORK:?EVM_NETWORK requis}
+      EVM_RPC_URL: ${EVM_RPC_URL:-}
+      SIRIUS_ESCROW_ADDRESS: ${SIRIUS_ESCROW_ADDRESS:?SIRIUS_ESCROW_ADDRESS requise}
+      SIRIUS_DATASET_ADDRESS: ${SIRIUS_DATASET_ADDRESS:?SIRIUS_DATASET_ADDRESS requise}
+      SIRIUS_LEGACY_ESCROW_ADDRESSES: ${SIRIUS_LEGACY_ESCROW_ADDRESSES:-}
+      SIRIUS_USDC_ADDRESS: ${SIRIUS_USDC_ADDRESS:-}
+      SIRIUS_KYB_ADDRESS: ${SIRIUS_KYB_ADDRESS:-}
+      SIRIUS_BILLING_VERSION: ${SIRIUS_BILLING_VERSION:-6}
+      SIRIUS_EVM_FINALITY: ${SIRIUS_EVM_FINALITY:-finalized}
+      SIRIUS_EVM_CONFIRMATIONS: ${SIRIUS_EVM_CONFIRMATIONS:-1}
+      # Finalité rapide (docs/passage-mainnet/20-finalite-rapide.md) : mêmes valeurs que Next ; vide = désactivée.
+      SIRIUS_FAST_FINALITY: ${SIRIUS_FAST_FINALITY:-}
+      SIRIUS_FAST_FINALITY_MAX_USDC: ${SIRIUS_FAST_FINALITY_MAX_USDC:-}
+      SIRIUS_FAST_FINALITY_TOTAL_USDC: ${SIRIUS_FAST_FINALITY_TOTAL_USDC:-}
+      SIRIUS_FAST_FINALITY_CONFIRMATIONS: ${SIRIUS_FAST_FINALITY_CONFIRMATIONS:-}
+      SIRIUS_REQUIRE_PHALA: ${SIRIUS_REQUIRE_PHALA:-false}
+      TEE_MODE: ${TEE_MODE:-stub}
+      RUNNER_URL: ${RUNNER_URL:-}
+      RUNNER_TRANSPORT_SECRET: ${RUNNER_TRANSPORT_SECRET:-}
+      SIRIUS_LOCK_AUTHORIZER: ${SIRIUS_LOCK_AUTHORIZER:-}
+      SIRIUS_EXPECTED_MRTD: ${SIRIUS_EXPECTED_MRTD:-}
+      SIRIUS_EXPECTED_RTMR3: ${SIRIUS_EXPECTED_RTMR3:-}
+      SIRIUS_EXPECTED_COMPOSE_HASH: ${SIRIUS_EXPECTED_COMPOSE_HASH:-}
+      SIRIUS_EXPECTED_MASTER_KEY_CHAIN_SHA256: ${SIRIUS_EXPECTED_MASTER_KEY_CHAIN_SHA256:-}
+      NEXT_PUBLIC_SIRIUS_INGRESS_KEY_SHA256: ${NEXT_PUBLIC_SIRIUS_INGRESS_KEY_SHA256:-}
+      # Retrait automatique des crédits d'escrow, désactivé par défaut. La clé est dédiée à
+      # ce worker et ne détient que du BTC : `withdrawFor` ne paie que le titulaire du crédit.
+      SIRIUS_WITHDRAW_RELAYER_ENABLED: ${SIRIUS_WITHDRAW_RELAYER_ENABLED:-false}
+      SIRIUS_WITHDRAW_RELAYER_KEY: ${SIRIUS_WITHDRAW_RELAYER_KEY:-}
+      SIRIUS_WITHDRAW_RELAYER_MIN_USDC: ${SIRIUS_WITHDRAW_RELAYER_MIN_USDC:-}
+      SIRIUS_WITHDRAW_RELAYER_DAILY_GAS_ETH: ${SIRIUS_WITHDRAW_RELAYER_DAILY_GAS_ETH:-}
+
+    # Le reaper lit la base et interroge la chaîne. Il n'écrit aucun fichier, n'accepte
+    # aucune connexion entrante et ne détient aucun secret d'enclave. Le durcissement
+    # ci-dessous ne coûte donc rien en fonctionnalité.
+    read_only: true
+    tmpfs:
+      - /tmp:size=16m,mode=1777
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+
+    # Aucun port publié : rien à joindre depuis l'extérieur.
+
+    # Le worker traite les signaux lui-même et s'arrête à la fin de la passe en cours.
+    # Un appel runner peut attendre 60 secondes avant de restituer la main.
+    stop_grace_period: 90s
+
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "5"
+
+    deploy:
+      resources:
+        limits:
+          memory: 512M

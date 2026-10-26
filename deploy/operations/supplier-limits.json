@@ -1,0 +1,98 @@
+{
+  "version": 1,
+  "checkedDocsAt": "2026-09-24",
+  "note": "Ce que la documentation publique permet ; l'état réel de chaque compte reste à relever dans son tableau de bord (bloc dashboard). Aucun réglage fournisseur n'a été modifié.",
+  "suppliers": [
+    {
+      "id": "phala",
+      "usedFor": "CVM du runner (tdx.small) et son disque de 20 Go",
+      "billingModes": "Prépayé, recharge automatique ou post-payé, au choix de l'espace de travail",
+      "hardCap": "partial",
+      "control": "En prépayé sans recharge, le solde est vérifié avant chaque démarrage ou redémarrage de CVM ; un espace suspendu ne peut plus démarrer ni modifier de CVM.",
+      "delay": "Non documenté pour une CVM déjà allumée quand le solde s'épuise",
+      "residualAfterStop": "Le disque reste facturé à l'arrêt, y compris dans un espace suspendu",
+      "recommendedSetting": "Prépayé, recharge automatique désactivée, crédit limité à l'enveloppe d'essai approuvée ; superviseur extérieur actif avant chaque session",
+      "owner": "Ali",
+      "sources": ["https://cloud.phala.com/about/pricing", "https://docs.phala.com/phala-cloud/changelog"],
+      "dashboard": { "verifiedAt": null, "verifiedBy": null, "observedMode": null, "autoRecharge": null, "capConfigured": null }
+    },
+    {
+      "id": "vercel",
+      "usedFor": "Application Next (production et staging)",
+      "billingModes": "Abonnement Pro par siège + usage au-delà du crédit mensuel",
+      "hardCap": "partial",
+      "control": "Spend Management : budget à la demande par cycle, alertes à 50/75/100 %, option « Pause Production Deployments » qui met en pause la production de tous les projets.",
+      "delay": "Vérification toutes les quelques minutes : l'usage continue plusieurs minutes après le seuil",
+      "residualAfterStop": "Sièges, intégrations et modules complémentaires ne sont pas couverts ; la pause rend le site indisponible (503)",
+      "recommendedSetting": "Budget inférieur au maximum acceptable, pause de production activée, alertes SMS pour Ali et Ali",
+      "owner": "Ali",
+      "sources": ["https://vercel.com/docs/spend-management", "https://vercel.com/docs/plans/pro-plan"],
+      "dashboard": { "verifiedAt": null, "verifiedBy": null, "observedMode": null, "autoRecharge": null, "capConfigured": null }
+    },
+    {
+      "id": "neon",
+      "usedFor": "PostgreSQL de l'application",
+      "billingModes": "Gratuit (quotas) ou offres payantes à l'usage",
+      "hardCap": "free-plan-only",
+      "control": "Offre gratuite : calcul suspendu une fois les CU-heures ou le transfert épuisés, écritures refusées au-delà du stockage ; aucune donnée supprimée. Offres payantes : alertes à 80 % et 100 % d'un seuil, sans plafond bloquant documenté.",
+      "delay": "Suspension au quota (offre gratuite) ; alertes seulement sur offre payante",
+      "residualAfterStop": "Stockage conservé",
+      "recommendedSetting": "Rester sur l'offre gratuite tant que possible ; sur offre payante, seuil d'alerte bas et surveillance du reaper qui empêche la mise en veille",
+      "owner": "Ali",
+      "sources": ["https://neon.com/docs/introduction/plans"],
+      "dashboard": { "verifiedAt": null, "verifiedBy": null, "observedMode": null, "autoRecharge": null, "capConfigured": null }
+    },
+    {
+      "id": "pinata",
+      "usedFor": "Stockage IPFS des blobs chiffrés (datasets et modèles)",
+      "billingModes": "Abonnement mensuel + dépassements à l'unité",
+      "hardCap": "none-documented",
+      "control": "Dépassements facturés au Go et par tranche de 10 000 requêtes ; aucun plafond bloquant documenté sur la grille publique.",
+      "delay": "Sans objet",
+      "residualAfterStop": "Stockage facturé tant que les blobs sont épinglés",
+      "recommendedSetting": "Vérifier l'offre réelle et les dépassements du mois ; limites de taille d'upload côté application maintenues",
+      "owner": "Ali",
+      "sources": ["https://pinata.cloud/pricing"],
+      "dashboard": { "verifiedAt": null, "verifiedBy": null, "observedMode": null, "autoRecharge": null, "capConfigured": null }
+    },
+    {
+      "id": "vps",
+      "usedFor": "Reapers staging et production actifs sur le nouveau VPS OVHcloud 162.19.66.80 ; superviseur extérieur installé, timers désactivés. Reapers dans /opt/sirius et /opt/sirius-staging ; outils dans /opt/sirius-ops.",
+      "billingModes": "OVHcloud confirmé par Ali le 25 septembre 2026 ; offre, montant et conditions du compte à relever",
+      "hardCap": "unknown",
+      "control": "Accès SSH et déploiements GitHub staging/production vérifiés le 25 septembre 2026 ; anciens reapers non arrêtés par choix de Ali. À relever chez OVHcloud : forfait fixe ou usage, trafic inclus, facturation des snapshots. Preuves : docs/VPS-MIGRATION.md.",
+      "delay": "Inconnu",
+      "residualAfterStop": "Inconnu",
+      "recommendedSetting": "Forfait fixe sans dépassement de trafic facturé si possible",
+      "owner": "Ali",
+      "sources": [],
+      "dashboard": { "verifiedAt": null, "verifiedBy": null, "observedMode": null, "autoRecharge": null, "capConfigured": null }
+    },
+    {
+      "id": "rpc",
+      "usedFor": "Lectures et envois sur Mezo testnet",
+      "billingModes": "RPC public de la chaîne, sans clé ni compte",
+      "hardCap": "not-applicable",
+      "control": "Aucun coût direct ; limites de débit non contractuelles. Un fournisseur RPC payant ajouté plus tard devra rejoindre cette liste.",
+      "delay": "Sans objet",
+      "residualAfterStop": "Aucun",
+      "recommendedSetting": "Garder le RPC public sur testnet ; le gas des transactions est suivi à part dans le registre runner",
+      "owner": "Ali",
+      "sources": ["https://rpc.test.mezo.org"],
+      "dashboard": { "verifiedAt": null, "verifiedBy": null, "observedMode": null, "autoRecharge": null, "capConfigured": null }
+    },
+    {
+      "id": "github",
+      "usedFor": "CI GitHub Actions du dépôt privé et images GHCR",
+      "billingModes": "Minutes incluses (2 000 par mois sur une offre gratuite) puis usage facturé",
+      "hardCap": "partial",
+      "control": "Sans moyen de paiement valide, l'usage est bloqué une fois le quota épuisé ; avec un moyen de paiement, des budgets peuvent arrêter l'usage des produits mesurés.",
+      "delay": "Non documenté",
+      "residualAfterStop": "Stockage des paquets et artefacts",
+      "recommendedSetting": "Budget Actions et Packages à un montant explicite avec arrêt de l'usage, ou pas de moyen de paiement",
+      "owner": "Ali",
+      "sources": ["https://docs.github.com/en/billing/concepts/product-billing/github-actions", "https://docs.github.com/en/billing/concepts/budgets-and-alerts"],
+      "dashboard": { "verifiedAt": null, "verifiedBy": null, "observedMode": null, "autoRecharge": null, "capConfigured": null }
+    }
+  ]
+}

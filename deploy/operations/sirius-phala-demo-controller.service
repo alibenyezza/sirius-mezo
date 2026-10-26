@@ -1,0 +1,31 @@
+[Unit]
+Description=Commandes manuelles de la démonstration Phala Sirius
+After=network-online.target
+Wants=network-online.target
+ConditionPathExists=/etc/sirius/operations/phala-demo-controller.env
+
+[Service]
+Type=simple
+User=sirius-ops
+WorkingDirectory=/opt/sirius-ops
+EnvironmentFile=/etc/sirius/operations/phala-demo-controller.env
+ExecStart=/usr/bin/node --conditions=react-server --import tsx /opt/sirius-ops/scripts/operations/demo-controller.ts
+Restart=on-failure
+RestartSec=10
+TimeoutStopSec=40
+UMask=0077
+NoNewPrivileges=true
+PrivateTmp=true
+PrivateDevices=true
+ProtectSystem=strict
+ProtectHome=true
+ReadWritePaths=/var/lib/sirius-ops
+ProtectKernelTunables=true
+ProtectKernelModules=true
+ProtectControlGroups=true
+RestrictSUIDSGID=true
+CapabilityBoundingSet=
+RestrictAddressFamilies=AF_INET AF_INET6 AF_UNIX
+
+[Install]
+WantedBy=multi-user.target

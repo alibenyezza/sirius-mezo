@@ -1,0 +1,34 @@
+[Unit]
+Description=Limite de durée de la session Phala Sirius
+After=network-online.target
+Wants=network-online.target
+ConditionPathExists=/etc/sirius/operations/session.json
+
+[Service]
+Type=oneshot
+User=sirius-ops
+WorkingDirectory=/opt/sirius
+ExecStart=/usr/bin/node /opt/sirius/scripts/operations/phala-watchdog.mjs /etc/sirius/operations/session.json --apply-stop
+TimeoutStartSec=75
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ReadWritePaths=/var/lib/sirius-ops
+# Durcissement A2.5 : validé avec le watchdog réel et une CLI Phala simulée (lecture puis arrêt).
+# Le réseau reste ouvert (API Phala, pnpm dlx) ; le cache pnpm vit dans /var/lib/sirius-ops.
+UMask=0077
+ProtectHome=true
+PrivateDevices=true
+ProtectKernelTunables=true
+ProtectKernelModules=true
+ProtectKernelLogs=true
+ProtectControlGroups=true
+ProtectClock=true
+ProtectHostname=true
+RestrictNamespaces=true
+RestrictRealtime=true
+RestrictSUIDSGID=true
+LockPersonality=true
+CapabilityBoundingSet=
+RestrictAddressFamilies=AF_INET AF_INET6 AF_UNIX
+SystemCallArchitectures=native

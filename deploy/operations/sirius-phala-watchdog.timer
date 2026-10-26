@@ -1,0 +1,11 @@
+[Unit]
+Description=Contrôle minute de la durée Phala Sirius
+
+[Timer]
+OnBootSec=30
+OnUnitActiveSec=60
+AccuracySec=1
+Unit=sirius-phala-watchdog.service
+
+[Install]
+WantedBy=timers.target

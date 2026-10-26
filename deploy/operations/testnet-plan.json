@@ -1,0 +1,36 @@
+{
+  "version": 1,
+  "status": "draft",
+  "checkedAt": "2026-09-23",
+  "network": "testnet",
+  "chainId": 31611,
+  "computeRecipient": "0xb6acf8a998bb8efa34a954cd6334ccc15da7f919",
+  "runner": "0x3b31923ee7cb2a15fc85abbeeae1fc32afc08c8d",
+  "instance": "tdx.small",
+  "diskGb": 20,
+  "computeUsdMicrosPerHour": "58000",
+  "diskUsdMicrosPerGbHour": "139",
+  "periodHours": 720,
+  "trial": {
+    "sessions": 10,
+    "minutesPerSession": 120,
+    "stopDelayMinutesPerSession": 5,
+    "proposedPhalaBudgetUsdMicros": "5000000"
+  },
+  "sources": [
+    "https://cloud.phala.com/about/instance-types",
+    "https://cloud.phala.com/about/pricing"
+  ],
+  "spendingCapUsdMicros": null,
+  "cashUsdMicros": "0",
+  "earnedMarginUsdMicros": "0",
+  "providerCapsVerified": false,
+  "phalaBenchmarkVerified": false,
+  "otherSupplierCostsVerified": false,
+  "scenarios": [
+    { "name": "Aucun emprunt, disque conservé trente jours", "runningHours": 0, "retentionHours": 720, "successfulJobs": 0 },
+    { "name": "Une session de deux heures, disque conservé trente jours", "runningHours": 2, "retentionHours": 720, "successfulJobs": 10 },
+    { "name": "Dix sessions de deux heures, disque conservé trente jours", "runningHours": 20, "retentionHours": 720, "successfulJobs": 100 },
+    { "name": "Machine allumée trente jours, un emprunt réussi par jour", "runningHours": 720, "retentionHours": 720, "successfulJobs": 30 }
+  ]
+}
