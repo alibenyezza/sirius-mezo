@@ -2,6 +2,7 @@ import "server-only";
 import { createHash, randomUUID } from "node:crypto";
 import { AsyncLocalStorage } from "node:async_hooks";
 import { AppError } from "@/lib/app-error";
+import { isDemoDeployment } from "@/lib/deployment-mode";
 import { evmEscrowBinding } from "@/lib/tee/evm-binding";
 import { BudgetLedger, type BudgetKind, type BudgetPolicy, type WorkflowBudget } from "./budget-ledger";
 import { countsAsRunnerFailure, releasesReservation } from "./failure-policy";
@@ -18,7 +19,10 @@ export function runnerBudget(): BudgetLedger | null {
   const path = process.env.RUNNER_BUDGET_FILE;
   if (cached && !path) throw new AppError("Changement du registre runner interdit à chaud", 503);
   if (!path) {
-    if (process.env.NODE_ENV === "production" || process.env.TEE_MODE === "phala" || process.env.EVM_NETWORK === "mainnet") {
+    // Instance de démonstration sur testnet (hébergeur serverless, sans disque persistant) :
+    // le runner tourne sans registre de budget. Hors démonstration, le registre reste obligatoire.
+    const demoWithoutLedger = isDemoDeployment() && process.env.TEE_MODE !== "phala" && process.env.EVM_NETWORK !== "mainnet";
+    if (!demoWithoutLedger && (process.env.NODE_ENV === "production" || process.env.TEE_MODE === "phala" || process.env.EVM_NETWORK === "mainnet")) {
       throw new AppError("RUNNER_BUDGET_FILE obligatoire avant toute opération runner", 503);
     }
     return null;
