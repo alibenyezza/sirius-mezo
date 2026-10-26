@@ -44,23 +44,27 @@ Provider                        Mezo                         Borrower
 | Explorer | https://explorer.test.mezo.org |
 | Gas | BTC (native, 18 decimals) |
 | Settlement token | MUSD `0x118917a40FAF1CD7a13dB0Ef56C86De7973Ac503` (18 decimals) |
-| `SiriusOpenKybRegistry` | [`0x53df0d2cffbe273e24d1327bc5e573bd380319bd`](https://explorer.test.mezo.org/address/0x53df0d2cffbe273e24d1327bc5e573bd380319bd) |
-| `SiriusDatasetRegistry` | [`0xc1d9dbff541600cdde741b0ce9664ebd7fa49d78`](https://explorer.test.mezo.org/address/0xc1d9dbff541600cdde741b0ce9664ebd7fa49d78) |
-| `SiriusEscrow` (v6, MUSD) | [`0xefb89e4c5d32581bf09122cb6f4cc60558a27f67`](https://explorer.test.mezo.org/address/0xefb89e4c5d32581bf09122cb6f4cc60558a27f67) |
+| `SiriusOpenKybRegistry` | [`0xf0ab86b45202c1600cb54b49cbd35bd3e4bb5392`](https://explorer.test.mezo.org/address/0xf0ab86b45202c1600cb54b49cbd35bd3e4bb5392) |
+| `SiriusDatasetRegistry` | [`0x2f7482e7cf68e9babda9e31b566ffcbaa3a9b969`](https://explorer.test.mezo.org/address/0x2f7482e7cf68e9babda9e31b566ffcbaa3a9b969) |
+| `SiriusEscrow` (v6, MUSD) | [`0xd14a0af1581bd7bd80d9da0f775c1c254967abda`](https://explorer.test.mezo.org/address/0xd14a0af1581bd7bd80d9da0f775c1c254967abda) |
+| Lock authorizer (app settlement account) | `0x2d017fb59077456E87C6f0E719dd75B03a910c8a` |
 | Deployer | `0xF1b3C80fF7ffa2D6f609D51dC5483e8e8da036c1` |
+| Live demo | https://sirius-mezo.vercel.app |
 | Manifest | [`deployments/mezo-testnet.json`](deployments/mezo-testnet.json) |
 
 ### Proof: a full MUSD loan on Mezo testnet
 
-Demo dataset title minted by the provider `0xeeD8eC97B94613a765639Ea72a9410CCb82eAe4f`, then a complete fair-exchange cycle settled in MUSD (2 MUSD, hashlock `c4e73922…f4382`):
+Demo dataset title minted by the provider `0xeeD8eC97B94613a765639Ea72a9410CCb82eAe4f`, then a complete fair-exchange cycle settled in MUSD (2 MUSD, hashlock `64bd9c9b…431cdb`), signed by the application's settlement account:
 
 | Step | Transaction |
 |---|---|
-| Dataset title minted (`SiriusDatasetRegistry.mint`) | [`0xc486e63d…3e04d5`](https://explorer.test.mezo.org/tx/0xc486e63db001edaad60048d854ba4cb08ac69f1ce8b452d6f3f38383ed3e04d5) |
-| Borrower approves MUSD for the escrow | [`0xf26f8e21…c2d99e`](https://explorer.test.mezo.org/tx/0xf26f8e21bf9c70c8dc3f5038ab56ac4077a6dc23b4a0a5fefcd9569401c2d99e) |
-| `SiriusEscrow.lock` — 2 MUSD locked with hashlock + EIP-712 authorization | [`0x24014c3c…719871`](https://explorer.test.mezo.org/tx/0x24014c3cf3be895ce67b8c5dd9378d519815c5efcdd7e2cb27c15e41fc719871) |
-| `SiriusEscrow.release` — preimage published, provider credited | [`0x1aa9d179…d4714`](https://explorer.test.mezo.org/tx/0x1aa9d179dc82613fe05180faa49dc03ed942e21777fd0cbb8ad92691b14d4714) |
-| `SiriusEscrow.withdrawFor` — provider receives 2 MUSD | [`0x0db9b21a…739df6`](https://explorer.test.mezo.org/tx/0x0db9b21a69390b9baf5669da160a682f6d83f03c34f382b2b45f843054739df6) |
+| Dataset title minted (`SiriusDatasetRegistry.mint`) | [`0x495bc76b…aa06d6`](https://explorer.test.mezo.org/tx/0x495bc76b6080466ae634e407e4b7e805b2b411986c46f084d9c0930bb6aa06d6) |
+| Borrower approves MUSD for the escrow | [`0x9c6e98d1…d56689`](https://explorer.test.mezo.org/tx/0x9c6e98d1af6dfa37e28902e50150dee547b977cc9338b2915a4f18c07cd56689) |
+| `SiriusEscrow.lock` — 2 MUSD locked with hashlock + EIP-712 authorization | [`0xa2db7f43…f152a9`](https://explorer.test.mezo.org/tx/0xa2db7f4339341f9bd7aea932408bc339389526e6dcdb5a4673cd5467fbf152a9) |
+| `SiriusEscrow.release` — preimage published, provider credited | [`0x765c78e9…09085c`](https://explorer.test.mezo.org/tx/0x765c78e91717068ce567f95807f1994c81cfacdadd101ccbca391b2c0d09085c) |
+| `SiriusEscrow.withdrawFor` — provider receives 2 MUSD | [`0xc72a906b…dd77d50`](https://explorer.test.mezo.org/tx/0xc72a906b375bea2360e3bee9a67c572fedd68c4abcbf4ad537a4029ffdd77d50) |
+
+An earlier trio (escrow [`0xefb89e4c…a27f67`](https://explorer.test.mezo.org/address/0xefb89e4c5d32581bf09122cb6f4cc60558a27f67)) ran the same cycle with the deployer as signer: lock [`0x24014c3c…719871`](https://explorer.test.mezo.org/tx/0x24014c3cf3be895ce67b8c5dd9378d519815c5efcdd7e2cb27c15e41fc719871), release [`0x1aa9d179…d4714`](https://explorer.test.mezo.org/tx/0x1aa9d179dc82613fe05180faa49dc03ed942e21777fd0cbb8ad92691b14d4714).
 
 Reproduce it yourself (needs test BTC for gas and a few test MUSD on the deployer key):
 

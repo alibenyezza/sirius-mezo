@@ -192,7 +192,10 @@ async function main() {
 
   async function deploy(name: string, args: unknown[] = []): Promise<Hex> {
     const { abi, bytecode } = artifact(name);
-    const hash = await walletClient.deployContract({ abi, bytecode, args, chain, account });
+    // Gas explicite : le RPC public de Mezo est équilibré entre plusieurs nœuds et
+    // l'estimation peut s'exécuter sur un nœud qui ne voit pas encore le contrat
+    // déployé juste avant (constructeur qui lit un autre contrat → « execution reverted »).
+    const hash = await walletClient.deployContract({ abi, bytecode, args, chain, account, gas: BigInt(3_500_000) });
 
     // `waitForTransactionReceipt` retente tant que le RPC n'a pas indexé la
     // transaction, au lieu d'abandonner au premier « not found ».
@@ -228,6 +231,9 @@ async function main() {
     functionName: "bindEscrow",
     args: [escrow],
     account,
+    // Gas explicite : juste après le déploiement, l'estimation du RPC public peut lire un état
+    // en retard (contrat pas encore visible) et retomber sous le plancher EIP-7623 de Mezo.
+    gas: BigInt(200_000),
   });
   const bindEscrowReceipt = await publicClient.waitForTransactionReceipt({ hash: bindEscrowHash, confirmations: 1 });
   if (bindEscrowReceipt.status !== "success") throw new Error("Liaison DatasetRegistry → SiriusEscrow rejetée");

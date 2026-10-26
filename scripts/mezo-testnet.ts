@@ -12,7 +12,7 @@
  * titre du dataset et reçoit le MUSD). L'escrow refuse qu'une adresse se paie elle-même.
  */
 import { spawnSync } from "node:child_process";
-import { appendFileSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
+import { appendFileSync, existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { randomBytes } from "node:crypto";
 import { resolve } from "node:path";
 import { config as loadEnv } from "dotenv";
@@ -57,6 +57,18 @@ function run(script: string, env: Record<string, string>) {
   return result.stdout;
 }
 
+/** Écrit ou remplace des variables dans .env.local : un second déploiement remplace les adresses. */
+function upsertEnv(entries: Record<string, string>) {
+  let text = existsSync(ENV_FILE) ? readFileSync(ENV_FILE, "utf8") : "";
+  for (const [name, value] of Object.entries(entries)) {
+    const line = `${name}="${value}"`;
+    const re = new RegExp(`^${name}=.*$`, "m");
+    text = re.test(text) ? text.replace(re, line) : `${text.replace(/\n*$/, "")}\n${line}\n`;
+    process.env[name] = value;
+  }
+  writeFileSync(ENV_FILE, text);
+}
+
 function envValue(output: string, name: string): Hex {
   const match = output.match(new RegExp(`${name}="(0x[0-9a-fA-F]{40})"`));
   if (!match) throw new Error(`${name} introuvable dans la sortie du déploiement`);
@@ -87,6 +99,13 @@ async function main() {
   if (!musdCode || musdCode === "0x") throw new Error("MUSD introuvable à l'adresse configurée");
   const musdCodeHash = keccak256(musdCode);
 
+  // Signataire des autorisations de lock : le compte de règlement de l'application (dérivé de
+  // SIRIUS_MASTER_KEY par scripts/mezo-app-secrets.ts) si SIRIUS_LOCK_AUTHORIZER est défini, sinon le déployeur.
+  const lockAuthorizer = (process.env.SIRIUS_LOCK_AUTHORIZER?.trim() || deployer.address) as Hex;
+  const settlementKey = process.env.SIRIUS_SETTLEMENT_KEY?.trim();
+  const smokeSignerKey = (settlementKey && lockAuthorizer.toLowerCase() !== deployer.address.toLowerCase() ? settlementKey : null) as Hex | null;
+  console.log(`signataire : ${lockAuthorizer}${smokeSignerKey ? " (compte de règlement de l'application)" : " (déployeur)"}`);
+
   let addresses: { escrow: Hex; kyb: Hex; datasets: Hex };
   if (smokeOnly) {
     const saved = JSON.parse(readFileSync(DEPLOYMENT_FILE, "utf8")) as { contracts: { escrow: Hex; kyb: Hex; datasets: Hex } };
@@ -99,27 +118,24 @@ async function main() {
       SIRIUS_ALLOW_SHARED_ROLES: "true",
       SIRIUS_USDC_ADDRESS: musd,
       SIRIUS_USDC_CODE_HASH: musdCodeHash,
-      SIRIUS_LOCK_AUTHORIZER: deployer.address,
+      SIRIUS_LOCK_AUTHORIZER: lockAuthorizer,
     });
     addresses = {
       escrow: envValue(output, "SIRIUS_ESCROW_ADDRESS"),
       kyb: envValue(output, "SIRIUS_KYB_ADDRESS"),
       datasets: envValue(output, "SIRIUS_DATASET_ADDRESS"),
     };
-    const lines = [
-      "", "# Contrats Sirius sur Mezo testnet (écrits par scripts/mezo-testnet.ts)",
-      'EVM_NETWORK="testnet"', 'NEXT_PUBLIC_EVM_NETWORK="testnet"', 'SIRIUS_BILLING_VERSION="6"',
-      `NEXT_PUBLIC_SIRIUS_ESCROW_ADDRESS="${addresses.escrow}"`, `NEXT_PUBLIC_SIRIUS_USDC_ADDRESS="${musd}"`,
-      `NEXT_PUBLIC_SIRIUS_KYB_ADDRESS="${addresses.kyb}"`, `NEXT_PUBLIC_SIRIUS_DATASET_ADDRESS="${addresses.datasets}"`,
-      `SIRIUS_ESCROW_ADDRESS="${addresses.escrow}"`, `SIRIUS_USDC_ADDRESS="${musd}"`, `SIRIUS_USDC_CODE_HASH="${musdCodeHash}"`,
-      `SIRIUS_KYB_ADDRESS="${addresses.kyb}"`, `SIRIUS_DATASET_ADDRESS="${addresses.datasets}"`,
-      `SIRIUS_LOCK_AUTHORIZER="${deployer.address}"`, "",
-    ];
-    appendFileSync(ENV_FILE, lines.join("\n"));
+    upsertEnv({
+      EVM_NETWORK: "testnet", NEXT_PUBLIC_EVM_NETWORK: "testnet", SIRIUS_BILLING_VERSION: "6",
+      NEXT_PUBLIC_SIRIUS_ESCROW_ADDRESS: addresses.escrow, NEXT_PUBLIC_SIRIUS_USDC_ADDRESS: musd,
+      NEXT_PUBLIC_SIRIUS_KYB_ADDRESS: addresses.kyb, NEXT_PUBLIC_SIRIUS_DATASET_ADDRESS: addresses.datasets,
+      SIRIUS_ESCROW_ADDRESS: addresses.escrow, SIRIUS_USDC_ADDRESS: musd, SIRIUS_USDC_CODE_HASH: musdCodeHash,
+      SIRIUS_KYB_ADDRESS: addresses.kyb, SIRIUS_DATASET_ADDRESS: addresses.datasets, SIRIUS_LOCK_AUTHORIZER: lockAuthorizer,
+    });
     mkdirSync(resolve(ROOT, "deployments"), { recursive: true });
     writeFileSync(DEPLOYMENT_FILE, JSON.stringify({
       network: "mezo-testnet", chainId: chain.id, explorer: chain.blockExplorers?.default.url,
-      deployedAt: new Date().toISOString(), deployer: deployer.address,
+      deployedAt: new Date().toISOString(), deployer: deployer.address, lockAuthorizer,
       settlementToken: { symbol: "MUSD", address: musd, decimals: 18, codeHash: musdCodeHash },
       contracts: { ...addresses, kybMode: "open", escrowVersion: "sirius-escrow-usdc-v6" },
     }, null, 2) + "\n");
@@ -157,12 +173,15 @@ async function main() {
     console.log("titre de dataset déjà publié");
   }
 
+  // L'emprunteur du prêt de démonstration est le signataire : le smoke exige que le même
+  // compte signe l'autorisation, paie le gas et verrouille le MUSD.
+  const borrower = smokeSignerKey ? privateKeyToAccount(smokeSignerKey) : deployer;
   const musdBalance = (await publicClient.readContract({
     address: musd, abi: [{ type: "function", name: "balanceOf", stateMutability: "view", inputs: [{ name: "a", type: "address" }], outputs: [{ type: "uint256" }] }] as const,
-    functionName: "balanceOf", args: [deployer.address],
+    functionName: "balanceOf", args: [borrower.address],
   })) as bigint;
-  console.log(`solde MUSD : ${formatEther(musdBalance)} (le prêt de démonstration verrouille 2 MUSD)`);
-  if (musdBalance < parseEther("2")) throw new Error(`Envoie au moins 2 MUSD de test à ${deployer.address} (emprunte du MUSD sur https://testnet.mezo.org)`);
+  console.log(`emprunteur : ${borrower.address} · solde MUSD ${formatEther(musdBalance)} (le prêt de démonstration verrouille 2 MUSD)`);
+  if (musdBalance < parseEther("2")) throw new Error(`Envoie au moins 2 MUSD de test à ${borrower.address} (node --import tsx scripts/mezo-fund.ts ${borrower.address} 0.005 20)`);
 
   console.log("\n── Prêt de démonstration : lock MUSD → release → retrait fournisseur ──");
   run("contracts/scripts/smoke.ts", {
@@ -172,6 +191,7 @@ async function main() {
     NEXT_PUBLIC_SIRIUS_KYB_ADDRESS: addresses.kyb,
     SIRIUS_SMOKE_PROVIDER_ADDRESS: provider.address,
     SIRIUS_SMOKE_DATASET_ID: DATASET_ID,
+    ...(smokeSignerKey ? { MEZO_DEPLOYER_KEY: smokeSignerKey } : {}),
   });
   console.log(`\nExplorateur : ${chain.blockExplorers?.default.url}/address/${addresses.escrow}`);
 }
