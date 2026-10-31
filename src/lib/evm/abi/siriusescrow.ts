@@ -82,6 +82,11 @@ export const siriusescrowAbi = [
   },
   {
     "inputs": [],
+    "name": "InvalidBorrowerSignature",
+    "type": "error"
+  },
+  {
+    "inputs": [],
     "name": "InvalidChallengePeriod",
     "type": "error"
   },
@@ -159,7 +164,17 @@ export const siriusescrowAbi = [
   },
   {
     "inputs": [],
+    "name": "LockRequestExpired",
+    "type": "error"
+  },
+  {
+    "inputs": [],
     "name": "NothingToWithdraw",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "PermitFailed",
     "type": "error"
   },
   {
@@ -782,6 +797,150 @@ export const siriusescrowAbi = [
       }
     ],
     "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "",
+        "type": "address"
+      }
+    ],
+    "name": "lockNonces",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "components": [
+          {
+            "internalType": "address",
+            "name": "borrower",
+            "type": "address"
+          },
+          {
+            "internalType": "address",
+            "name": "provider",
+            "type": "address"
+          },
+          {
+            "internalType": "uint256",
+            "name": "amount",
+            "type": "uint256"
+          },
+          {
+            "internalType": "bytes32",
+            "name": "hashlock",
+            "type": "bytes32"
+          },
+          {
+            "internalType": "uint8",
+            "name": "challengeDays",
+            "type": "uint8"
+          },
+          {
+            "internalType": "bytes32",
+            "name": "loanIdHash",
+            "type": "bytes32"
+          },
+          {
+            "internalType": "bytes32",
+            "name": "datasetId",
+            "type": "bytes32"
+          },
+          {
+            "internalType": "bytes32",
+            "name": "trainingProfile",
+            "type": "bytes32"
+          },
+          {
+            "internalType": "uint256",
+            "name": "nonce",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "deadline",
+            "type": "uint256"
+          }
+        ],
+        "internalType": "struct SiriusEscrow.LockRequest",
+        "name": "request",
+        "type": "tuple"
+      },
+      {
+        "internalType": "bytes",
+        "name": "borrowerSignature",
+        "type": "bytes"
+      },
+      {
+        "components": [
+          {
+            "internalType": "uint256",
+            "name": "value",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "deadline",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint8",
+            "name": "v",
+            "type": "uint8"
+          },
+          {
+            "internalType": "bytes32",
+            "name": "r",
+            "type": "bytes32"
+          },
+          {
+            "internalType": "bytes32",
+            "name": "s",
+            "type": "bytes32"
+          }
+        ],
+        "internalType": "struct SiriusEscrow.Permit",
+        "name": "permit",
+        "type": "tuple"
+      },
+      {
+        "components": [
+          {
+            "internalType": "uint40",
+            "name": "deadline",
+            "type": "uint40"
+          },
+          {
+            "internalType": "bytes",
+            "name": "signature",
+            "type": "bytes"
+          }
+        ],
+        "internalType": "struct SiriusEscrow.LockAuthorization",
+        "name": "authorization",
+        "type": "tuple"
+      }
+    ],
+    "name": "lockWithSignature",
+    "outputs": [
+      {
+        "internalType": "bytes32",
+        "name": "loanKey",
+        "type": "bytes32"
+      }
+    ],
+    "stateMutability": "nonpayable",
     "type": "function"
   },
   {
