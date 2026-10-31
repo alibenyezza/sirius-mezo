@@ -5,10 +5,11 @@ import { resolveClientNetwork } from "@/lib/evm/networks";
 /**
  * Approvisionnement du compte connecté.
  *
- * Sur une instance de démonstration, « ajouter des fonds » veut dire frapper des
- * jetons de test : le réseau est un testnet et le jeton a une frappe ouverte. Aucun
- * service d'achat par carte ne vend cette monnaie-là, et il serait absurde d'en
- * chercher un.
+ * Sur une instance de démonstration, « ajouter des fonds » veut dire recevoir du MUSD
+ * de test depuis la réserve du distributeur, et un peu de BTC pour le gas : le réseau
+ * est un testnet, et aucun service d'achat par carte ne vend cette monnaie-là. Le
+ * distributeur ne ressert pas un compte déjà pourvu : un champ `null` veut dire « rien
+ * envoyé », pas « échec ».
  *
  * Sur une instance réelle, la même intention passe par MoonPay, d'où le repli. La
  * fenêtre y est ouverte après l'appel réseau, ce qui peut la faire bloquer sur Safari
@@ -16,10 +17,11 @@ import { resolveClientNetwork } from "@/lib/evm/networks";
  * il ne doit pas ouvrir de fenêtre parasite à chaque clic.
  */
 
+/** Réponse de `/api/faucet` (`FaucetResult`) : `usdc` désigne le MUSD, `eth` le BTC natif. */
 export interface FondsAjoutes {
-  usdc: string;
+  usdc: string | null;
   eth: string | null;
-  usdcTxHash: string;
+  usdcTxHash: string | null;
 }
 
 export async function addFunds(): Promise<FondsAjoutes> {
@@ -60,9 +62,9 @@ export async function addFunds(): Promise<FondsAjoutes> {
  *
  * Trois précautions, qui sont tout l'intérêt de ne pas réutiliser `addFunds` :
  *
- * 1. Seulement à solde nul. Le faucet frappe l'USDC sans condition ; l'appeler à chaque
- *    connexion distribuerait mille jetons de plus à qui en a déjà. Un solde natif à zéro
- *    est la marque d'un compte qui n'a jamais servi.
+ * 1. Seulement à solde nul. Le faucet refuse déjà de resservir un compte pourvu, mais
+ *    l'appeler à chaque connexion consommerait le quota horaire du compte pour rien. Un
+ *    solde natif à zéro est la marque d'un compte qui n'a jamais servi.
  * 2. Aucune fenêtre. `addFunds` ouvre MoonPay quand le faucet répond 503 ; une fenêtre
  *    que personne n'a demandée serait au mieux surprenante, au pire bloquée par le
  *    navigateur puisqu'aucun clic ne la précède.

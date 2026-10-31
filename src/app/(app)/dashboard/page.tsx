@@ -16,6 +16,7 @@ import { truncate } from "@/lib/format";
 import { useLocale } from "@/components/i18n/LocaleProvider";
 import { DisclaimerNote } from "@/components/ui/DisclaimerNote";
 import { AddFundsDialog } from "@/components/wallet/AddFundsDialog";
+import { faucetReceiptMessage } from "@/components/wallet/add-funds";
 import { GetStartedCard } from "@/components/onboarding/GetStartedCard";
 import { WELCOME_BODY, WELCOME_TITLE } from "@/lib/onboarding/copy";
 
@@ -97,11 +98,7 @@ function DashboardPageContent() {
     setFundsMessage(null);
     try {
       const recu = await addFunds();
-      setFundsMessage(
-        recu.eth
-          ? t("{usdc} {token} et {eth} ETH envoyés.", { usdc: recu.usdc, token, eth: recu.eth })
-          : t("{usdc} {token} envoyés.", { usdc: recu.usdc, token }),
-      );
+      setFundsMessage(faucetReceiptMessage(recu, token, t));
       await refresh();
     } catch (err) {
       setFundsMessage(t(err instanceof Error ? err.message : "Ajout de fonds indisponible"));

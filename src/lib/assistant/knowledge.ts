@@ -43,7 +43,7 @@ export const SIRIUS_KNOWLEDGE_BASE = `# Sirius — knowledge base
 ## Funds and tokens
 - You need two things: BTC for gas, and the stablecoin (MUSD on mainnet, test MUSD on testnet) to pay for a loan.
 - "Add funds" on mainnet opens a dialog with three options: by card (MoonPay, buys MUSD or ETH), from another wallet (Mezo app, Kraken, any wallet), or from another chain (bridge: USDC on Base arrives as MUSD, or as BTC for gas, on Mezo).
-- On the testnet instance, "Add funds" uses a faucet that sends test tokens and a little test ETH.
+- On the testnet instance, "Add funds" uses a faucet that transfers 10 test MUSD from a funded reserve (MUSD is issued by the Mezo protocol, it cannot be minted) and a little test BTC for gas, only to wallets that lack them.
 - Settlements and refunds are credited inside the escrow contract: go to the Wallet page and click Withdraw to move them to your wallet (you pay the gas). The team may also run a relayer that withdraws automatically.
 - The Wallet page shows balance, available BTC for gas, Add funds, Send / withdraw to any EVM address.
 

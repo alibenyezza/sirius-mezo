@@ -146,6 +146,9 @@ function PageBottom() {
           <Link href="/status" className="py-2 text-sm text-muted underline-offset-4 transition-colors hover:text-foreground hover:underline">
             {t("État du protocole")}
           </Link>
+          <Link href="/proof" className="py-2 text-sm text-muted underline-offset-4 transition-colors hover:text-foreground hover:underline">
+            {t("Preuve on-chain")}
+          </Link>
           <Link href="/terms" className="py-2 text-sm text-muted underline-offset-4 transition-colors hover:text-foreground hover:underline">
             {t("Conditions d’utilisation")}
           </Link>

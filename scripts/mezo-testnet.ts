@@ -7,6 +7,17 @@
  * Lit `.env.local` (MEZO_DEPLOYER_KEY, jamais affichée). Après déploiement, les adresses
  * sont ajoutées à `.env.local` et écrites dans `deployments/mezo-testnet.json`.
  *
+ * Redéploiement (nouvel escrow, ex. ajout de `lockWithSignature`) : le registre KYB ouvert
+ * déjà en place est réutilisé par défaut (`contracts.kyb` du manifeste, ou
+ * `SIRIUS_REUSE_KYB_ADDRESS` ; `SIRIUS_FRESH_KYB=true` pour en déployer un neuf). Le
+ * registre de datasets est toujours redéployé, `bindEscrow` n'acceptant qu'une liaison :
+ * le titre de démonstration est republié, les autres titres doivent l'être par leurs
+ * fournisseurs. Le trio remplacé passe dans `previous` (tableau, le plus récent en premier)
+ * et son escrow rejoint `SIRIUS_LEGACY_ESCROW_ADDRESSES` pour que les crédits qui y
+ * restent soient encore retirables. Le bloc `verification` disparaît (nouvelles adresses
+ * non vérifiées, voir docs/MEZO-TESTNET.md), `evidence` est conservé. Règles pures dans
+ * `scripts/mezo-manifest.ts`.
+ *
  * Le prêt de démonstration fait intervenir deux comptes : le déployeur joue l'acheteur
  * (il verrouille le MUSD) et un second compte jetable joue le fournisseur (il publie le
  * titre du dataset et reçoit le MUSD). L'escrow refuse qu'une adresse se paie elle-même.
@@ -22,6 +33,14 @@ import { mezoTestnet } from "../src/lib/evm/networks";
 import { TESTNET_STABLECOIN_ADDRESS } from "../src/lib/evm/stablecoin";
 import { cidHash, datasetIdHash } from "../src/lib/evm/dataset-key";
 import { DEFAULT_MODEL_SELECTION, trainingProfileHash } from "../src/lib/models/registry";
+import {
+  DEFAULT_ESCROW_VERSION,
+  escrowFeatures,
+  legacyEscrowAddresses,
+  nextManifest,
+  reuseKybAddress,
+  type DeploymentManifestFile,
+} from "./mezo-manifest";
 
 const ROOT = resolve(__dirname, "..");
 const ENV_FILE = resolve(ROOT, ".env.local");
@@ -106,12 +125,17 @@ async function main() {
   const smokeSignerKey = (settlementKey && lockAuthorizer.toLowerCase() !== deployer.address.toLowerCase() ? settlementKey : null) as Hex | null;
   console.log(`signataire : ${lockAuthorizer}${smokeSignerKey ? " (compte de règlement de l'application)" : " (déployeur)"}`);
 
+  const saved: DeploymentManifestFile | null = existsSync(DEPLOYMENT_FILE)
+    ? (JSON.parse(readFileSync(DEPLOYMENT_FILE, "utf8")) as DeploymentManifestFile)
+    : null;
+
   let addresses: { escrow: Hex; kyb: Hex; datasets: Hex };
   if (smokeOnly) {
-    const saved = JSON.parse(readFileSync(DEPLOYMENT_FILE, "utf8")) as { contracts: { escrow: Hex; kyb: Hex; datasets: Hex } };
-    addresses = saved.contracts;
+    if (!saved) throw new Error("deployments/mezo-testnet.json absent : déploie d'abord (sans --smoke)");
+    addresses = { escrow: saved.contracts.escrow as Hex, kyb: saved.contracts.kyb as Hex, datasets: saved.contracts.datasets as Hex };
   } else {
-    console.log("\n── Déploiement des contrats ──");
+    const reusedKyb = reuseKybAddress(process.env, saved);
+    console.log(`\n── Déploiement des contrats${reusedKyb ? ` (registre KYB réutilisé : ${reusedKyb})` : ""} ──`);
     const output = run("contracts/scripts/deploy.ts", {
       SIRIUS_DEPLOY_NETWORK: "testnet",
       SIRIUS_KYB_MODE: "open",
@@ -119,27 +143,44 @@ async function main() {
       SIRIUS_USDC_ADDRESS: musd,
       SIRIUS_USDC_CODE_HASH: musdCodeHash,
       SIRIUS_LOCK_AUTHORIZER: lockAuthorizer,
+      ...(reusedKyb ? { SIRIUS_REUSE_KYB_ADDRESS: reusedKyb } : {}),
     });
     addresses = {
       escrow: envValue(output, "SIRIUS_ESCROW_ADDRESS"),
       kyb: envValue(output, "SIRIUS_KYB_ADDRESS"),
       datasets: envValue(output, "SIRIUS_DATASET_ADDRESS"),
     };
+
+    // Version et fonctionnalités de l'escrow : la version est lue sur le contrat (constante
+    // `VERSION`), les fonctionnalités dans l'ABI compilée qui vient d'être déployée.
+    const escrowAbi = artifactAbi("SiriusEscrow");
+    const escrowVersion = await publicClient
+      .readContract({ address: addresses.escrow, abi: escrowAbi, functionName: "VERSION" })
+      .then((value) => (typeof value === "string" && value ? value : DEFAULT_ESCROW_VERSION), () => DEFAULT_ESCROW_VERSION);
+    const features = escrowFeatures(escrowAbi);
+
+    // L'escrow remplacé reste autorisé en lecture et en retrait (crédits, remboursements).
+    const retiredEscrows = saved && saved.contracts.escrow.toLowerCase() !== addresses.escrow.toLowerCase() ? [saved.contracts.escrow] : [];
     upsertEnv({
       EVM_NETWORK: "testnet", NEXT_PUBLIC_EVM_NETWORK: "testnet", SIRIUS_BILLING_VERSION: "6",
       NEXT_PUBLIC_SIRIUS_ESCROW_ADDRESS: addresses.escrow, NEXT_PUBLIC_SIRIUS_USDC_ADDRESS: musd,
       NEXT_PUBLIC_SIRIUS_KYB_ADDRESS: addresses.kyb, NEXT_PUBLIC_SIRIUS_DATASET_ADDRESS: addresses.datasets,
       SIRIUS_ESCROW_ADDRESS: addresses.escrow, SIRIUS_USDC_ADDRESS: musd, SIRIUS_USDC_CODE_HASH: musdCodeHash,
       SIRIUS_KYB_ADDRESS: addresses.kyb, SIRIUS_DATASET_ADDRESS: addresses.datasets, SIRIUS_LOCK_AUTHORIZER: lockAuthorizer,
+      SIRIUS_LEGACY_ESCROW_ADDRESSES: legacyEscrowAddresses(process.env.SIRIUS_LEGACY_ESCROW_ADDRESSES, retiredEscrows, addresses.escrow),
     });
     mkdirSync(resolve(ROOT, "deployments"), { recursive: true });
-    writeFileSync(DEPLOYMENT_FILE, JSON.stringify({
-      network: "mezo-testnet", chainId: chain.id, explorer: chain.blockExplorers?.default.url,
+    const manifest = nextManifest(saved, {
+      chainId: chain.id, explorer: chain.blockExplorers?.default.url,
       deployedAt: new Date().toISOString(), deployer: deployer.address, lockAuthorizer,
       settlementToken: { symbol: "MUSD", address: musd, decimals: 18, codeHash: musdCodeHash },
-      contracts: { ...addresses, kybMode: "open", escrowVersion: "sirius-escrow-usdc-v6" },
-    }, null, 2) + "\n");
-    console.log(`\nAdresses écrites dans deployments/mezo-testnet.json et .env.local`);
+      contracts: { ...addresses, kybMode: "open", escrowVersion, ...(features.length ? { escrowFeatures: features } : {}) },
+    });
+    writeFileSync(DEPLOYMENT_FILE, JSON.stringify(manifest, null, 2) + "\n");
+    console.log(`\nAdresses écrites dans deployments/mezo-testnet.json et .env.local (escrow ${escrowVersion}${features.length ? `, ${features.join(", ")}` : ""})`);
+    if (retiredEscrows.length) {
+      console.log(`Ancien escrow ${retiredEscrows[0]} ajouté à SIRIUS_LEGACY_ESCROW_ADDRESSES ; les titres de datasets de l'ancien registre doivent être republiés.`);
+    }
   }
 
   // Fournisseur de démonstration : second compte jetable, financé en BTC par le déployeur.

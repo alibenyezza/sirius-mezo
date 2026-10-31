@@ -10,6 +10,11 @@ import { deploymentPlan } from "../../scripts/deploy-policy";
  *
  *   MEZO_DEPLOYER_KEY=0x... pnpm contracts:deploy:testnet
  *
+ * `SIRIUS_REUSE_KYB_ADDRESS=0x...` garde un registre KYB déjà déployé (vérifié on-chain) et
+ * ne déploie que le registre de datasets et l'escrow : `SiriusDatasetRegistry.bindEscrow`
+ * n'accepte qu'une liaison, un nouvel escrow impose donc un nouveau registre de datasets,
+ * jamais un nouveau registre KYB. Les trois adresses sont imprimées dans tous les cas.
+ *
  * Écrit en viem pur plutôt qu'avec les aides de `hardhat-viem`, pour deux raisons.
  * D'abord `hardhat-viem` ne connaît que les chaînes livrées dans `viem/chains`, et
  * Mezo n'en fait pas partie. Ensuite il appelle `getTransaction`
@@ -58,6 +63,21 @@ function requireAddress(variable: string): Hex {
   const configured = process.env[variable]?.trim();
   if (!configured || !/^0x[0-9a-fA-F]{40}$/.test(configured)) {
     throw new Error(`${variable} doit être une adresse EVM valide`);
+  }
+  return configured as Hex;
+}
+
+/**
+ * Registre KYB déjà déployé à réutiliser (`SIRIUS_REUSE_KYB_ADDRESS`), ou `null` pour en
+ * déployer un neuf. Le registre ouvert n'a pas d'état et le registre strict porte ses
+ * attestations : redéployer l'escrow et le registre de datasets n'oblige pas à le changer.
+ * Forme EIP-55 ou minuscules acceptées ; l'existence du code est vérifiée sur la chaîne.
+ */
+function optionalReusedKyb(): Hex | null {
+  const configured = process.env.SIRIUS_REUSE_KYB_ADDRESS?.trim();
+  if (!configured) return null;
+  if (!/^0x[0-9a-fA-F]{40}$/.test(configured) || /^0x0{40}$/i.test(configured)) {
+    throw new Error("SIRIUS_REUSE_KYB_ADDRESS doit être une adresse EVM non nulle");
   }
   return configured as Hex;
 }
@@ -118,6 +138,8 @@ async function main() {
   // seul l'argument de construction diffère — et revenir au KYB réel consistera à
   // les redéployer sans cette variable.
   const kybOuvert = plan.kybOpen;
+  const reusedKyb = optionalReusedKyb();
+  const kybContract = kybOuvert ? "SiriusOpenKybRegistry" : "SiriusKybRegistry";
 
   const admin = kybOuvert ? account.address : requireRole("SIRIUS_KYB_ADMIN", account.address);
   const verifier = kybOuvert ? account.address : requireRole("SIRIUS_KYB_VERIFIER", account.address);
@@ -178,10 +200,45 @@ async function main() {
     if (!code || code === "0x") throw new Error(`L'admin KYB ${governed} doit être un contrat (Safe), pas une clé`);
   }
 
+  // Registre KYB réutilisé : il doit exister sur cette chaîne et répondre comme le ferait un
+  // registre fraîchement déployé dans le même mode (ouvert : laisse passer n'importe qui ;
+  // strict : connaît le vérificateur configuré). Un registre de l'autre mode, ou un contrat
+  // quelconque, est refusé ici plutôt que découvert au premier emprunt.
+  const kybAbi = artifact(kybContract).abi;
+
+  /** Lecture de bon sens du registre KYB, la même pour un registre neuf ou réutilisé. */
+  async function assertKybBehaves(address: Hex, label: string) {
+    let answer: unknown;
+    try {
+      answer = kybOuvert
+        // Le contrôle utile ici est l'inverse du contrôle habituel : on vérifie que le
+        // registre laisse effectivement passer, y compris une adresse qui n'a jamais rien
+        // signé. Un faux négatif bloquerait tous les emprunts sans message clair.
+        ? await publicClient.readContract({ address, abi: kybAbi, functionName: "isKybValid", args: ["0x000000000000000000000000000000000000dEaD"] })
+        : await publicClient.readContract({ address, abi: kybAbi, functionName: "isVerifier", args: [verifier] });
+    } catch (error) {
+      throw new Error(`${label} ${address} ne répond pas comme un ${kybContract} : ${error instanceof Error ? error.message : String(error)}`);
+    }
+    if (answer !== true) {
+      throw new Error(
+        kybOuvert
+          ? `${label} : le registre ouvert refuse une adresse — il ne remplit pas son rôle`
+          : `${label} : le vérificateur KYB ${verifier} n'est pas enregistré dans ce registre`,
+      );
+    }
+  }
+
+  if (reusedKyb) {
+    const code = await publicClient.getBytecode({ address: reusedKyb });
+    if (!code || code === "0x") throw new Error(`SIRIUS_REUSE_KYB_ADDRESS ${reusedKyb} ne contient aucun contrat sur ${network}`);
+    await assertKybBehaves(reusedKyb, "SIRIUS_REUSE_KYB_ADDRESS");
+    console.log(`registre KYB  : ${reusedKyb} (réutilisé, ${kybOuvert ? "ouvert" : "strict"})`);
+  }
+
   if (plan.dryRun) {
     console.log("");
     console.log("Exécution à blanc : toutes les vérifications sont passées, aucune transaction envoyée.");
-    console.log(`contrats      : ${kybOuvert ? "SiriusOpenKybRegistry" : "SiriusKybRegistry"}, SiriusDatasetRegistry, ${escrowContract}`);
+    console.log(`contrats      : ${reusedKyb ? `${kybContract} réutilisé (${reusedKyb})` : kybContract}, SiriusDatasetRegistry, ${escrowContract}`);
     console.log(`signataire    : ${lockAuthorizer}`);
     if (!kybOuvert) console.log(`admin KYB     : ${admin}\nvérificateur  : ${verifier}`);
     return;
@@ -219,9 +276,11 @@ async function main() {
   }
 
   console.log("");
-  const kyb = kybOuvert
-    ? await deploy("SiriusOpenKybRegistry")
-    : await deploy("SiriusKybRegistry", [admin, verifier]);
+  const kyb = reusedKyb
+    ?? (kybOuvert
+      ? await deploy("SiriusOpenKybRegistry")
+      : await deploy("SiriusKybRegistry", [admin, verifier]));
+  if (reusedKyb) console.log(`${kybContract.padEnd(22)} ${reusedKyb}  (réutilisé)`);
   // Ce rôle ne sert qu'à la liaison unique ; le déployeur effectue la transaction.
   const datasets = await deploy("SiriusDatasetRegistry", [kyb, account.address]);
   const escrow = await deploy(escrowContract, [usdc, kyb, datasets, lockAuthorizer]);
@@ -242,7 +301,7 @@ async function main() {
   console.log("");
   console.log(`gas total     : ${totalGas.toLocaleString("fr-FR")}`);
   if (kybOuvert) {
-    console.log("registre KYB  : OUVERT — toute adresse est valide, sans vérification");
+    console.log(`registre KYB  : OUVERT — toute adresse est valide, sans vérification${reusedKyb ? " (réutilisé)" : ""}`);
   } else {
     console.log(`admin KYB     : ${admin}`);
     console.log(`vérificateur  : ${verifier}`);
@@ -252,7 +311,6 @@ async function main() {
   const escrowAbi = artifact(escrowContract).abi;
   const deployedAuthorizer = await publicClient.readContract({ address: escrow, abi: escrowAbi, functionName: "lockAuthorizer" }) as Hex;
   if (deployedAuthorizer.toLowerCase() !== lockAuthorizer.toLowerCase()) throw new Error("Signataire de lock incorrect");
-  const kybAbi = artifact(kybOuvert ? "SiriusOpenKybRegistry" : "SiriusKybRegistry").abi;
   const datasetAbi = artifact("SiriusDatasetRegistry").abi;
 
   const accounting = (await publicClient.readContract({
@@ -288,26 +346,7 @@ async function main() {
     throw new Error("SiriusEscrow ne référence pas le registre dataset déployé");
   }
 
-  if (kybOuvert) {
-    // Le contrôle utile ici est l'inverse du contrôle habituel : on vérifie que le
-    // registre laisse effectivement passer, y compris une adresse qui n'a jamais rien
-    // signé. Un faux négatif bloquerait tous les emprunts sans message clair.
-    const passeSansAttestation = await publicClient.readContract({
-      address: kyb,
-      abi: kybAbi,
-      functionName: "isKybValid",
-      args: ["0x000000000000000000000000000000000000dEaD"],
-    });
-    if (!passeSansAttestation) throw new Error("Le registre ouvert refuse une adresse — il ne remplit pas son rôle");
-  } else {
-    const verifierRegistered = await publicClient.readContract({
-      address: kyb,
-      abi: kybAbi,
-      functionName: "isVerifier",
-      args: [verifier],
-    });
-    if (!verifierRegistered) throw new Error("Le premier vérificateur KYB n'a pas été enregistré");
-  }
+  await assertKybBehaves(kyb, reusedKyb ? "Le registre KYB réutilisé" : "Le registre KYB déployé");
 
   const linkedKyb = (await publicClient.readContract({
     address: datasets,
@@ -343,7 +382,7 @@ async function main() {
     console.log("Explorateur :");
     for (const [name, address] of [
       [escrowContract, escrow],
-      [kybOuvert ? "SiriusOpenKybRegistry" : "SiriusKybRegistry", kyb],
+      [reusedKyb ? `${kybContract} (réutilisé)` : kybContract, kyb],
       ["SiriusDatasetRegistry", datasets],
     ] as const) {
       console.log(`  ${name.padEnd(22)} ${explorer}/address/${address}`);

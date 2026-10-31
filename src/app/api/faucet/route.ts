@@ -8,14 +8,15 @@ import { enforceRateLimit, FixedWindowRateLimiter, requestClientKey } from "@/li
 export const runtime = "nodejs";
 
 /**
- * Le rationnement compte autant que la distribution : la réserve d'ETH est finie et
- * un seul visiteur en boucle la viderait pour tous les autres. Une demande par heure
- * et par compte suffit largement — mille USDC couvrent des centaines d'emprunts.
+ * Le rationnement compte autant que la distribution : les réserves de MUSD et de BTC
+ * sont finies et un seul visiteur en boucle les viderait pour tous les autres. Une
+ * demande par heure et par compte suffit largement — dix MUSD couvrent plusieurs emprunts
+ * sur la démonstration, et le distributeur ne ressert pas un compte déjà pourvu.
  */
 // Le plafond global borne ce que l'instance peut perdre en une heure, quel que soit le
 // nombre d'adresses : avec des comptes créés en un clic, l'adresse n'est plus une
-// contrainte. À 0,0002 ETH la distribution, trente par heure font 0,006 ETH — un
-// incident coûte une soirée, pas la réserve.
+// contrainte. À 0,0002 BTC et 10 MUSD la distribution, trente par heure font 0,006 BTC
+// et 300 MUSD — un incident coûte une soirée, pas la réserve.
 const faucetLimiter = new FixedWindowRateLimiter({
   windowMs: 60 * 60_000,
   maxPerKey: 1,

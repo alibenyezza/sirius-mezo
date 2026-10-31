@@ -26,3 +26,26 @@ export function addFundsOptions(network: EvmNetwork): AddFundsOptions {
     ? { faucet: false, bridge: false, transfer: true }
     : { faucet: true, bridge: false, transfer: false };
 }
+
+/** Ce que le faucet a versé : `null` quand le compte en avait déjà assez. */
+export interface FaucetReceipt {
+  /** MUSD envoyés (nom historique du champ). */
+  usdc: string | null;
+  /** BTC natif envoyé pour le gas (nom historique du champ). */
+  eth: string | null;
+}
+
+type Translate = (key: string, variables?: Record<string, string | number>) => string;
+
+/**
+ * Confirmation affichée après un appel au faucet. Le distributeur ne ressert pas un compte
+ * déjà pourvu ; le message doit le dire plutôt que d'annoncer un versement qui n'a pas eu
+ * lieu, sinon l'utilisateur cherche des fonds qui ne viendront pas.
+ */
+export function faucetReceiptMessage(received: FaucetReceipt, token: string, t: Translate): string {
+  const { usdc, eth } = received;
+  if (usdc && eth) return t("{usdc} {token} et {eth} BTC envoyés.", { usdc, token, eth });
+  if (usdc) return t("{usdc} {token} envoyés.", { usdc, token });
+  if (eth) return t("{eth} BTC pour le gas envoyés ; ton solde {token} suffisait déjà.", { eth, token });
+  return t("Compte déjà pourvu : rien à envoyer.");
+}

@@ -18,6 +18,29 @@
     "kybMode": "open",
     "escrowVersion": "sirius-escrow-usdc-v6"
   },
+  "verification": {
+    "explorer": "https://explorer.test.mezo.org",
+    "method": "hardhat verify (Blockscout etherscan-compatible API, network mezoTestnet)",
+    "compiler": "v0.8.24+commit.e11b9ed9",
+    "verifiedAt": "2026-10-31T17:06:18.864Z",
+    "contracts": {
+      "escrow": {
+        "verified": true,
+        "name": "SiriusEscrow",
+        "url": "https://explorer.test.mezo.org/address/0xd14a0af1581bd7bd80d9da0f775c1c254967abda?tab=contract"
+      },
+      "datasets": {
+        "verified": true,
+        "name": "SiriusDatasetRegistry",
+        "url": "https://explorer.test.mezo.org/address/0x2f7482e7cf68e9babda9e31b566ffcbaa3a9b969?tab=contract"
+      },
+      "kyb": {
+        "verified": true,
+        "name": "SiriusOpenKybRegistry",
+        "url": "https://explorer.test.mezo.org/address/0xf0ab86b45202c1600cb54b49cbd35bd3e4bb5392?tab=contract"
+      }
+    }
+  },
   "demo": {
     "provider": "0xeeD8eC97B94613a765639Ea72a9410CCb82eAe4f",
     "borrower": "0x2d017fb59077456E87C6f0E719dd75B03a910c8a",

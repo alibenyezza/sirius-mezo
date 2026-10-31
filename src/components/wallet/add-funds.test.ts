@@ -2,7 +2,8 @@ import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import { test } from "node:test";
 import qrcode from "qrcode-generator";
-import { addFundsOptions } from "./add-funds";
+import { translateEnglish } from "@/lib/i18n/english";
+import { addFundsOptions, faucetReceiptMessage } from "./add-funds";
 import { buildAddressQr, QR_QUIET_ZONE } from "./qr";
 
 const LOWER = "0x2f9b9a9eb5fef4f4a2218984a6f27d9f4174d13d";
@@ -16,6 +17,22 @@ test("ajout de fonds sur mainnet : transfert et pont, pas de faucet", () => {
 
 test("ajout de fonds sur testnet : le faucet actuel, sans transfert ni pont", () => {
   assert.deepEqual(addFundsOptions("testnet"), { faucet: true, bridge: false, transfer: false });
+});
+
+test("confirmation du faucet : chaque combinaison de versements a son message, y compris « rien envoyé »", () => {
+  const token = "test MUSD";
+  const t = translateEnglish;
+  assert.equal(faucetReceiptMessage({ usdc: "10", eth: "0.0002" }, token, t), "Sent 10 test MUSD and 0.0002 BTC.");
+  assert.equal(faucetReceiptMessage({ usdc: "10", eth: null }, token, t), "Sent 10 test MUSD.");
+  assert.equal(
+    faucetReceiptMessage({ usdc: null, eth: "0.0002" }, token, t),
+    "Sent 0.0002 BTC for gas; your test MUSD balance was already sufficient.",
+  );
+  assert.equal(faucetReceiptMessage({ usdc: null, eth: null }, token, t), "Account already funded: nothing to send.");
+  // Jamais « ETH » : le gas de Mezo est du BTC.
+  for (const received of [{ usdc: "10", eth: "0.0002" }, { usdc: null, eth: "0.0002" }]) {
+    assert.doesNotMatch(faucetReceiptMessage(received, token, (key) => key), /ETH/);
+  }
 });
 
 /** Reconstruit la grille de modules sombres à partir du chemin SVG produit. */
