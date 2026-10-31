@@ -2,12 +2,13 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { EscrowCredits } from "@/components/wallet/EscrowCredits";
+import { EarnCard } from "@/components/wallet/EarnCard";
 import { Card } from "@/components/ui/Card";
 import { ConnectPrompt } from "@/components/wallet/ConnectCta";
 import { Page, PageHeader } from "@/components/layout/Page";
 import { SecureAccountCard } from "@/components/wallet/SecureAccount";
 import { AddFundsDialog } from "@/components/wallet/AddFundsDialog";
-import { addFundsOptions } from "@/components/wallet/add-funds";
+import { addFundsOptions, faucetReceiptMessage } from "@/components/wallet/add-funds";
 import { normalizeAddress, shortAddress } from "@/components/profile/address";
 import { isWrongNetwork, networkBadge } from "@/components/profile/network";
 import { useCopy } from "@/components/profile/useCopy";
@@ -71,14 +72,10 @@ function WalletPageContent() {
     setFundsMessage(null);
     try {
       const recu = await addFunds();
-      setFundsMessage(
-        recu.eth
-          ? t("{usdc} {token} et {eth} ETH envoyés.", { usdc: recu.usdc, token, eth: recu.eth })
-          : t("{usdc} {token} envoyés.", { usdc: recu.usdc, token }),
-      );
+      setFundsMessage(faucetReceiptMessage(recu, token, t));
       await refresh();
       // Sans cet effacement, la confirmation restait à l'écran indéfiniment. Le solde
-      // continuait de bouger — un emprunt, un retrait — et « 1000 USDC envoyés » finissait
+      // continuait de bouger — un emprunt, un retrait — et « 10 MUSD envoyés » finissait
       // affiché à côté d'un solde qui ne correspondait plus, ce qui se lit comme un échec
       // du virement alors qu'il a bien eu lieu.
       window.setTimeout(() => setFundsMessage(null), 8_000);
@@ -162,6 +159,7 @@ function WalletPageContent() {
       {fundsDialog && <AddFundsDialog network={NETWORK} address={address} onClose={() => setFundsDialog(false)} />}
 
       <EscrowCredits onWithdraw={refresh} guideAnchor="page:wallet:credits" />
+      <EarnCard guideAnchor="page:wallet:earn" />
 
       <SecureAccountCard />
     </Page>
@@ -172,6 +170,7 @@ function WalletPageContent() {
 function AccountCard({ address, authenticated }: { address: string; authenticated: boolean }) {
   const { t } = useLocale();
   const walletNetwork = useWalletStore((s) => s.network);
+  const source = useWalletStore((s) => s.source);
   const { state: copyState, copy } = useCopy();
   const badge = networkBadge(NETWORK);
   const wrongNetwork = isWrongNetwork(NETWORK, walletNetwork);
@@ -192,6 +191,7 @@ function AccountCard({ address, authenticated }: { address: string; authenticate
       <div>
         <SectionTitle>{t("Wallet")}</SectionTitle>
         <p className="mt-2 font-mono text-sm" title={address}>{shortAddress(address) ?? truncate(address)}</p>
+        {source === "passport" && <p className="mt-1 text-xs text-muted">{t("Wallet Bitcoin via Mezo Passport")}</p>}
         <div className="mt-2 flex flex-wrap gap-2">
           <button
             type="button"

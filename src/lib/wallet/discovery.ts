@@ -1,6 +1,7 @@
 "use client";
 
 import type { Eip1193Provider } from "@/lib/wallet/manager";
+import { mezoPassportEnabled } from "@/lib/wallet/passport-flag";
 
 /**
  * Découverte des portefeuilles installés, selon EIP-6963.
@@ -54,6 +55,25 @@ export function embeddedConfigured(): boolean {
 /** Vrai si c'est le portefeuille embarqué que l'utilisateur a choisi. */
 export function embeddedSelected(): boolean {
   return selectedWalletRdns() === EMBEDDED_RDNS;
+}
+
+/**
+ * Identifiant du smart account Mezo Passport, réservé pour les mêmes raisons.
+ *
+ * Un wallet Bitcoin connecté par Passport ne s'annonce pas en EIP-6963 ; le smart account
+ * qui le représente est choisi, mémorisé et retrouvé par ce `rdns`, comme le portefeuille
+ * embarqué, sans que ce module ait à charger le SDK.
+ */
+export const PASSPORT_RDNS = "org.mezo.passport";
+
+/** Sans le drapeau, les wallets Bitcoin ne sont pas proposés du tout. */
+export function passportConfigured(): boolean {
+  return mezoPassportEnabled();
+}
+
+/** Vrai si c'est un wallet Bitcoin par Mezo Passport que l'utilisateur a choisi. */
+export function passportSelected(): boolean {
+  return selectedWalletRdns() === PASSPORT_RDNS;
 }
 
 const decouverts = new Map<string, AnnouncedWallet>();
@@ -115,6 +135,36 @@ export function notifyWalletChange(): void {
 /** `null` tant que `embedded.ts` n'a pas été chargé — donc tant qu'il n'a pas servi. */
 export function embeddedWallet(): EmbeddedWallet | null {
   return embarque;
+}
+
+/** Même inversion pour Mezo Passport : `passport.ts` se déclare ici quand il est chargé. */
+let passport: EmbeddedWallet | null = null;
+
+export function registerPassportWallet(wallet: EmbeddedWallet): void {
+  passport = wallet;
+  notifier();
+}
+
+/** `null` tant que `passport.ts` n'a pas été chargé. */
+export function passportWallet(): EmbeddedWallet | null {
+  return passport;
+}
+
+/**
+ * Portefeuille porté par un SDK — embarqué ou Passport — si c'est lui qui est choisi.
+ *
+ * Les deux partagent les mêmes gestes hors EIP-1193 : pas de sélecteur de comptes à rouvrir,
+ * une bascule de chaîne et une déconnexion qui passent par le SDK. `manager.ts` les traite
+ * d'un bloc plutôt que d'énumérer chaque cas.
+ */
+export function selectedSdkWallet(): EmbeddedWallet | null {
+  if (embeddedSelected()) return embarque;
+  if (passportSelected()) return passport;
+  return null;
+}
+
+export function sdkWalletSelected(): boolean {
+  return embeddedSelected() || passportSelected();
 }
 
 function demarrerEcoute(): void {
@@ -213,6 +263,7 @@ export function selectedProvider(): Eip1193Provider | null {
   // `null` — ce qui est la bonne réponse, puisqu'il n'y a effectivement aucune session
   // sociale ouverte à ce moment-là.
   if (rdns === EMBEDDED_RDNS) return embarque?.provider() ?? null;
+  if (rdns === PASSPORT_RDNS) return passport?.provider() ?? null;
 
   const connu = decouverts.get(rdns)?.provider;
   if (connu) return connu;

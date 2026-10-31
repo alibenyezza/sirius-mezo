@@ -1,7 +1,12 @@
 allowBuilds:
   '@prisma/engines': true
   better-sqlite3: true
+  # Dépendances natives optionnelles amenées par Mezo Passport (web3, ws) : aucune n'est
+  # nécessaire au navigateur ni au serveur, on ne compile rien.
+  bufferutil: false
+  core-js: false
   ed25519: false
+  es5-ext: false
   esbuild: true
   keccak: false
   prisma: true
@@ -10,6 +15,10 @@ allowBuilds:
   sharp: true
   tiny-secp256k1: false
   unrs-resolver: true
+  utf-8-validate: false
+  web3: false
+  web3-bzz: false
+  web3-shh: false
 overrides:
   # @phala/dstack-sdk 0.5.8 exige @noble/hashes@^1.6.1 (subpaths /sha256 /sha512), mais le
   # projet embarque la v2 (subpaths renommés) → épingle l'arête du SDK sur la 1.x compatible.

@@ -1,0 +1,71 @@
+/** Intégrations Mezo (lock par signature, Borrow & Buy, gains fournisseurs). */
+export const MEZO_MESSAGES_EN: Record<string, string> = {
+  // Borrow & Buy
+  "Introuvable": "Not found",
+  "Montant invalide : entier atomique attendu": "Invalid amount: atomic integer expected",
+  "Corps de tirage invalide": "Invalid draw body",
+  "Montant de tirage nul": "Draw amount is zero",
+  "Signature de tirage expirée : recommence": "Draw signature expired: start again",
+  "Échéance de tirage trop lointaine": "Draw deadline is too far in the future",
+  "Tirage refusé": "Draw refused",
+  "Signature de tirage déjà consommée ou périmée": "Draw signature already used or stale",
+  "Tirage refusé par le protocole MUSD": "The MUSD protocol refused the draw",
+  "Tirage rejeté par la chaîne": "The chain rejected the draw",
+  "Position MUSD indisponible": "MUSD position is unavailable",
+  "Tirage sur trove indisponible sur cette instance": "Drawing from a trove is unavailable on this instance",
+  "Relais du tirage refusé": "The draw could not be relayed",
+  "Pas assez de MUSD ? Ouvre un trove sur": "Not enough MUSD? Open a trove on",
+  "et paie directement depuis ton Bitcoin.": "and pay straight from your Bitcoin.",
+  "Payer depuis ton Bitcoin": "Pay from your Bitcoin",
+  "Tire {amount} MUSD sur ton trove Mezo : ta dette augmente de {amount} MUSD plus {fee} MUSD de frais, ton BTC reste en collatéral.":
+    "Draw {amount} MUSD from your Mezo trove: your debt grows by {amount} MUSD plus a {fee} MUSD fee, your BTC stays as collateral.",
+  "Dette actuelle": "Current debt",
+  "Dette après": "Debt after",
+  "Ratio actuel": "Current ratio",
+  "Ratio après": "Ratio after",
+  "Tirage en cours…": "Drawing…",
+  "Tirer le MUSD et acheter": "Draw MUSD & buy",
+  "Une signature, aucune transaction : Sirius soumet le tirage et paie le gas. Le MUSD arrive directement sur ton wallet.":
+    "One signature, no transaction: Sirius submits the draw and pays the gas. MUSD lands directly in your wallet.",
+  // Gains fournisseurs
+  "Action earn inconnue": "Unknown earn action",
+  "Montant nul": "Amount is zero",
+  "Solde MUSD insuffisant": "Insufficient MUSD balance",
+  "Transaction indisponible": "Transaction unavailable",
+  "Mets ton MUSD au travail sur Mezo": "Put your MUSD to work on Mezo",
+  "Solde disponible : {amount} MUSD. Les gains réglés par l’escrow sont retirables ci-dessus, puis déposables ici.":
+    "Available balance: {amount} MUSD. Earnings settled by the escrow are withdrawable above, then can be deposited here.",
+  "Stability Pool MUSD": "MUSD Stability Pool",
+  "Les dépôts absorbent les liquidations et reçoivent le BTC saisi en collatéral. Pas de récompense MEZO.":
+    "Deposits absorb liquidations and receive the seized BTC collateral. No MEZO rewards.",
+  "Ton dépôt : {deposit} MUSD · gain BTC : {gain} BTC · total du pool : {total} MUSD":
+    "Your deposit: {deposit} MUSD · BTC gain: {gain} BTC · pool total: {total} MUSD",
+  "Dépôt…": "Depositing…",
+  "Déposer": "Deposit",
+  "Épargne sMUSD": "sMUSD savings",
+  "Reçu d’épargne 1:1 en sMUSD ; le rendement vient des frais du protocole MUSD.":
+    "1:1 savings receipt in sMUSD; yield comes from MUSD protocol fees.",
+  "Ton solde : {shares} sMUSD · rendement réclamable : {yield} MUSD": "Your balance: {shares} sMUSD · claimable yield: {yield} MUSD",
+  "Réclamation…": "Claiming…",
+  "Réclamer le rendement": "Claim yield",
+  // Lock par signature
+  "Paiement par signature désactivé sur cette instance": "One-signature payment is disabled on this instance",
+  "Paiement par signature réservé à l’escrow v6": "One-signature payment is only available on the v6 escrow",
+  "Transaction de lock inattendue": "Unexpected lock transaction",
+  "L’escrow déployé n’accepte pas encore le lock par signature": "The deployed escrow does not support one-signature locks yet",
+  "Domaine EIP-712 du jeton incohérent": "The token's EIP-712 domain is inconsistent",
+  "Demande de lock d’un autre compte": "Lock request belongs to another account",
+  "Termes du lock modifiés depuis la signature : recommence": "Lock terms changed since you signed: start again",
+  "Demande de lock expirée : recommence": "Lock request expired: start again",
+  "Signature de lock déjà consommée ou périmée": "Lock signature already used or stale",
+  "Lock par signature refusé par le contrat": "The contract rejected the signed lock",
+  "Corps de relais de lock invalide": "Invalid lock relay body",
+  "Paiement par signature indisponible avec un devis compute": "One-signature payment is unavailable with a compute quote",
+  "Charges de signature indisponibles": "Signature payloads are unavailable",
+  "Préparation du prêt expirée. Relance l’emprunt.": "Loan preparation expired. Start the borrow again.",
+  "Relais du lock par signature refusé": "The signed lock could not be relayed",
+  "Payer en une signature (sans gas)": "Pay with one signature (no gas)",
+  "Signature…": "Signing…",
+  "Deux signatures dans ton wallet, aucune transaction : Sirius soumet le lock et paie le gas en BTC. Le MUSD part de ton compte au moment du lock.":
+    "Two signatures in your wallet, no transaction: Sirius submits the lock and pays the gas in BTC. MUSD leaves your account at lock time.",
+};

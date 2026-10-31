@@ -7,13 +7,32 @@ import { hasRunnerDelegation } from "@/lib/runner/authorization-client";
 import { tryNormalizeAddress } from "@/lib/evm/address";
 import { EVM_CHAIN_IDS, resolveClientNetwork, type EvmNetwork } from "@/lib/evm/networks";
 import { connectExternalWallet, getExternalWallet } from "@/lib/wallet/manager";
-import { EMBEDDED_RDNS, embeddedSelected, selectWallet, subscribeWalletChanges } from "@/lib/wallet/discovery";
-import { useWalletStore } from "@/stores/wallet";
+import {
+  EMBEDDED_RDNS,
+  PASSPORT_RDNS,
+  embeddedSelected,
+  passportSelected,
+  selectWallet,
+  subscribeWalletChanges,
+} from "@/lib/wallet/discovery";
+import type { PassportWalletChoice, PassportWalletId } from "@/lib/wallet/passport";
+import { useWalletStore, type WalletSource } from "@/stores/wallet";
 
 function networkForChain(chainId: unknown): string {
   if (typeof chainId !== "string") return "unknown";
   const parsed = Number.parseInt(chainId, 16);
   return (Object.entries(EVM_CHAIN_IDS).find(([, id]) => id === parsed)?.[0] as EvmNetwork | undefined) ?? chainId;
+}
+
+/**
+ * Origine à inscrire au store pour le portefeuille choisi.
+ *
+ * Un smart account Mezo Passport se distingue d'une EOA : le serveur en accepte une
+ * autre forme de signature, et l'interface dit à l'utilisateur ce qu'il a connecté.
+ * Une extension et le portefeuille embarqué restent « external » : une EOA a signé.
+ */
+function sourceOfSelection(): Exclude<WalletSource, null> {
+  return passportSelected() ? "passport" : "external";
 }
 
 /**
@@ -113,6 +132,45 @@ export function openEmbeddedWallet(): Promise<void> {
   });
 }
 
+export type PassportConnection = { status: "connected" } | { status: "choose"; wallets: PassportWalletChoice[] };
+
+/**
+ * Ouvre la connexion d'un wallet Bitcoin par Mezo Passport et adopte le smart account obtenu.
+ *
+ * Même économie que pour la connexion sociale : le SDK n'est chargé qu'au clic, et le choix
+ * n'est mémorisé qu'après une connexion réussie. Sans `walletId`, on connecte le seul wallet
+ * Bitcoin installé ; s'il y en a plusieurs, on rend la liste et l'interface fait choisir.
+ *
+ * Le store note la source « passport » : le serveur vérifie alors la signature auprès du
+ * compte (ERC-1271), et non par `ecrecover`.
+ */
+export function openPassportWallet(walletId?: PassportWalletId): Promise<PassportConnection> {
+  clearWalletDisconnected();
+  return (async (): Promise<PassportConnection> => {
+    const passport = await import("@/lib/wallet/passport");
+    const installed = passport.detectBitcoinWallets().filter((wallet) => wallet.installed);
+    const chosen = walletId ?? (installed.length === 1 ? installed[0].id : null);
+    if (!chosen) {
+      if (installed.length === 0) throw new Error("Aucun wallet Bitcoin détecté. Installe Unisat, OKX Wallet ou Xverse.");
+      return { status: "choose", wallets: installed };
+    }
+    const { address, chainId } = await passport.connectPassport(chosen);
+    if (walletDisconnectedByUser()) return { status: "connected" };
+    const normalized = tryNormalizeAddress(address);
+    if (!normalized) throw new Error("Adresse EVM invalide.");
+    selectWallet(PASSPORT_RDNS);
+    useWalletStore.getState().setConnected(normalized, networkForChain(chainId), "passport");
+    void synchroniserSession(normalized, () =>
+      useWalletStore.getState().address === normalized &&
+      useWalletStore.getState().network === networkForChain(chainId),
+    );
+    return { status: "connected" };
+  })().catch((error) => {
+    console.error("Connexion Mezo Passport échouée", error);
+    throw error;
+  });
+}
+
 export function WalletConnector() {
   const setConnected = useWalletStore((state) => state.setConnected);
   const setDisconnected = useWalletStore((state) => state.setDisconnected);
@@ -144,7 +202,7 @@ export function WalletConnector() {
         if (!current(version) || useWalletStore.getState().connected || !Array.isArray(accounts) || typeof accounts[0] !== "string") return;
         const address = tryNormalizeAddress(accounts[0]);
         if (!address) return;
-        setConnected(address, networkForChain(chainId), "external");
+        setConnected(address, networkForChain(chainId), sourceOfSelection());
         void synchroniserSession(address, () => current(version));
       };
       const onAccountsChanged = (accounts: unknown) => {
@@ -158,7 +216,7 @@ export function WalletConnector() {
           setDisconnected();
           return;
         }
-        setConnected(address, useWalletStore.getState().network ?? "unknown", "external");
+        setConnected(address, useWalletStore.getState().network ?? "unknown", sourceOfSelection());
         void provider.request({ method: "eth_chainId" }).then((chainId) => {
           if (!current(version)) return;
           setNetwork(networkForChain(chainId));
@@ -187,6 +245,13 @@ export function WalletConnector() {
     if (embeddedSelected()) {
       void import("@/lib/wallet/embedded")
         .then(({ restoreEmbedded }) => restoreEmbedded())
+        .catch(() => {});
+    }
+    // Même reprise pour un wallet Bitcoin : le SDK ne rouvre la session que si le wallet se
+    // dit déjà autorisé, sans fenêtre au chargement.
+    if (passportSelected()) {
+      void import("@/lib/wallet/passport")
+        .then(({ restorePassport }) => restorePassport())
         .catch(() => {});
     }
     const unsubscribe = subscribeWalletChanges(bind);

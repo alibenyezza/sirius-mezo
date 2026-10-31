@@ -36,7 +36,7 @@ function Row({ label, value, href, mono = false }: { label: string; value: strin
 
 export default function StatusPage() {
   // « MUSD » sur mainnet, « test MUSD » sur testnet : la page est en anglais, sans t().
-  const { network, chain, mainnet, symbol, confidentialCompute, settlement, externalAudit, limits, contracts } = readProtocolStatus();
+  const { network, chain, mainnet, symbol, confidentialCompute, settlement, externalAudit, limits, contracts, mezo } = readProtocolStatus();
 
   return (
     <main className="relative z-10 mx-auto w-full max-w-2xl px-6 py-12">
@@ -64,6 +64,21 @@ export default function StatusPage() {
           ? <Row key={label} label={label} value={address} href={addressExplorerUrl(network, address)} mono />
           : <Row key={label} label={label} value="Not configured" />)}
       </dl>
+
+      <h2 className="mt-10 text-lg font-semibold">MUSD yield venues</h2>
+      <p className="mt-2 max-w-prose text-sm text-muted">
+        Mezo protocol contracts where idle MUSD can earn: the Stability Pool backs liquidations and pays depositors in BTC;
+        the sMUSD savings vault pays yield in MUSD. Neither is operated by Sirius.
+      </p>
+      <dl className="mt-3 rounded-xl border border-border bg-surface px-5 py-1">
+        <Row label="MUSD Stability Pool" value={mezo.stabilityPool} href={addressExplorerUrl(network, mezo.stabilityPool)} mono />
+        <Row label="sMUSD savings vault" value={mezo.savingsVault} href={addressExplorerUrl(network, mezo.savingsVault)} mono />
+      </dl>
+
+      <p className="mt-3 max-w-prose text-sm text-muted">
+        Verified sources, live escrow accounting and the settlement cycle replayed on testnet are on the{" "}
+        <Link href="/proof" className="text-accent hover:text-accent/80">on-chain proof</Link> page.
+      </p>
 
       <p className="mt-8 max-w-prose text-sm text-muted">
         Every loan leaves a receipt in the <Link href="/audit" className="text-accent hover:text-accent/80">audit ledger</Link>.

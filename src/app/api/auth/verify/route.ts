@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { verifyChallenge } from "@/lib/auth/challenge";
 import { authenticationOrigin } from "@/lib/auth/origin";
-import { verifyLoginSignature } from "@/lib/evm/signature";
+import { verifyLoginSignature } from "@/lib/evm/smart-account-signature";
 import { tryNormalizeAddress } from "@/lib/evm/address";
 import { setSession, type SessionSource } from "@/lib/auth/session";
 import { errorResponse } from "@/lib/errors";
@@ -11,7 +11,7 @@ import { touchUserProfileAfterLogin } from "@/lib/users/profile";
 
 export const runtime = "nodejs";
 
-const SOURCES: SessionSource[] = ["external"];
+const SOURCES: SessionSource[] = ["external", "passport"];
 const verifyLimiter = new FixedWindowRateLimiter({
   windowMs: 5 * 60_000,
   maxPerKey: 20,

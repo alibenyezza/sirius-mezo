@@ -2,11 +2,12 @@
 
 import { useEffect, useState } from "react";
 import { useWalletStore } from "@/stores/wallet";
-import { chooseExternalWallet, embeddedConfigured, waitForWallets, type WalletInfo } from "@/lib/wallet/discovery";
+import { chooseExternalWallet, embeddedConfigured, passportConfigured, waitForWallets, type WalletInfo } from "@/lib/wallet/discovery";
+import type { PassportWalletChoice, PassportWalletId } from "@/lib/wallet/passport";
 import { signInWithWallet } from "@/lib/auth/client";
 import { messageOf } from "@/lib/errors-client";
 import { resolveClientNetwork } from "@/lib/evm/networks";
-import { openEmbeddedWallet, openWalletModal } from "./WalletConnector";
+import { openEmbeddedWallet, openPassportWallet, openWalletModal } from "./WalletConnector";
 import { logoutCurrentWallet } from "./logout";
 import { useLocale } from "@/components/i18n/LocaleProvider";
 import { TermsNotice } from "./TermsNotice";
@@ -36,6 +37,7 @@ export function ConnectButton({
   const address = useWalletStore((s) => s.address);
   const network = useWalletStore((s) => s.network);
   const authenticated = useWalletStore((s) => s.authenticated);
+  const source = useWalletStore((s) => s.source);
   const { t } = useLocale();
   const [open, setOpen] = useState(false);
   const [authPending, setAuthPending] = useState(false);
@@ -92,6 +94,7 @@ export function ConnectButton({
   const toggleMenu = () => {
     const ouvrir = !open;
     setOpen(ouvrir);
+    setBitcoinChoices(null);
     if (!ouvrir || connected) return;
     setScanning(true);
     void waitForWallets()
@@ -107,6 +110,27 @@ export function ConnectButton({
     setConnectError(null);
     try {
       await openEmbeddedWallet();
+      setOpen(false);
+    } catch (error) {
+      setConnectError(messageOf(error));
+    } finally {
+      setConnectPending(false);
+    }
+  };
+
+  // Wallets Bitcoin par Mezo Passport. Avec un seul wallet installé, la connexion part
+  // directement ; avec plusieurs, le menu propose de choisir avant d'ouvrir quoi que ce soit.
+  const [bitcoinChoices, setBitcoinChoices] = useState<PassportWalletChoice[] | null>(null);
+  const handlePassport = async (walletId?: PassportWalletId) => {
+    setConnectPending(true);
+    setConnectError(null);
+    try {
+      const outcome = await openPassportWallet(walletId);
+      if (outcome.status === "choose") {
+        setBitcoinChoices(outcome.wallets);
+        return;
+      }
+      setBitcoinChoices(null);
       setOpen(false);
     } catch (error) {
       setConnectError(messageOf(error));
@@ -181,11 +205,48 @@ export function ConnectButton({
                     </span>
                     <span className="mt-0.5 block text-xs text-muted">{t("Sans crypto, en un clic")}</span>
                   </button>
-                  {connectError && (
-                    <p role="alert" className="px-4 pb-3 text-xs text-negative">{t(connectError)}</p>
+                  <div className="border-t border-border" />
+                </>
+              )}
+              {passportConfigured() && (
+                <>
+                  <button
+                    type="button"
+                    onClick={() => void handlePassport()}
+                    disabled={connectPending}
+                    data-guide="connect-passport"
+                    className="block w-full px-4 py-3 text-left transition-colors hover:bg-white/5 disabled:opacity-60"
+                  >
+                    <span className="text-sm font-medium text-foreground">
+                      {connectPending ? t("Connexion…") : t("Wallet Bitcoin · Mezo Passport")}
+                    </span>
+                    <span className="mt-0.5 block text-xs text-muted">
+                      {t("Connecte Unisat, OKX ou Xverse. Mezo crée un smart account pour ton wallet Bitcoin.")}
+                    </span>
+                  </button>
+                  {bitcoinChoices && (
+                    <div className="px-4 pb-3">
+                      <p className="text-xs text-muted">{t("Choisis ton wallet Bitcoin")}</p>
+                      <div className="mt-2 flex flex-wrap gap-2">
+                        {bitcoinChoices.map((wallet) => (
+                          <button
+                            key={wallet.id}
+                            type="button"
+                            onClick={() => void handlePassport(wallet.id)}
+                            disabled={connectPending}
+                            className="rounded-lg border border-border px-2.5 py-1 text-xs font-medium transition-colors hover:border-white/20 disabled:opacity-60"
+                          >
+                            {wallet.name}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
                   )}
                   <div className="border-t border-border" />
                 </>
+              )}
+              {connectError && (
+                <p role="alert" className="border-b border-border px-4 py-3 text-xs text-negative">{t(connectError)}</p>
               )}
               {scanning && wallets.length === 0 && (
                 <div className="px-4 py-3 text-xs text-muted">{t("Recherche des wallets…")}</div>
@@ -257,6 +318,9 @@ export function ConnectButton({
                 >
                   Mezo · {network ?? "—"}
                 </span>
+                {source === "passport" && (
+                  <span className="mt-1 block text-xs text-muted">{t("Wallet Bitcoin via Mezo Passport")}</span>
+                )}
               </span>
               <span className={`shrink-0 transition-colors ${copied ? "text-positive" : "text-muted group-hover:text-foreground"}`} aria-hidden>
                 {copied ? (

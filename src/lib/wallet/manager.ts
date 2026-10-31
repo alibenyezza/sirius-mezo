@@ -1,7 +1,15 @@
 "use client";
 
 import { chainForNetwork, resolveClientNetwork } from "@/lib/evm/networks";
-import { clearSelectedWallet, embeddedSelected, embeddedWallet, selectedProvider, selectedWalletRdns } from "@/lib/wallet/discovery";
+import {
+  clearSelectedWallet,
+  embeddedSelected,
+  passportSelected,
+  sdkWalletSelected,
+  selectedProvider,
+  selectedSdkWallet,
+  selectedWalletRdns,
+} from "@/lib/wallet/discovery";
 import { displayAddress } from "@/lib/evm/address";
 
 export interface Eip1193Provider {
@@ -24,6 +32,7 @@ function provider(): Eip1193Provider {
   // la session sociale s'est fermée, il faut la rouvrir — là où une extension
   // simplement pas encore annoncée ne dit rien de tel à l'utilisateur.
   if (embeddedSelected()) throw new Error("Session Google fermée — reconnecte-toi.");
+  if (passportSelected()) throw new Error("Session du wallet Bitcoin fermée — reconnecte-toi.");
   if (selectedWalletRdns()) throw new Error("Le wallet sélectionné est indisponible.");
 
   const candidate = (window as unknown as { ethereum?: Eip1193Provider }).ethereum;
@@ -45,12 +54,13 @@ export async function ensureExpectedChain(wallet = provider()): Promise<void> {
   const current = await wallet.request({ method: "eth_chainId" });
   if (typeof current === "string" && current.toLowerCase() === expected) return;
 
-  // Le portefeuille embarqué ne connaît que les chaînes déclarées à sa configuration : il
-  // n'y a rien à lui ajouter, seulement à désigner laquelle est active. Et il le fait par
-  // son SDK, pas par une méthode EIP-1193 que son provider n'expose pas.
-  const embarque = embeddedSelected() ? embeddedWallet() : null;
-  if (embarque) {
-    await embarque.switchChain(expected);
+  // Un portefeuille porté par un SDK — embarqué ou Mezo Passport — ne connaît que les chaînes
+  // déclarées à sa configuration : il n'y a rien à lui ajouter, seulement à désigner laquelle
+  // est active. Et il le fait par son SDK, pas par une méthode EIP-1193 que son provider
+  // n'expose pas.
+  const sdk = selectedSdkWallet();
+  if (sdk) {
+    await sdk.switchChain(expected);
     return;
   }
 
@@ -83,10 +93,11 @@ export async function ensureExpectedChain(wallet = provider()): Promise<void> {
  * connexion, d'une méthode absente, où l'on retombe sur l'ancien comportement.
  */
 async function demanderChoixDuCompte(wallet: Eip1193Provider): Promise<void> {
-  // Un portefeuille embarqué n'a qu'un compte, dérivé de l'identité sociale : il n'existe
-  // aucun sélecteur à rouvrir. Demander la permission afficherait au mieux rien, au pire
-  // une erreur là où l'utilisateur attend une connexion.
-  if (embeddedSelected()) return;
+  // Un portefeuille embarqué n'a qu'un compte, dérivé de l'identité sociale ; un smart
+  // account Passport n'en a qu'un non plus, celui du wallet Bitcoin : il n'existe aucun
+  // sélecteur à rouvrir. Demander la permission afficherait au mieux rien, au pire une
+  // erreur là où l'utilisateur attend une connexion.
+  if (sdkWalletSelected()) return;
   try {
     await wallet.request({ method: "wallet_requestPermissions", params: [{ eth_accounts: {} }] });
   } catch (error) {
@@ -132,8 +143,8 @@ export async function disconnectWallet(): Promise<void> {
   // Le SDK absent vaut session déjà fermée : c'est le cas d'une reprise qui a échoué, et
   // il n'y a alors rien à fermer. Passer au repli ferait échouer une déconnexion que
   // l'utilisateur a pourtant demandée.
-  if (embeddedSelected()) {
-    await embeddedWallet()?.logout().catch(() => {});
+  if (sdkWalletSelected()) {
+    await selectedSdkWallet()?.logout().catch(() => {});
     // La session sociale est fermée : garder ce choix ferait refuser ensuite toute
     // extension qui ne s'annonce pas en EIP-6963 (« Aucun wallet détecté »).
     clearSelectedWallet();

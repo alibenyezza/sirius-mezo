@@ -76,6 +76,10 @@ node --import tsx scripts/mezo-testnet.ts --smoke   # replay only the MUSD loan 
 
 Mainnet target: Mezo chain id `31612`, MUSD `0xdD468A1DDc392dcdbEf6db6e34E89AA338F9F186`. The deploy script refuses mainnet unless `SIRIUS_ALLOW_MAINNET=true` and only accepts MUSD as the settlement token there.
 
+### Bitcoin wallets via Mezo Passport
+
+With `NEXT_PUBLIC_MEZO_PASSPORT=true`, the connect menu offers **Bitcoin wallet · Mezo Passport**: Unisat, OKX Wallet or Xverse connect through [`@mezo-org/passport`](https://www.npmjs.com/package/@mezo-org/passport), and Mezo maps the Bitcoin account to a smart account on Mezo (an OrangeKit Safe owned by a contract that verifies Bitcoin signatures). The Passport connector is wrapped as an EIP-1193 provider, so the whole app — sign-in, runner delegation, MUSD payments, escrow — keeps using the same wallet layer. Sign-in and delegation signatures are Safe ERC-1271 signatures wrapped in ERC-6492 (so an account that has not been deployed yet can already sign), verified on-chain by the server with viem's `verifyMessage`; transactions go through Mezo's relayer and are paid by the smart account. EIP-712 consent signatures (sponsored KYB) are not available for Passport accounts yet. The flag defaults to off and leaves the MetaMask flow untouched.
+
 ## Contracts
 
 - `SiriusEscrow` v6: MUSD escrow per loan, EIP-712 lock authorization from the enclave, SHA-256 hashlock, locked training profile, KYB check on both parties, atomic release before deadline, refund after deadline, pull-only payouts. Reads `decimals()` on-chain so the minimum amount follows the token.
@@ -127,11 +131,30 @@ pnpm test
 pnpm contracts:test
 ```
 
-## Roadmap (Wave 2)
+## Wave 2: MUSD as Bitcoin-backed money, not a generic ERC-20
 
-1. Full application flow on Mezo testnet: wallet, marketplace, training, certificate, all settled in MUSD.
-2. Phala enclave wired to the Mezo escrow, signed execution certificates, MEZO support for platform fees.
-3. Mezo mainnet deployment with real MUSD, first data providers, KYB.
+Wave 1 used MUSD the way any ERC-20 would be used: approve, lock, release. Wave 2 plugs Sirius into what
+is specific to MUSD on Mezo. Every item below is implemented in this repository; the switches that make a
+Sirius account spend gas are off by default and documented in `.env.example`.
+
+| Integration | What it does | Where |
+|---|---|---|
+| **One-signature payment** (`SiriusEscrow.lockWithSignature`) | The buyer signs an EIP-2612 `permit` on MUSD and an EIP-712 `LockRequest`; Sirius's settlement account submits the lock and pays the gas in BTC. No approve transaction, no BTC needed by the buyer. Per-borrower nonce, deadline, permit front-running tolerated when the allowance already covers the amount. | `contracts/src/SiriusEscrow.sol`, `src/lib/sirius/gasless-lock.ts`, `POST /api/loans/[id]/lock-with-signature`, flag `SIRIUS_GASLESS_LOCK` |
+| **Borrow & Buy** (`BorrowerOperationsSignatures.withdrawMUSDWithSignature`) | A buyer who holds a Mezo trove pays a training run by drawing the exact price in MUSD against their BTC collateral: one signature, relayed by Sirius, MUSD minted straight to the buyer, then the normal escrow lock. The UI shows debt and collateral ratio before and after, and refuses draws that would push the ratio under 1.21. | `src/lib/mezo/trove.ts`, `draw-relay.ts`, `GET /api/trove`, `POST /api/trove/draw`, flag `SIRIUS_BORROW_AND_BUY` |
+| **Earnings put to work** | Providers route the MUSD they earned into the MUSD Stability Pool (earn seized BTC from liquidations) or the sMUSD savings vault (protocol yield), and back, from the wallet page. Live positions, honest copy, no invented APY. | `src/lib/mezo/earn*.ts`, `GET /api/wallet/earn`, `src/components/wallet/EarnCard.tsx`, flag `SIRIUS_MEZO_EARN` |
+| **Bitcoin wallets via Mezo Passport** | Connect Unisat, OKX or Xverse through `@mezo-org/passport`; the smart account is bridged into the existing wallet layer and server-side signature checks accept ERC-1271/6492 signatures. | `src/lib/wallet/passport*.ts`, flag `NEXT_PUBLIC_MEZO_PASSPORT` |
+| **Verified contracts and public proof** | All deployed contracts are source-verified on the Mezo explorer; `/proof` lists network, contracts, live escrow accounting, every demo transaction and previous deployments, with no account needed. | `/proof`, `deployments/mezo-testnet.json`, `docs/MEZO-TESTNET.md` |
+| **Faucet on canonical MUSD** | The in-app faucet transfers 10 test MUSD from a funded reserve instead of calling `mint` on the canonical token (which only the protocol may do). | `src/lib/sirius/faucet.ts` |
+
+Protocol addresses (testnet and mainnet proxies, verified on-chain) live in `src/lib/mezo/protocol.ts`.
+`lockWithSignature` requires redeploying the escrow and dataset registry; the procedure is in
+[`docs/MEZO-TESTNET.md`](docs/MEZO-TESTNET.md).
+
+## Roadmap
+
+1. Mezo mainnet deployment with real MUSD, provider earnings routed to sMUSD, first data providers, KYB.
+2. Phala enclave wired to the Mezo escrow with signed execution certificates.
+3. Platform fees payable in MEZO, with a discount for veBTC / veMEZO holders.
 
 ## Documentation
 

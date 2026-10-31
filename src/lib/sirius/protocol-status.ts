@@ -2,6 +2,7 @@ import "server-only";
 import type { Chain } from "viem";
 import { resolveServerNetwork, type EvmNetwork } from "@/lib/evm/networks";
 import { stablecoinSymbol } from "@/lib/evm/stablecoin";
+import { musdProtocol } from "@/lib/mezo/protocol";
 
 /**
  * État public du protocole, lu dans la configuration du serveur : une seule source pour la page
@@ -32,6 +33,8 @@ export interface ProtocolStatus {
   /** Plafonds formatés avec le symbole ; `null` hors mainnet ou non configurés. */
   limits: { perLoan: string | null; totalExposure: string | null };
   contracts: ProtocolContract[];
+  /** Lieux de rendement MUSD du protocole Mezo (proxys, `src/lib/mezo/protocol.ts`), pas des contrats Sirius. */
+  mezo: { stabilityPool: string; savingsVault: string };
 }
 
 export const PROTOCOL_SETTLEMENT = "On-chain escrow: the provider is paid when training completes; the borrower is refunded after the deadline otherwise";
@@ -44,6 +47,7 @@ export function readProtocolStatus(env: Readonly<Record<string, string | undefin
   const enclave = env.TEE_MODE === "phala" && env.SIRIUS_REQUIRE_PHALA === "true" && Boolean(env.SIRIUS_EXPECTED_MRTD);
   const maxLoan = env.SIRIUS_MAX_LOAN_USDC?.trim() || null;
   const maxExposure = env.SIRIUS_MAX_EXPOSURE_USDC?.trim() || null;
+  const { stabilityPool, savingsVault } = musdProtocol(network);
   return {
     network,
     chain,
@@ -65,5 +69,6 @@ export function readProtocolStatus(env: Readonly<Record<string, string | undefin
       { key: "kybRegistry", label: "KYB registry", address: env.SIRIUS_KYB_ADDRESS || null },
       { key: "stablecoin", label: symbol, address: env.SIRIUS_USDC_ADDRESS || null },
     ],
+    mezo: { stabilityPool, savingsVault },
   };
 }

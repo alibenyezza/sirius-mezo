@@ -72,18 +72,29 @@ export function assertLoanLockTransaction(
   transaction: { from: string; to: string | null; input: Hex },
   scope: { loanId: string; borrower: string; escrow: string },
 ): void {
-  if (!addressesEqual(transaction.from, scope.borrower) || !addressesEqual(transaction.to ?? "", scope.escrow)) {
+  if (!addressesEqual(transaction.to ?? "", scope.escrow)) {
     throw new AppError("Transaction de lock de paiement invalide", 409);
   }
+  const expected = loanIdHash(scope.loanId);
+  let matches = false;
+  let relayed = false;
   try {
     const call = decodeFunctionData({ abi: [...siriusescrowAbi, ...legacyEscrowAbi, ...siriusescrowv7Abi], data: transaction.input });
     if (call.functionName === "lock") {
-      if (call.args[4] === loanIdHash(scope.loanId)) return;
+      if (call.args[4] === expected) matches = true;
       const terms = call.args[0];
-      if (typeof terms === "object" && terms.loanIdHash === loanIdHash(scope.loanId)) return;
+      if (typeof terms === "object" && terms.loanIdHash === expected) matches = true;
+    } else if (call.functionName === "lockWithSignature") {
+      // Lock relayé : l'emprunteur est celui qui a signé la demande, pas l'expéditeur.
+      const request = call.args[0];
+      relayed = true;
+      matches = request.loanIdHash === expected && addressesEqual(request.borrower, scope.borrower);
     }
   } catch {
     // Ne pas relayer l'erreur de décodage : elle peut contenir le calldata complet.
   }
-  throw new AppError("Transaction étrangère au lock", 409);
+  if (!relayed && !addressesEqual(transaction.from, scope.borrower)) {
+    throw new AppError("Transaction de lock de paiement invalide", 409);
+  }
+  if (!matches) throw new AppError("Transaction étrangère au lock", 409);
 }

@@ -38,6 +38,17 @@ const ORIGINES_EMBARQUEES = process.env.NEXT_PUBLIC_WEB3AUTH_CLIENT_ID?.trim()
   ? " https://*.web3auth.io https://metadata.tor.us"
   : "";
 
+/**
+ * Relais Mezo Passport, ajouté seulement là où les wallets Bitcoin sont proposés.
+ *
+ * Les transactions d'un smart account Passport partent du navigateur vers le relais de Mezo
+ * (`/api/v2/relay` sur `mezo.org` ou `test.mezo.org`), qui les exécute et se fait rembourser
+ * par le compte. Le RPC de la chaîne, lui, figure déjà ci-dessous.
+ */
+const ORIGINES_PASSPORT = process.env.NEXT_PUBLIC_MEZO_PASSPORT?.trim() === "true"
+  ? " https://mezo.org https://test.mezo.org"
+  : "";
+
 function contentSecurityPolicy(nonce: string): string {
   const development = process.env.NODE_ENV !== "production";
   return [
@@ -47,7 +58,7 @@ function contentSecurityPolicy(nonce: string): string {
     `style-src 'self' 'unsafe-inline'${ORIGINES_EMBARQUEES ? " https://fonts.googleapis.com" : ""}`,
     `img-src 'self' data: blob:${ORIGINES_EMBARQUEES ? " https://*.web3auth.io https://images.toruswallet.io" : ""}`,
     `font-src 'self' data:${ORIGINES_EMBARQUEES ? " https://fonts.gstatic.com" : ""}`,
-    `connect-src 'self' https://mainnet.mezo.public.validationcloud.io https://rpc.test.mezo.org https://explorer.mezo.org https://explorer.test.mezo.org https://buy.moonpay.com https://buy-sandbox.moonpay.com${ORIGINES_EMBARQUEES}`,
+    `connect-src 'self' https://mainnet.mezo.public.validationcloud.io https://rpc.test.mezo.org https://explorer.mezo.org https://explorer.test.mezo.org https://buy.moonpay.com https://buy-sandbox.moonpay.com${ORIGINES_EMBARQUEES}${ORIGINES_PASSPORT}`,
     `frame-src ${ORIGINES_EMBARQUEES ? "https://*.web3auth.io" : "'none'"}`,
     "worker-src 'self' blob:",
     "media-src 'none'",

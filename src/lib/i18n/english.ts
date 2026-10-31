@@ -12,10 +12,12 @@ import { FUNDING_MESSAGES_EN } from "./funding-en";
 import { ONBOARDING_MESSAGES_EN } from "./onboarding-en";
 import { ASSISTANT_MESSAGES_EN } from "./assistant-en";
 import { GUIDE_MESSAGES_EN } from "./guide-en";
+import { MEZO_MESSAGES_EN } from "./mezo-en";
 
 export const EN_MESSAGES: Record<string, string> = {
   ...ASSISTANT_MESSAGES_EN,
   ...GUIDE_MESSAGES_EN,
+  ...MEZO_MESSAGES_EN,
   ...ERROR_MESSAGES_EN,
   ...PHALA_MESSAGES_EN,
   ...SHARED_MESSAGES_EN,
@@ -75,6 +77,7 @@ export const EN_MESSAGES: Record<string, string> = {
   "SIRIUS_KYB_AUTO_INVITE=true exige SIRIUS_KYB_AUTO_INVITE_KEY : 0x suivi de 64 caractères hexadécimaux": "SIRIUS_KYB_AUTO_INVITE=true requires SIRIUS_KYB_AUTO_INVITE_KEY: 0x followed by 64 hexadecimal characters",
   "SIRIUS_KYB_AUTO_INVITE_KEY doit être une clé dédiée, distincte du vérificateur KYB de démonstration": "SIRIUS_KYB_AUTO_INVITE_KEY must be a dedicated key, distinct from the demo KYB verifier",
   "État du protocole": "Protocol status",
+  "Preuve on-chain": "On-chain proof",
   "Publié le {date}": "Published on {date}",
   "Prix du compute": "Compute price",
   "Frais d’exécution retenus": "Execution fees retained",
@@ -151,8 +154,10 @@ export const EN_MESSAGES: Record<string, string> = {
   "Préparation du KYB échouée": "KYB preparation failed",
   "Acceptation du KYB échouée": "KYB acceptance failed",
   "Envoi en cours…": "Sending…",
-  "{usdc} {token} et {eth} ETH envoyés.": "Sent {usdc} {token} and {eth} ETH.",
+  "{usdc} {token} et {eth} BTC envoyés.": "Sent {usdc} {token} and {eth} BTC.",
   "{usdc} {token} envoyés.": "Sent {usdc} {token}.",
+  "{eth} BTC pour le gas envoyés ; ton solde {token} suffisait déjà.": "Sent {eth} BTC for gas; your {token} balance was already sufficient.",
+  "Compte déjà pourvu : rien à envoyer.": "Account already funded: nothing to send.",
   "Ajout de fonds indisponible": "Adding funds is unavailable",
   "Distribution de fonds de test indisponible sur cette instance": "Test funds are not available on this instance",
   "Trop de requêtes — réessaie plus tard": "Too many requests — try again later",
@@ -237,6 +242,11 @@ export const EN_MESSAGES: Record<string, string> = {
   "Bientôt disponible": "Coming soon",
   "Sans crypto, en un clic": "No crypto needed, one click",
   "Wallet externe": "External wallet",
+  // Wallets Bitcoin par Mezo Passport (menu de connexion, page wallet)
+  "Wallet Bitcoin · Mezo Passport": "Bitcoin wallet · Mezo Passport",
+  "Connecte Unisat, OKX ou Xverse. Mezo crée un smart account pour ton wallet Bitcoin.": "Connect Unisat, OKX or Xverse. Mezo creates a smart account for your Bitcoin wallet.",
+  "Choisis ton wallet Bitcoin": "Choose your Bitcoin wallet",
+  "Wallet Bitcoin via Mezo Passport": "Bitcoin wallet via Mezo Passport",
   "Mauvais réseau — bascule ton wallet sur {network}.": "Wrong network — switch your wallet to {network}.",
   "Authentifié": "Authenticated",
   "Se connecter": "Sign in",
@@ -435,7 +445,8 @@ const DYNAMIC_MESSAGES_EN: readonly [RegExp, string][] = [
   [/^trop de lignes CSV \(max (\d+)\)$/, "Too many CSV rows (maximum $1)"],
   [/^trop de features numériques \(max (\d+)\)$/, "Too many numeric features (maximum $1)"],
   [/^dataset trop petit pour préserver la confidentialité \(min (\d+) lignes\)$/, "Dataset too small to preserve privacy (minimum $1 rows)"],
-  [/^Distributeur épuisé \(([^)]+) ETH\) — préviens l'équipe pour qu'elle le recharge$/, "Faucet depleted ($1 ETH) — contact the team to refill it"],
+  [/^Distributeur épuisé \(([^)]+) BTC\) — préviens l'équipe pour qu'elle le recharge$/, "Faucet depleted ($1 BTC) — contact the team to refill it"],
+  [/^Réserve MUSD du distributeur épuisée \(([^)]+) MUSD\) — emprunte du MUSD contre du BTC de test sur https:\/\/testnet\.mezo\.org et envoie-le à (0x[0-9a-fA-F]{40})$/, "Faucet MUSD reserve is empty ($1 MUSD) — borrow MUSD against test BTC at https://testnet.mezo.org and send it to $2"],
   [/^Intégrité Merkle invalide pour (.+)$/, "Invalid Merkle integrity for $1"],
   [/^Trop de poids \((\d+) > (\d+)\) — borné par l'output-gate$/, "Too many weights ($1 > $2) — restricted by the output gate"],
   [/^Sortie trop volumineuse \((\d+) > (\d+) o\) — bornée par l'output-gate$/, "Output too large ($1 > $2 bytes) — restricted by the output gate"],

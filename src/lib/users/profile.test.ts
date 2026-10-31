@@ -577,7 +577,7 @@ test("la connexion crée le profil du wallet vérifié et réussit même si la b
       if (message === "expired") throw new AppError("Challenge refusé", 401);
       verified++;
     } },
-    "@/lib/evm/signature": { verifyLoginSignature: async ({ address, signature }: { address: string; signature: string }) => {
+    "@/lib/evm/smart-account-signature": { verifyLoginSignature: async ({ address, signature }: { address: string; signature: string }) => {
       if (signature !== "0xvalid") throw new AppError("Signature invalide", 401);
       return address;
     } },

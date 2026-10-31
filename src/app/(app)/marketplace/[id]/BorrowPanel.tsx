@@ -10,6 +10,8 @@ import { connectWallet } from "@/components/wallet/WalletConnector";
 import { signInWithWallet } from "@/lib/auth/client";
 import { messageOf } from "@/lib/errors-client";
 import { borrowDataset } from "@/lib/loans/client";
+import { borrowDatasetWithSignature } from "@/lib/loans/signature-client";
+import { BorrowAndBuyCard } from "@/components/loans/BorrowAndBuyCard";
 import { modelSelection } from "@/lib/models/registry";
 import { createInFlightGuard } from "@/lib/onboarding/steps";
 import { activeLoanOnDataset, type LoanDisplayInput } from "@/lib/train/loan-display";
@@ -56,6 +58,8 @@ export function BorrowPanel({
   const { confirmQuote, quoteDialog } = useComputeQuoteConfirmation();
   const { confirmDuplicate, duplicateDialog } = useDuplicateLoanConfirmation();
   const [busy, setBusy] = useState(false);
+  const [signing, setSigning] = useState(false);
+  const [gaslessLock, setGaslessLock] = useState(false);
   const [borrowGuard] = useState(createInFlightGuard);
   const [signingIn, setSigningIn] = useState(false);
   // Message d'erreur et emprunt réussi sont, eux aussi, rangés avec le compte : après un
@@ -122,6 +126,16 @@ export function BorrowPanel({
     };
   }, [sessionKey, rechecked]);
 
+  // Lock par signature : affiché seulement si l'instance relaie `lockWithSignature`.
+  useEffect(() => {
+    let actif = true;
+    void fetch("/api/mezo/features", { cache: "no-store" })
+      .then((r) => (r.ok ? (r.json() as Promise<{ gaslessLock?: unknown }>) : null))
+      .then((features) => { if (actif && features) setGaslessLock(features.gaslessLock === true); })
+      .catch(() => {});
+    return () => { actif = false; };
+  }, []);
+
   async function signIn() {
     setSigningIn(true);
     try {
@@ -168,6 +182,36 @@ export function BorrowPanel({
     }
   }
 
+  // Même garde que l'emprunt classique ; seul le mode de paiement change (deux signatures,
+  // aucune transaction, gas payé par Sirius). Le prix affiché est recoupé côté client.
+  async function borrowWithSignature() {
+    await borrowGuard.run(async () => {
+      setError(null);
+      if (!useWalletStore.getState().authenticated) {
+        await signIn();
+        return;
+      }
+      if (providerVerified === false) return;
+      if (!(await ensureVerifiedFor("borrow"))) return;
+      if (sessionKey && useOnboardingStore.getState().kyb === "valid") setKyb({ session: sessionKey, missing: false });
+      if (!model || !priceUsdcAtomic) {
+        setError("Profil d’entraînement du dataset absent ou invalide");
+        return;
+      }
+      if (dejaEmprunte && !(await confirmDuplicate(dejaEmprunte))) return;
+      setSigning(true);
+      try {
+        if (await borrowDatasetWithSignature({ datasetId, priceUsdcAtomic })) {
+          setBorrowed((current) => ({ session: currentSession(), count: current.count + 1 }));
+        }
+      } catch (err) {
+        setError(messageOf(err));
+      } finally {
+        setSigning(false);
+      }
+    });
+  }
+
   // Vérification dans la fenêtre partagée (accès instantané, ou invitation si coupé), sans quitter la fiche.
   async function handleOnboard() {
     setError(null);
@@ -185,12 +229,23 @@ export function BorrowPanel({
         <button
           type="button"
           onClick={() => void borrow()}
-          disabled={busy || signingIn || !model || !priceUsdcAtomic || providerVerified === false}
+          disabled={busy || signing || signingIn || !model || !priceUsdcAtomic || providerVerified === false}
           title={!model ? t("Réimporte ce dataset avec un profil d’entraînement") : undefined}
           className="rounded-xl bg-accent px-5 py-2.5 text-sm font-medium text-background transition-colors hover:bg-accent/90 disabled:opacity-50"
         >
           {busy ? t("Escrow…") : signingIn ? t("Connexion…") : t("Emprunter")}
         </button>
+        {gaslessLock && (
+          <button
+            type="button"
+            onClick={() => void borrowWithSignature()}
+            disabled={busy || signing || signingIn || !model || !priceUsdcAtomic || providerVerified === false}
+            title={t("Deux signatures dans ton wallet, aucune transaction : Sirius soumet le lock et paie le gas en BTC. Le MUSD part de ton compte au moment du lock.")}
+            className="rounded-xl border border-accent/60 bg-surface px-5 py-2.5 text-sm font-medium text-accent transition-colors hover:border-accent disabled:opacity-50"
+          >
+            {signing ? t("Signature…") : t("Payer en une signature (sans gas)")}
+          </button>
+        )}
         {showKyb && (
           <button
             type="button"
@@ -201,6 +256,9 @@ export function BorrowPanel({
           </button>
         )}
       </div>
+      {authenticated && model && priceUsdcAtomic && providerVerified !== false && (
+        <BorrowAndBuyCard priceUsdcAtomic={priceUsdcAtomic} disabled={busy || signing || signingIn} onDrawn={borrow} />
+      )}
       {!authenticated && (
         <p className="text-xs text-muted">
           {t("La consultation est ouverte à tous. Pour emprunter, connectez votre wallet et signez : la connexion est demandée au clic.")}

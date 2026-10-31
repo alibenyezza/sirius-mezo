@@ -1,7 +1,7 @@
 import { create } from "zustand";
 
 export type WalletRole = "provider" | "borrower" | null;
-export type WalletSource = "external" | null;
+export type WalletSource = "external" | "passport" | null;
 /**
  * Issue de l'approvisionnement automatique d'un compte neuf. Un échec y reste lisible :
  * sans cela, un faucet à sec ou rationné laissait l'utilisateur devant un solde nul sans
@@ -16,7 +16,8 @@ interface WalletState {
   connected: boolean;
   connecting: boolean;
   role: WalletRole;
-  // Origine de la connexion active : wallet EIP-1193 injecté.
+  // Origine de la connexion active : wallet EIP-1193 injecté ou embarqué (« external »),
+  // ou smart account d'un wallet Bitcoin par Mezo Passport (« passport »).
   source: WalletSource;
   // Session serveur active (cookie signé) : le wallet a prouvé sa possession par signature.
   authenticated: boolean;

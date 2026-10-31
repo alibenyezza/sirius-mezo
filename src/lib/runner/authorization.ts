@@ -2,7 +2,7 @@ import "server-only";
 import { createPublicKey, verify as verifySignature, createHash } from "node:crypto";
 import { AppError } from "@/lib/app-error";
 import { addressesEqual, normalizeAddress } from "@/lib/evm/address";
-import { recoverWalletAddress } from "@/lib/evm/signature";
+import { verifyWalletOrContractSignature } from "@/lib/evm/smart-account-signature";
 import {
   parseDelegationMessage,
   runnerGrantMessage,
@@ -81,13 +81,17 @@ export async function authenticateRunnerGrant(value: unknown): Promise<Validated
   const expectedNetwork = process.env.EVM_NETWORK || "testnet";
   if (fields.network !== expectedNetwork) throw new AppError("Réseau de délégation invalide", 401);
 
-  let walletAddress: string;
+  // L'adresse du message et le sujet du grant sont déjà confondus ci-dessus : la signature
+  // est vérifiée contre cette adresse-là, EOA par `ecrecover` ou smart account Mezo Passport
+  // par le compte lui-même.
   try {
-    walletAddress = await recoverWalletAddress(delegation.message, delegation.walletSignature);
-  } catch {
-    throw new AppError("Signature wallet de délégation invalide", 401);
-  }
-  if (!addressesEqual(walletAddress, fields.address) || !addressesEqual(walletAddress, payload.subject)) {
+    await verifyWalletOrContractSignature({
+      address: fields.address,
+      message: delegation.message,
+      signature: delegation.walletSignature,
+    });
+  } catch (error) {
+    if (error instanceof AppError && error.status === 503) throw error;
     throw new AppError("Signature wallet de délégation invalide", 401);
   }
 

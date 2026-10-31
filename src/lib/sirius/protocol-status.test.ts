@@ -31,12 +31,21 @@ test("état du protocole : plafonds seulement sur mainnet, enclave seulement si 
     ["escrow", "0xescrow"], ["datasetRegistry", null], ["kybRegistry", null], ["stablecoin", null],
   ]);
   assert.equal(mainnet.contracts[3].label, mainnet.symbol);
+  // Lieux de rendement MUSD : adresses du réseau résolu, jamais lues dans l'environnement.
+  assert.deepEqual(mainnet.mezo, {
+    stabilityPool: "0x73245Eff485aB3AAc1158B3c4d8f4b23797B0e32",
+    savingsVault: "0xb4D498029af77680cD1eF828b967f010d06C51CC",
+  });
 
   const testnet = withNetwork("testnet", () => readProtocolStatus({ ...env, SIRIUS_EXPECTED_MRTD: "" }));
   assert.equal(testnet.mainnet, false);
   assert.equal(testnet.enclave, false);
   assert.match(testnet.confidentialCompute, /Demonstration mode/);
   assert.deepEqual(testnet.limits, { perLoan: null, totalExposure: null });
+  assert.deepEqual(testnet.mezo, {
+    stabilityPool: "0x1CCA7E410eE41739792eA0A24e00349Dd247680e",
+    savingsVault: "0x6f461c68B2c5492C0F5CCEc5a264d692aA7A8e16",
+  });
 });
 
 test("la page /status et l'outil de l'assistant lisent la même source", () => {
