@@ -18,6 +18,13 @@ interface IERC20Permit {
         external;
 }
 
+/// @notice Optional fee schedule read at release. It may only lower the escrow's base fee.
+/// @dev Implemented by SiriusMezoFeePolicy (veMEZO holders pay less). The escrow calls it with a
+/// gas cap and ignores any failure, so a broken policy can never block a release.
+interface ISiriusFeePolicy {
+    function feeBpsFor(address provider, uint256 baseFeeBps) external view returns (uint256);
+}
+
 /// @title SiriusEscrow
 /// @notice Hashlock escrow in USDC for a Sirius confidential training loan.
 /// @dev The deployed USDC address is immutable. There is no owner, proxy or upgrade path.
@@ -85,6 +92,12 @@ contract SiriusEscrow {
     /// raised either way.
     uint256 public immutable MIN_AMOUNT;
     uint256 internal constant MAX_AMOUNT = type(uint96).max;
+    /// @notice Hard ceiling on the platform fee, whatever the deployment says: 10 %.
+    uint256 public constant MAX_FEE_BPS = 1_000;
+    uint256 internal constant BPS = 10_000;
+    uint256 internal constant FEE_POLICY_GAS = 300_000;
+    /// @notice Longest validity a borrower may give a signed `LockRequest`.
+    uint256 public constant MAX_LOCK_REQUEST_TTL = 1 days;
     bytes32 internal constant ZERO_PREIMAGE_HASH =
         0x66687aadf862bd776c8fc18b8e9f8e20089714856ee233b3902a591d0d5f2925;
 
@@ -92,6 +105,12 @@ contract SiriusEscrow {
     SiriusKybRegistry public immutable kyb;
     SiriusDatasetRegistry public immutable datasets;
     address public immutable lockAuthorizer;
+    /// @notice Receives the platform fee as pull-only credit. Zero disables the fee.
+    address public immutable feeRecipient;
+    /// @notice Base platform fee on each release, in basis points of the loan amount.
+    uint256 public immutable feeBps;
+    /// @notice Optional schedule that can only lower `feeBps` for a provider. Zero = flat fee.
+    ISiriusFeePolicy public immutable feePolicy;
     mapping(bytes32 => Loan) private _loans;
     mapping(bytes32 => uint256) private _activeLoansForDataset;
     mapping(address => uint256) private _credit;
@@ -125,6 +144,8 @@ contract SiriusEscrow {
     event LoanRefunded(bytes32 indexed loanKey, address indexed borrower, uint256 amount, uint64 seq);
     event CreditAccrued(address indexed account, bytes32 indexed loanKey, uint256 amount, uint256 balance);
     event Withdrawn(address indexed account, uint256 amount);
+    event FeeCharged(bytes32 indexed loanKey, address indexed provider, address indexed recipient, uint256 fee, uint256 feeBps);
+    event LockNonceCancelled(address indexed borrower, uint256 cancelledNonce);
 
     error Reentrancy();
     error ZeroAddress();
@@ -155,6 +176,7 @@ contract SiriusEscrow {
     error LockRequestExpired();
     error InvalidBorrowerSignature();
     error PermitFailed();
+    error InvalidFee();
 
     modifier nonReentrant() {
         if (_guard == 1) revert Reentrancy();
@@ -163,12 +185,26 @@ contract SiriusEscrow {
         _guard = 0;
     }
 
-    constructor(IERC20 usdc_, SiriusKybRegistry kyb_, SiriusDatasetRegistry datasets_, address lockAuthorizer_) {
+    constructor(
+        IERC20 usdc_,
+        SiriusKybRegistry kyb_,
+        SiriusDatasetRegistry datasets_,
+        address lockAuthorizer_,
+        address feeRecipient_,
+        uint256 feeBps_,
+        ISiriusFeePolicy feePolicy_
+    ) {
         if (address(usdc_) == address(0)) revert ZeroAddress();
         if (address(usdc_).code.length == 0) revert InvalidUsdcContract();
         if (address(kyb_) == address(0)) revert ZeroAddress();
         if (address(datasets_) == address(0)) revert ZeroAddress();
         if (lockAuthorizer_ == address(0)) revert ZeroAddress();
+        if (feeBps_ > MAX_FEE_BPS) revert InvalidFee();
+        // A fee needs somewhere to go; a recipient without a fee is a misconfiguration too.
+        if ((feeRecipient_ == address(0)) != (feeBps_ == 0)) revert InvalidFee();
+        // Credit owed to the escrow itself or to the token could never be withdrawn.
+        if (feeRecipient_ == address(this) || feeRecipient_ == address(usdc_)) revert InvalidFee();
+        if (address(feePolicy_) != address(0) && (feeBps_ == 0 || address(feePolicy_).code.length == 0)) revert InvalidFee();
 
         // The floor follows the token, not the chain. Reading decimals() here also proves
         // the address answers like an ERC-20 before a single loan can exist.
@@ -180,6 +216,9 @@ contract SiriusEscrow {
         kyb = kyb_;
         datasets = datasets_;
         lockAuthorizer = lockAuthorizer_;
+        feeRecipient = feeRecipient_;
+        feeBps = feeBps_;
+        feePolicy = feePolicy_;
     }
 
     function loanKeyOf(address borrower, bytes32 loanIdHash) public pure returns (bytes32) {
@@ -224,6 +263,7 @@ contract SiriusEscrow {
         returns (bytes32 loanKey)
     {
         if (block.timestamp >= request.deadline) revert LockRequestExpired();
+        if (request.deadline > block.timestamp + MAX_LOCK_REQUEST_TTL) revert LockRequestExpired();
         if (request.nonce != lockNonces[request.borrower]) revert InvalidBorrowerSignature();
         address signer = _recover(_digest(_lockRequestHash(request)), borrowerSignature);
         if (signer == address(0) || signer != request.borrower) revert InvalidBorrowerSignature();
@@ -241,6 +281,14 @@ contract SiriusEscrow {
             request.borrower, request.provider, request.amount, request.hashlock, request.challengeDays,
             request.loanIdHash, request.datasetId, request.trainingProfile, authorization
         );
+    }
+
+    /// @notice Burn the caller's next `LockRequest` nonce, voiding any request already signed
+    ///         with it (and, since nonces are sequential, every later one).
+    function cancelLockNonce() external returns (uint256 cancelled) {
+        cancelled = lockNonces[msg.sender];
+        unchecked { lockNonces[msg.sender] = cancelled + 1; }
+        emit LockNonceCancelled(msg.sender, cancelled);
     }
 
     /// @dev Checks and effects shared by `lock` and `lockWithSignature`. `borrower` is the
@@ -347,13 +395,45 @@ contract SiriusEscrow {
         loan.preimage = preimage;
         lockedUsdc -= amount;
         unchecked { _activeLoansForDataset[loan.datasetId] -= 1; }
-        uint256 balance = _credit[loan.provider] + amount;
-        _credit[loan.provider] = balance;
+        address provider = loan.provider;
+        uint256 bps = feeBpsFor(provider);
+        uint256 fee = amount * bps / BPS;
+        uint256 net = amount - fee;
+        uint256 balance = _credit[provider] + net;
+        _credit[provider] = balance;
         owedUsdc += amount;
 
-        emit LoanReleased(loanKey, loan.provider, msg.sender, preimage, amount, _nextSeq());
+        emit LoanReleased(loanKey, provider, msg.sender, preimage, amount, _nextSeq());
         emit PreimageRevealed(loan.hashlock, loanKey, preimage);
-        emit CreditAccrued(loan.provider, loanKey, amount, balance);
+        emit CreditAccrued(provider, loanKey, net, balance);
+        if (fee != 0) {
+            uint256 feeBalance = _credit[feeRecipient] + fee;
+            _credit[feeRecipient] = feeBalance;
+            emit FeeCharged(loanKey, provider, feeRecipient, fee, bps);
+            emit CreditAccrued(feeRecipient, loanKey, fee, feeBalance);
+        }
+    }
+
+    /// @notice Fee rate a release would apply to `provider` now, in basis points.
+    /// @dev The policy is read with a gas cap through a raw staticcall: a revert, an
+    /// out-of-gas or a malformed answer falls back to the base fee, and an answer above
+    /// the base fee is ignored. Refunds never pay a fee.
+    function feeBpsFor(address provider) public view returns (uint256 bps) {
+        bps = feeBps;
+        if (bps == 0 || address(feePolicy) == address(0)) return bps;
+        bytes memory query = abi.encodeCall(ISiriusFeePolicy.feeBpsFor, (provider, bps));
+        address policy = address(feePolicy);
+        bool ok;
+        uint256 size;
+        uint256 offered;
+        // Raw call so that only one word of return data is ever copied (no return bomb).
+        assembly ("memory-safe") {
+            ok := staticcall(FEE_POLICY_GAS, policy, add(query, 0x20), mload(query), 0x00, 0x20)
+            size := returndatasize()
+            offered := mload(0x00)
+        }
+        if (!ok || size != 32) return bps;
+        if (offered < bps) bps = offered;
     }
 
     /// @notice Credit the borrower after the challenge period. Permissionless for liveness.

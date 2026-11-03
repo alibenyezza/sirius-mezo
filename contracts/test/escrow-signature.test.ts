@@ -64,7 +64,7 @@ async function fixture() {
   };
   await Promise.all([grantKyb(borrower), grantKyb(provider), grantKyb(stranger)]);
   const registry = await hre.viem.deployContract("SiriusDatasetRegistry", [kyb.address, admin.account.address]);
-  const escrow = await hre.viem.deployContract("SiriusEscrow", [usdc.address, kyb.address, registry.address, admin.account.address]);
+  const escrow = await hre.viem.deployContract("SiriusEscrow", [usdc.address, kyb.address, registry.address, admin.account.address, "0x0000000000000000000000000000000000000000", 0n, "0x0000000000000000000000000000000000000000"]);
   await registry.write.bindEscrow([escrow.address], { account: admin.account });
   await registry.write.mint([datasetIdHash(DATASET_ID), DATASET_CID_HASH, DATASET_MERKLE_ROOT, 1n, TRAINING_PROFILE], {
     account: provider.account,
@@ -312,5 +312,63 @@ describe("SiriusEscrow lockWithSignature", () => {
     expect(locked).to.equal(0n);
     expect(owed).to.equal(0n);
     expect(balance).to.equal(0n);
+  });
+});
+
+describe("SiriusEscrow lockWithSignature : annulation et bornes", () => {
+  it("cancelLockNonce annule une requête déjà signée", async () => {
+    const ctx = await loadFixture(fixture);
+    const { request } = await buildRequest(ctx);
+    const signature = await signRequest(ctx, ctx.borrower, request);
+    const permit = await signPermit(ctx, ctx.borrower, request.amount);
+    const authorization = await authorize(ctx, request);
+    await ctx.escrow.write.cancelLockNonce({ account: ctx.borrower.account });
+    expect(await ctx.escrow.read.lockNonces([ctx.borrower.account.address])).to.equal(request.nonce + 1n);
+    await expect(ctx.escrow.write.lockWithSignature([request, signature, permit, authorization], { account: ctx.relayer.account }))
+      .to.be.rejectedWith("InvalidBorrowerSignature");
+  });
+
+  it("refuse un nonce futur", async () => {
+    const ctx = await loadFixture(fixture);
+    const { request } = await buildRequest(ctx, { nonce: 1n });
+    const signature = await signRequest(ctx, ctx.borrower, request);
+    const authorization = await authorize(ctx, request);
+    await expect(ctx.escrow.write.lockWithSignature([request, signature, NO_PERMIT, authorization], { account: ctx.relayer.account }))
+      .to.be.rejectedWith("InvalidBorrowerSignature");
+  });
+
+  it("refuse une requête valable plus d'un jour", async () => {
+    const ctx = await loadFixture(fixture);
+    const { request } = await buildRequest(ctx, { deadline: BigInt((await time.latest()) + 2 * DAY) });
+    const signature = await signRequest(ctx, ctx.borrower, request);
+    const authorization = await authorize(ctx, request);
+    await expect(ctx.escrow.write.lockWithSignature([request, signature, NO_PERMIT, authorization], { account: ctx.relayer.account }))
+      .to.be.rejectedWith("LockRequestExpired");
+  });
+
+  it("refuse une signature malléable (s haut) et un v brut 0 ou 1", async () => {
+    const ctx = await loadFixture(fixture);
+    const { request } = await buildRequest(ctx);
+    const signature = await signRequest(ctx, ctx.borrower, request);
+    const authorization = await authorize(ctx, request);
+    const N = 0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEBAAEDCE6AF48A03BBFD25E8CD0364141n;
+    const r = signature.slice(2, 66);
+    const s = BigInt(`0x${signature.slice(66, 130)}`);
+    const v = Number.parseInt(signature.slice(130, 132), 16);
+    const highS = `0x${r}${(N - s).toString(16).padStart(64, "0")}${(v === 27 ? 28 : 27).toString(16)}` as Hex;
+    const rawV = `0x${signature.slice(2, 130)}${(v - 27).toString(16).padStart(2, "0")}` as Hex;
+    for (const bad of [highS, rawV]) {
+      await expect(ctx.escrow.write.lockWithSignature([request, bad, NO_PERMIT, authorization], { account: ctx.relayer.account }))
+        .to.be.rejectedWith("InvalidBorrowerSignature");
+    }
+  });
+
+  it("refuse une signature faite pour une autre chaîne", async () => {
+    const ctx = await loadFixture(fixture);
+    const { request } = await buildRequest(ctx);
+    const otherChain = await ctx.borrower.signTypedData(lockRequestTypedData({ chainId: ctx.chainId + 1, escrow: ctx.escrow.address, request }));
+    const authorization = await authorize(ctx, request);
+    await expect(ctx.escrow.write.lockWithSignature([request, otherChain, NO_PERMIT, authorization], { account: ctx.relayer.account }))
+      .to.be.rejectedWith("InvalidBorrowerSignature");
   });
 });

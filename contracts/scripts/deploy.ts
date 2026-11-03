@@ -4,6 +4,9 @@ import { createPublicClient, createWalletClient, formatEther, http, keccak256, t
 import { privateKeyToAccount } from "viem/accounts";
 import { EVM_CHAINS, USDC_DECIMALS_BY_NETWORK, type EvmNetwork } from "../../src/lib/evm/networks";
 import { deploymentPlan } from "../../scripts/deploy-policy";
+import { mezoGovernance, SIRIUS_FEE_DEFAULTS } from "../../src/lib/mezo/governance";
+import { feeConfigErrors, mezoFeeChecks } from "../../scripts/mezo-fee-checks";
+import { BTC_TOKEN_ADDRESS, MEZO_CHECKOUT_TESTNET } from "../../src/lib/mezo/protocol";
 
 /**
  * Déploie les contrats Sirius sur Mezo.
@@ -14,6 +17,12 @@ import { deploymentPlan } from "../../scripts/deploy-policy";
  * ne déploie que le registre de datasets et l'escrow : `SiriusDatasetRegistry.bindEscrow`
  * n'accepte qu'une liaison, un nouvel escrow impose donc un nouveau registre de datasets,
  * jamais un nouveau registre KYB. Les trois adresses sont imprimées dans tous les cas.
+ *
+ * Frais de plateforme (escrow v6 seulement) : `SIRIUS_FEE_BPS` (0 = aucun frais, défaut) et
+ * `SIRIUS_FEE_TREASURY`. Avec des frais, le script déploie d'abord `SiriusMezoFeePolicy`
+ * (remise pour les détenteurs de veMEZO, `SIRIUS_FEE_DISCOUNT_BPS`, `SIRIUS_FEE_MIN_VEMEZO_POWER`)
+ * et `SiriusFeeRouter` (part `SIRIUS_FEE_INCENTIVE_BPS` versée en bribe MUSD sur le gauge
+ * BTC/MUSD de Mezo), puis l'escrow qui crédite ses frais au routeur.
  *
  * Écrit en viem pur plutôt qu'avec les aides de `hardhat-viem`, pour deux raisons.
  * D'abord `hardhat-viem` ne connaît que les chaînes livrées dans `viem/chains`, et
@@ -115,7 +124,7 @@ async function main() {
   const balance = await publicClient.getBalance({ address: account.address });
   console.log(`réseau        : ${network} (chainId ${chain.id})`);
   console.log(`déployeur     : ${account.address}`);
-  console.log(`solde         : ${formatEther(balance)} ETH`);
+  console.log(`solde         : ${formatEther(balance)} ${chain.nativeCurrency.symbol}`);
 
   if (balance === 0n && plan.dryRun) {
     console.log("solde nul     : accepté pour une exécution à blanc, refusé pour un vrai déploiement");
@@ -235,6 +244,30 @@ async function main() {
     console.log(`registre KYB  : ${reusedKyb} (réutilisé, ${kybOuvert ? "ouvert" : "strict"})`);
   }
 
+  // Frais : configuration lue et validée avant toute transaction.
+  const feeBps = BigInt(process.env.SIRIUS_FEE_BPS?.trim() || "0");
+  const feeEnabled = feeBps > BigInt(0);
+  if (feeEnabled && escrowContract !== "SiriusEscrow") throw new Error("SIRIUS_FEE_BPS n'est pris en charge que par l'escrow v6");
+  const feeTreasury = feeEnabled ? requireAddress("SIRIUS_FEE_TREASURY") : null;
+  const incentiveBps = BigInt(process.env.SIRIUS_FEE_INCENTIVE_BPS?.trim() || String(SIRIUS_FEE_DEFAULTS.incentiveBps));
+  const discountedBps = BigInt(process.env.SIRIUS_FEE_DISCOUNT_BPS?.trim() || String(SIRIUS_FEE_DEFAULTS.discountedBps));
+  const minVeMezoPower = BigInt(process.env.SIRIUS_FEE_MIN_VEMEZO_POWER?.trim() || SIRIUS_FEE_DEFAULTS.minVeMezoPower);
+  const feeErrors = feeConfigErrors({ feeBps, incentiveBps, discountedBps, minVeMezoPower, treasury: feeTreasury, deployer: account.address });
+  if (feeErrors.length) throw new Error(`Configuration des frais refusée : ${feeErrors.join(" ; ")}`);
+  const governance = feeEnabled ? mezoGovernance(network === "mainnet" ? "mainnet" : "testnet") : null;
+  if (feeEnabled) {
+    console.log(`frais         : ${feeBps} bps, ${discountedBps} bps avec veMEZO ≥ ${minVeMezoPower}, ${incentiveBps} bps des frais en bribe sur ${governance!.btcMusdGauge}`);
+    if (feeTreasury && feeTreasury.toLowerCase() === account.address.toLowerCase()) {
+      console.log("trésorerie    : le déployeur lui-même (acceptable sur testnet)");
+    }
+    // Dépendances Mezo lues avant la moindre transaction, à blanc compris.
+    const failed = (await mezoFeeChecks(publicClient, network === "mainnet" ? "mainnet" : "testnet")).filter((check) => !check.ok);
+    if (failed.length) {
+      throw new Error(`Dépendances Mezo des frais en échec : ${failed.map((check) => `${check.label} (${check.detail})`).join(", ")}`);
+    }
+    console.log("dépendances   : gauge BTC/MUSD vivant, bribe avec votes, MUSD whitelisté, veMEZO et veBTC répondent");
+  }
+
   if (plan.dryRun) {
     console.log("");
     console.log("Exécution à blanc : toutes les vérifications sont passées, aucune transaction envoyée.");
@@ -283,7 +316,52 @@ async function main() {
   if (reusedKyb) console.log(`${kybContract.padEnd(22)} ${reusedKyb}  (réutilisé)`);
   // Ce rôle ne sert qu'à la liaison unique ; le déployeur effectue la transaction.
   const datasets = await deploy("SiriusDatasetRegistry", [kyb, account.address]);
-  const escrow = await deploy(escrowContract, [usdc, kyb, datasets, lockAuthorizer]);
+  let feeRouter: Hex | null = null;
+  let feePolicy: Hex | null = null;
+  if (feeEnabled && governance && feeTreasury) {
+    feePolicy = await deploy("SiriusMezoFeePolicy", [governance.veMezo, minVeMezoPower, discountedBps]);
+    feeRouter = await deploy("SiriusFeeRouter", [usdc, governance.poolsVoter, governance.btcMusdGauge, feeTreasury, incentiveBps]);
+    const routedBribe = (await publicClient.readContract({
+      address: feeRouter, abi: artifact("SiriusFeeRouter").abi, functionName: "bribe",
+    })) as Hex;
+    if (routedBribe.toLowerCase() !== governance.btcMusdBribe.toLowerCase()) {
+      throw new Error(`SiriusFeeRouter vise le bribe ${routedBribe}, attendu ${governance.btcMusdBribe}`);
+    }
+  }
+  const escrow = await deploy(
+    escrowContract,
+    escrowContract === "SiriusEscrow"
+      ? [usdc, kyb, datasets, lockAuthorizer, feeRouter ?? "0x0000000000000000000000000000000000000000", feeBps, feePolicy ?? "0x0000000000000000000000000000000000000000"]
+      : [usdc, kyb, datasets, lockAuthorizer],
+  );
+  if (feeEnabled) {
+    const escrowAbiForFees = artifact(escrowContract).abi;
+    const [onChainRecipient, onChainBps, onChainPolicy] = await Promise.all([
+      publicClient.readContract({ address: escrow, abi: escrowAbiForFees, functionName: "feeRecipient" }),
+      publicClient.readContract({ address: escrow, abi: escrowAbiForFees, functionName: "feeBps" }),
+      publicClient.readContract({ address: escrow, abi: escrowAbiForFees, functionName: "feePolicy" }),
+    ]) as [Hex, bigint, Hex];
+    if (onChainRecipient.toLowerCase() !== feeRouter!.toLowerCase() || onChainBps !== feeBps || onChainPolicy.toLowerCase() !== feePolicy!.toLowerCase()) {
+      throw new Error("SiriusEscrow ne porte pas la configuration de frais attendue");
+    }
+    // La politique et le routeur répondent comme prévu une fois en place.
+    const [probeBps, deferral] = await Promise.all([
+      publicClient.readContract({ address: escrow, abi: escrowAbiForFees, functionName: "feeBpsFor", args: [account.address] }),
+      publicClient.readContract({ address: feeRouter!, abi: artifact("SiriusFeeRouter").abi, functionName: "incentiveDeferral" }),
+    ]) as [bigint, number];
+    if (probeBps > feeBps) throw new Error(`feeBpsFor(${account.address}) = ${probeBps}, au-dessus du taux de base`);
+    console.log(`frais lus     : ${probeBps} bps pour le déployeur, routeur en état ${deferral} (1 = rien en attente)`);
+  }
+  // Paiement en BTC : swap Mezo Pools + verrouillage signé, une transaction. Testnet, escrow v6.
+  let checkout: Hex | null = null;
+  if (network === "testnet" && escrowContract === "SiriusEscrow" && process.env.SIRIUS_CHECKOUT?.trim() !== "false") {
+    const c = MEZO_CHECKOUT_TESTNET;
+    checkout = await deploy("SiriusCheckout", [
+      escrow, BTC_TOKEN_ADDRESS, c.poolsRouter, c.poolFactory, c.btcUsdFeed, BigInt(c.maxSlippageBps), BigInt(c.maxFeedAge),
+    ]);
+    const linked = (await publicClient.readContract({ address: checkout, abi: artifact("SiriusCheckout").abi, functionName: "escrow" })) as Hex;
+    if (linked.toLowerCase() !== escrow.toLowerCase()) throw new Error("SiriusCheckout ne pointe pas sur l'escrow déployé");
+  }
   const bindEscrowHash = await walletClient.writeContract({
     address: datasets,
     abi: artifact("SiriusDatasetRegistry").abi,
@@ -377,6 +455,14 @@ async function main() {
   console.log(`SIRIUS_USDC_ADDRESS="${usdc}"`);
   console.log(`SIRIUS_KYB_ADDRESS="${kyb}"`);
   console.log(`SIRIUS_DATASET_ADDRESS="${datasets}"`);
+  if (feeRouter && feePolicy) {
+    console.log(`SIRIUS_FEE_ROUTER_ADDRESS="${feeRouter}"`);
+    console.log(`SIRIUS_FEE_POLICY_ADDRESS="${feePolicy}"`);
+    console.log(`SIRIUS_FEE_BPS="${feeBps}"`);
+  }
+  if (checkout) {
+    console.log(`SIRIUS_CHECKOUT_ADDRESS="${checkout}"`);
+  }
   if (explorer) {
     console.log("");
     console.log("Explorateur :");
@@ -384,6 +470,7 @@ async function main() {
       [escrowContract, escrow],
       [reusedKyb ? `${kybContract} (réutilisé)` : kybContract, kyb],
       ["SiriusDatasetRegistry", datasets],
+      ...(feeRouter && feePolicy ? [["SiriusFeeRouter", feeRouter], ["SiriusMezoFeePolicy", feePolicy]] as const : []),
     ] as const) {
       console.log(`  ${name.padEnd(22)} ${explorer}/address/${address}`);
     }

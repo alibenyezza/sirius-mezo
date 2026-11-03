@@ -14,7 +14,7 @@ import { dirname, join, resolve } from "node:path";
  * arguments et les retours de chaque fonction.
  */
 
-const CONTRACTS = ["SiriusEscrow", "SiriusEscrowV7", "SiriusKybRegistry", "SiriusDatasetRegistry"] as const;
+const CONTRACTS = ["SiriusEscrow", "SiriusEscrowV7", "SiriusKybRegistry", "SiriusDatasetRegistry", "SiriusFeeRouter", "SiriusMezoFeePolicy", "SiriusCheckout"] as const;
 
 const artifactsRoot = resolve(__dirname, "..", "artifacts", "src");
 const outputRoot = resolve(__dirname, "..", "..", "src", "lib", "evm", "abi");

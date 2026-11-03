@@ -57,7 +57,7 @@ async function fixture() {
 
   await Promise.all([grantKyb(borrower), grantKyb(provider), grantKyb(stranger)]);
   const registry = await hre.viem.deployContract("SiriusDatasetRegistry", [kyb.address, admin.account.address]);
-  const escrow = await hre.viem.deployContract("SiriusEscrow", [usdc.address, kyb.address, registry.address, admin.account.address]);
+  const escrow = await hre.viem.deployContract("SiriusEscrow", [usdc.address, kyb.address, registry.address, admin.account.address, "0x0000000000000000000000000000000000000000", 0n, "0x0000000000000000000000000000000000000000"]);
   await registry.write.bindEscrow([escrow.address], { account: admin.account });
   await registry.write.mint([datasetIdHash(DATASET_ID), DATASET_CID_HASH, DATASET_MERKLE_ROOT, 1n, TRAINING_PROFILE], {
     account: provider.account,
@@ -260,7 +260,7 @@ describe("SiriusEscrow USDC", () => {
     // d'autant. Une constante écrite en dur ferait ici un plancher de poussière, et
     // laisserait passer des prêts dont le gas dépasse le montant.
     const usdc18 = await hre.viem.deployContract("MockUsdc18");
-    const escrow18 = await hre.viem.deployContract("SiriusEscrow", [usdc18.address, ctx.kyb.address, ctx.registry.address, ctx.admin.account.address]);
+    const escrow18 = await hre.viem.deployContract("SiriusEscrow", [usdc18.address, ctx.kyb.address, ctx.registry.address, ctx.admin.account.address, "0x0000000000000000000000000000000000000000", 0n, "0x0000000000000000000000000000000000000000"]);
     assert.equal(await escrow18.read.MIN_AMOUNT(), 10n ** 15n);
   });
 
@@ -268,19 +268,19 @@ describe("SiriusEscrow USDC", () => {
     const ctx = await loadFixture(fixture);
     const usdc0 = await hre.viem.deployContract("MockUsdc0");
     await expect(
-      hre.viem.deployContract("SiriusEscrow", [usdc0.address, ctx.kyb.address, ctx.registry.address, ctx.admin.account.address]),
+      hre.viem.deployContract("SiriusEscrow", [usdc0.address, ctx.kyb.address, ctx.registry.address, ctx.admin.account.address, "0x0000000000000000000000000000000000000000", 0n, "0x0000000000000000000000000000000000000000"]),
     ).to.be.rejectedWith("UnsupportedUsdcDecimals");
   });
 
   it("refuse un token à frais et une adresse sans code", async () => {
     const ctx = await loadFixture(fixture);
     await expect(
-      hre.viem.deployContract("SiriusEscrow", [ctx.borrower.account.address, ctx.kyb.address, ctx.registry.address, ctx.admin.account.address]),
+      hre.viem.deployContract("SiriusEscrow", [ctx.borrower.account.address, ctx.kyb.address, ctx.registry.address, ctx.admin.account.address, "0x0000000000000000000000000000000000000000", 0n, "0x0000000000000000000000000000000000000000"]),
     ).to.be.rejectedWith("InvalidUsdcContract");
 
     const feeUsdc = await hre.viem.deployContract("MockFeeUsdc");
     const feeRegistry = await hre.viem.deployContract("SiriusDatasetRegistry", [ctx.kyb.address, ctx.admin.account.address]);
-    const feeEscrow = await hre.viem.deployContract("SiriusEscrow", [feeUsdc.address, ctx.kyb.address, feeRegistry.address, ctx.admin.account.address]);
+    const feeEscrow = await hre.viem.deployContract("SiriusEscrow", [feeUsdc.address, ctx.kyb.address, feeRegistry.address, ctx.admin.account.address, "0x0000000000000000000000000000000000000000", 0n, "0x0000000000000000000000000000000000000000"]);
     await feeRegistry.write.bindEscrow([feeEscrow.address], { account: ctx.admin.account });
     const feeDatasetHash = datasetIdHash("fee-token-dataset");
     await feeRegistry.write.mint([feeDatasetHash, DATASET_CID_HASH, DATASET_MERKLE_ROOT, 1n, TRAINING_PROFILE], {
@@ -340,7 +340,7 @@ describe("SiriusEscrow USDC", () => {
   it("refuse un lock tant que le registre n'est pas lié à cet escrow", async () => {
     const ctx = await loadFixture(fixture);
     const registry = await hre.viem.deployContract("SiriusDatasetRegistry", [ctx.kyb.address, ctx.admin.account.address]);
-    const escrow = await hre.viem.deployContract("SiriusEscrow", [ctx.usdc.address, ctx.kyb.address, registry.address, ctx.admin.account.address]);
+    const escrow = await hre.viem.deployContract("SiriusEscrow", [ctx.usdc.address, ctx.kyb.address, registry.address, ctx.admin.account.address, "0x0000000000000000000000000000000000000000", 0n, "0x0000000000000000000000000000000000000000"]);
     const datasetHash = datasetIdHash("unbound-escrow-dataset");
     await registry.write.mint([datasetHash, DATASET_CID_HASH, DATASET_MERKLE_ROOT, 1n, TRAINING_PROFILE], {
       account: ctx.provider.account,

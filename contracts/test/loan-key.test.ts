@@ -54,7 +54,7 @@ async function fixture() {
   await grantKyb(wallets[0]);
   await grantKyb(wallets[1]);
   const registry = await hre.viem.deployContract("SiriusDatasetRegistry", [kyb.address, wallets[0].account.address]);
-  const escrow = await hre.viem.deployContract("SiriusEscrow", [usdc.address, kyb.address, registry.address, wallets[2].account.address]);
+  const escrow = await hre.viem.deployContract("SiriusEscrow", [usdc.address, kyb.address, registry.address, wallets[2].account.address, "0x0000000000000000000000000000000000000000", 0n, "0x0000000000000000000000000000000000000000"]);
   await registry.write.bindEscrow([escrow.address], { account: wallets[0].account });
   const datasetId = "loan-key-dataset";
   await registry.write.mint([
