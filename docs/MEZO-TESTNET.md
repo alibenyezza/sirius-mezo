@@ -140,9 +140,10 @@ What the run changes locally:
 `node --import tsx scripts/mezo-testnet.ts --smoke` replays the cycle on the manifest's
 current trio without deploying anything.
 
-### 2. Verify the two new contracts
+### 2. Verify the new contracts
 
-Only the dataset registry and the escrow are new; the KYB registry keeps its verification.
+The dataset registry, the escrow and, with fees on (the default), the fee policy and the fee
+router are new; the KYB registry keeps its verification.
 Take the arguments from the manifest (`contracts.*`, `deployer`, `lockAuthorizer`,
 `settlementToken.address`):
 
@@ -155,13 +156,31 @@ cd contracts
   0xf0ab86b45202c1600cb54b49cbd35bd3e4bb5392 \
   <deployer>
 
-# SiriusEscrow(usdc_, kyb_, datasets_, lockAuthorizer_) — usdc_ is MUSD
+# SiriusMezoFeePolicy(veMezo_, minPower_, discountedBps_) — veMEZO testnet, defaults 1e18 and 100
+../node_modules/.bin/hardhat verify --network mezoTestnet \
+  <contracts.feePolicy> \
+  0xaCE816CA2bcc9b12C59799dcC5A959Fb9b98111b 1000000000000000000 100
+
+# SiriusFeeRouter(musd_, voter_, gauge_, treasury_, incentiveBps_) — PoolsVoter, BTC/MUSD gauge
+../node_modules/.bin/hardhat verify --network mezoTestnet \
+  <contracts.feeRouter> \
+  0x118917a40FAF1CD7a13dB0Ef56C86De7973Ac503 \
+  0x263F1Fd5fB7F866881e1B6cD7d5d6c40Fd985F0D \
+  0x72D88B0795373437E86792DEd8362D66dC43Cd2c \
+  <treasury, the deployer by default> 5000
+
+# SiriusEscrow(usdc_, kyb_, datasets_, lockAuthorizer_, feeRecipient_, feeBps_, feePolicy_)
 ../node_modules/.bin/hardhat verify --network mezoTestnet \
   <contracts.escrow> \
   0x118917a40FAF1CD7a13dB0Ef56C86De7973Ac503 \
   0xf0ab86b45202c1600cb54b49cbd35bd3e4bb5392 \
   <contracts.datasets> \
-  <lockAuthorizer>
+  <lockAuthorizer> \
+  <contracts.feeRouter> 200 <contracts.feePolicy>
+
+# SiriusCheckout(escrow_, btc_, router_, poolFactory_, btcUsdFeed_, maxSlippageBps_, maxFeedAge_)
+# BTC precompile, Mezo Pools router and factory, Skip BTC/USD feed precompile, 3 %, 1 h
+../node_modules/.bin/hardhat verify --network mezoTestnet   <contracts.checkout>   <contracts.escrow>   0x7b7c000000000000000000000000000000000000   0x9a1ff7FE3a0F69959A3fBa1F1e5ee18e1A9CD7E9   0x4947243CC818b627A5D06d14C4eCe7398A23Ce1A   0x7b7c000000000000000000000000000000000015   300 3600
 ```
 
 Then write the `verification` block back into `deployments/mezo-testnet.json` (see the
@@ -294,7 +313,55 @@ ratio). None of the demo accounts had one on 31 October 2026.
 
 ## Earnings routes
 
-Flag: `SIRIUS_MEZO_EARN=true` (server) and `NEXT_PUBLIC_MEZO_EARN=true` (wallet card).
+Flag: `SIRIUS_MEZO_EARN=true` (server).
 `GET /api/wallet/earn` returns the position in both venues; with `?action=provide|withdraw-sp|
 deposit-savings|withdraw-savings|claim-yield&amount=<atomic>` it also returns the transactions to sign,
 prefixed by an MUSD `approve` when the venue's allowance is short. The wallet signs them one by one.
+
+## Platform fee routed back to Mezo
+
+The escrow keeps `feeBps` (200 = 2 %, capped at 10 % in the contract) of every **released**
+payment and credits it, pull-only, to `SiriusFeeRouter`. Refunds pay no fee.
+
+- **veMEZO discount.** At release the escrow asks `SiriusMezoFeePolicy.feeBpsFor(provider, base)`
+  through a 300k-gas `staticcall`. A provider whose veMEZO voting power (first five positions,
+  `votingPowerOfNFT`) reaches `minPower` pays `discountedBps` (100 = 1 %). A revert, an
+  out-of-gas, a malformed or a higher answer falls back to the base fee: the policy can never
+  block a release or raise the fee. veMEZO returns zero power in the block an NFT moves, so a
+  position cannot be flash-borrowed into the release.
+- **Router.** `distribute(escrow)` is permissionless. It pulls the router's credit
+  (`withdrawFor` is permissionless too, so the router holds no escrow address), sends
+  `10000 - incentiveBps` to the treasury and posts the rest with
+  `BribeVotingReward.notifyRewardAmount(MUSD, amount)` on the BTC/MUSD gauge of the v2
+  PoolsVoter, so veBTC holders who vote for that pool earn from every run sold. It holds the
+  incentive instead of posting when the gauge is dead, when the bribe has no votes (an
+  epoch's reward would be unclaimable), and in the first and last hour of an epoch (Thursday
+  00:00 UTC), and posts it on a later call.
+- **Dependencies, read-only check.** `node --import tsx scripts/mezo-fee-check.ts [testnet|mainnet]`
+  confirms the voter, gauge, bribe, MUSD whitelisting, votes on the bribe, veMEZO and veBTC.
+  Addresses: `src/lib/mezo/governance.ts` (the v1 contracts in `mezo-org/tigris` are stale).
+- **Distributing.** `node --import tsx scripts/mezo-distribute-fees.ts` simulates; add `--send`
+  to send the transaction from the settlement or deployer key.
+- **Configuration.** `SIRIUS_FEE_BPS` (0 disables the fee and deploys neither contract),
+  `SIRIUS_FEE_TREASURY`, `SIRIUS_FEE_INCENTIVE_BPS` (default 5000), `SIRIUS_FEE_DISCOUNT_BPS`
+  (default 100), `SIRIUS_FEE_MIN_VEMEZO_POWER` (default 1e18). `scripts/mezo-testnet.ts`
+  deploys with 2 % and the deployer as treasury unless configured.
+
+## Pay with BTC (Mezo Pools + oracle)
+
+`SiriusCheckout` lets a buyer pay for a training run with BTC in one transaction. The BTC sent
+with `buyWithBtc` is swapped to MUSD on the Mezo Pools BTC/MUSD basic pool
+(`0xd16A5Df82120ED8D626a1a15232bFcE2366d6AA9`, router `0x9a1f…E7E9`), the MUSD lands in the
+buyer's wallet, and the escrow locks the price from it through the buyer's signed `LockRequest`
+(same signatures as the one-signature payment). The swap must clear the buyer's minimum (the
+price) and an oracle floor: Mezo's Skip BTC/USD precompile (`0x7b7c…0015`), at most one hour old,
+at most 3 % below. The contract never holds funds between calls and has no owner.
+
+It was checked against live testnet state before deployment: `eth_call` with a state override
+(checkout code at a free address, a stub escrow) swapped 0.0001 BTC for 7.858 MUSD through the
+real router, BTC precompile and oracle, about 286k gas.
+
+The deploy script deploys it after the escrow (`SIRIUS_CHECKOUT=false` skips it) and prints
+`SIRIUS_CHECKOUT_ADDRESS`. Flags: `SIRIUS_PAY_WITH_BTC=true` plus `SIRIUS_CHECKOUT_ADDRESS`
+(server) and `NEXT_PUBLIC_SIRIUS_CHECKOUT_ADDRESS`. Passport accounts do not see the button:
+the escrow checks an EOA signature.

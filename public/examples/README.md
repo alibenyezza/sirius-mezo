@@ -1,6 +1,6 @@
 # Jeux de données d'exemple
 
-État au 23 septembre 2026 : ces jeux servent à la recette locale ou de démonstration. Le [parcours de facturation v7](../../docs/BILLING-INTEGRATION.md) est intégré localement, mais les [bloqueurs de l’audit](../../docs/AUDIT-2026-09-23.md) restent ouverts ; Phala est arrêté. Les données publiques et synthétiques ne valident ni la confidentialité d’un usage réel ni un tarif fournisseur.
+Ces jeux servent à la démonstration sur le testnet Mezo. Les données publiques et synthétiques ne valident ni la confidentialité d’un usage réel ni un tarif.
 
 Jeux prêts à déposer dans Sirius pour exécuter un prêt complet sans préparer de
 données. Ils sont rangés par famille de modèle :
@@ -22,7 +22,7 @@ Chaque paire contient un fichier `-train.csv` à déposer et un fichier `-test.c
 Sur staging, utiliser `sirius-mezo-staging.vercel.app`. `sirius-mezo.vercel.app`
 est un alias de main, indépendamment de la branche ouverte dans l'éditeur.
 Les jeux de test sont réutilisables ; les comptes, datasets publiés et clés restent
-propres à chaque environnement. Voir [le guide des branches](../../docs/DEPLOYMENT.md).
+propres à chaque environnement.
 
 ## Régression linéaire
 

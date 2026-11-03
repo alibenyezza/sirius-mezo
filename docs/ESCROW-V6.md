@@ -2,7 +2,7 @@
 
 État local sur staging au 13 septembre 2026. Aucun contrat ni environnement distant n'a été modifié pendant cette correction. Les observations initiales sont conservées dans [l'audit du 12 septembre](AUDIT-STAGING-2026-09-12.md).
 
-**Priorité de reprise du 23 septembre :** avant un nouveau déploiement pour Phala, valider les risques restants de la [facturation du compute au borrower](COMPUTE-BILLING.md). Le [contrat v7 et ses tests](ESCROW-V7.md), ainsi que le [parcours applicatif signé](BILLING-INTEGRATION.md), sont intégrés localement ; le [suivi de l'audit](AUDIT-2026-09-23.md#suivi-des-correctifs-locaux--23-septembre-2026) distingue les correctifs des limites bloquantes. Ce document conserve les garanties et procédures v6 comme référence historique : il ne déclenche pas un redéploiement v6 intermédiaire. Lire [PHALA.md](PHALA.md) pour l’état actuel et la contrainte de crédits.
+**Priorité de reprise du 23 septembre :** avant un nouveau déploiement pour Phala, valider les risques restants de la [facturation du compute au borrower](COMPUTE-BILLING.md). Le [contrat v7 et ses tests](ESCROW-V7.md), ainsi que le [parcours applicatif signé](BILLING-INTEGRATION.md), sont intégrés localement ; le [suivi de l'audit](AUDIT-2026-09-23.md#suivi-des-correctifs-locaux--23-septembre-2026) distingue les correctifs des limites bloquantes. Ce document conserve les garanties et procédures v6 comme référence historique : il ne déclenche pas un redéploiement v6 intermédiaire. Lire PHALA.md pour l’état actuel et la contrainte de crédits.
 
 ## Front et authentification
 
@@ -28,7 +28,7 @@ Le worker reaper peut démarrer sur le couple Escrow v5 / DatasetRegistry v4 exi
 
 ## Déploiement et migration staging
 
-Le passage du runner in-process à Phala exige un nouvel escrow v6 même si le contrat courant est déjà en v6 : sa nouvelle master key produit un autre `lockAuthorizer`. Le registre dataset associé doit également être redéployé. Dans ce cas, ne pas transférer l’ancienne master key dans la CVM ; la conservation de clé évoquée ci-dessous concerne les changements de contrats sous une même identité runner. Suivre [PHALA.md](PHALA.md) pour l’amorçage sans contrats, la réimportation et la préservation séparée des modèles historiques.
+Le passage du runner in-process à Phala exige un nouvel escrow v6 même si le contrat courant est déjà en v6 : sa nouvelle master key produit un autre `lockAuthorizer`. Le registre dataset associé doit également être redéployé. Dans ce cas, ne pas transférer l’ancienne master key dans la CVM ; la conservation de clé évoquée ci-dessous concerne les changements de contrats sous une même identité runner. Suivre PHALA.md pour l’amorçage sans contrats, la réimportation et la préservation séparée des modèles historiques.
 
 Un merge de code ne transforme pas les contrats existants. Le contrat escrow est immuable et le registre dataset ne peut lier qu'un escrow, une seule fois : **un nouvel escrow v6 et un nouveau registre v4 associé sont nécessaires**. Le script de déploiement crée aussi un registre KYB. Le correctif A8 du 13 septembre fait passer le registre strict à **v3**, avec un domaine EIP-712 version **2** et le champ signé `uint64 verifierEpoch`. Prévoir de nouvelles attestations si le mode KYB gouverné est utilisé ; une signature de l’ancien registre est inutilisable sur le nouveau. Le registre ouvert de démonstration reste distinct et ne fournit pas ces garanties. Le token USDC peut rester le même.
 

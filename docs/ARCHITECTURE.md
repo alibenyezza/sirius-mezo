@@ -114,4 +114,4 @@ La migration applicative est EVM-only. La validation sur testnet avec des wallet
 - Le runner Phala doit être déployé avec RA-TLS, quote TDX, replay RTMR3 et valeurs d'attestation épinglées côté Next.
 - Les adresses de contrat, le réseau attendu et le RPC sont des paramètres de déploiement : aucune valeur vide ne doit atteindre une instance de production.
 
-La migration v6 demeure une [référence historique](ESCROW-V6.md). La prochaine bascule suit v7 après correction des bloqueurs, validation des tarifs, de la comptabilité et des plafonds fournisseurs. Elle exige des contrats cohérents, la clôture des anciens prêts, la préservation des modèles et les préflights adaptés. Aucun changement d'adresse ne migre les prêts actifs. Voir [PHALA.md](PHALA.md).
+La migration v6 demeure une [référence historique](ESCROW-V6.md). La prochaine bascule suit v7 après correction des bloqueurs, validation des tarifs, de la comptabilité et des plafonds fournisseurs. Elle exige des contrats cohérents, la clôture des anciens prêts, la préservation des modèles et les préflights adaptés. Aucun changement d'adresse ne migre les prêts actifs. Voir PHALA.md.

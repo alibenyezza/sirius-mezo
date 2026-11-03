@@ -1,6 +1,6 @@
 # Realistic regression benchmarks
 
-Status — 23 September 2026: these fixtures remain synthetic local benchmarks. The [v7 billing flow](../../../docs/BILLING-INTEGRATION.md) is integrated locally, but the [audit findings](../../../docs/AUDIT-2026-09-23.md) remain open and Phala is stopped. Benchmark scores and local execution times do not establish commercial prices, supplier costs or production readiness.
+These fixtures are synthetic local benchmarks. Benchmark scores and local execution times do not establish commercial prices, supplier costs or production readiness.
 
 These datasets are synthetic and deterministic, but they are designed around the
 failure modes of operational data rather than around a target score. They contain
@@ -33,7 +33,7 @@ pnpm datasets:benchmarks
 Use `sirius-mezo-staging.vercel.app` for staging. The `sirius-mezo.vercel.app`
 alias belongs to main, regardless of the branch open in your editor. Uploaded
 datasets and delivered models belong to their deployment; switching branches
-does not move them. See the [deployment guide](../../../docs/DEPLOYMENT.md).
+does not move them.
 
 These files are safe synthetic inputs for the local demo runner, which decrypts
 inside the Next process when `RUNNER_URL` is unset. Confidential production data
