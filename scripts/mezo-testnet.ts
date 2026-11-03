@@ -33,6 +33,7 @@ import { mezoTestnet } from "../src/lib/evm/networks";
 import { TESTNET_STABLECOIN_ADDRESS } from "../src/lib/evm/stablecoin";
 import { cidHash, datasetIdHash } from "../src/lib/evm/dataset-key";
 import { DEFAULT_MODEL_SELECTION, trainingProfileHash } from "../src/lib/models/registry";
+import { SIRIUS_FEE_DEFAULTS } from "../src/lib/mezo/governance";
 import {
   DEFAULT_ESCROW_VERSION,
   escrowFeatures,
@@ -94,6 +95,12 @@ function envValue(output: string, name: string): Hex {
   return match[1] as Hex;
 }
 
+/** Valeur facultative imprimée par le déploiement (adresse ou entier), `null` si absente. */
+function optionalEnvValue(output: string, name: string): string | null {
+  const match = output.match(new RegExp(`${name}="([0-9a-zA-Z]+)"`));
+  return match ? match[1] : null;
+}
+
 async function waitReceipt(label: string, hash: Hex) {
   const receipt = await publicClient.waitForTransactionReceipt({ hash, confirmations: 1, retryCount: 20, retryDelay: 1_500, timeout: 120_000 });
   if (receipt.status !== "success") throw new Error(`${label} rejeté (${hash})`);
@@ -143,8 +150,19 @@ async function main() {
       SIRIUS_USDC_ADDRESS: musd,
       SIRIUS_USDC_CODE_HASH: musdCodeHash,
       SIRIUS_LOCK_AUTHORIZER: lockAuthorizer,
+      // Frais de plateforme : 2 % par défaut, trésorerie = déployeur sauf configuration.
+      SIRIUS_FEE_BPS: process.env.SIRIUS_FEE_BPS?.trim() || String(SIRIUS_FEE_DEFAULTS.feeBps),
+      SIRIUS_FEE_TREASURY: process.env.SIRIUS_FEE_TREASURY?.trim() || deployer.address,
       ...(reusedKyb ? { SIRIUS_REUSE_KYB_ADDRESS: reusedKyb } : {}),
     });
+    const feeRouter = optionalEnvValue(output, "SIRIUS_FEE_ROUTER_ADDRESS");
+    const feePolicy = optionalEnvValue(output, "SIRIUS_FEE_POLICY_ADDRESS");
+    const feeBps = optionalEnvValue(output, "SIRIUS_FEE_BPS");
+    const checkout = optionalEnvValue(output, "SIRIUS_CHECKOUT_ADDRESS");
+    const feeContracts = {
+      ...(feeRouter && feePolicy && feeBps ? { feeRouter, feePolicy, feeBps: Number(feeBps) } : {}),
+      ...(checkout ? { checkout } : {}),
+    };
     addresses = {
       escrow: envValue(output, "SIRIUS_ESCROW_ADDRESS"),
       kyb: envValue(output, "SIRIUS_KYB_ADDRESS"),
@@ -168,13 +186,15 @@ async function main() {
       SIRIUS_ESCROW_ADDRESS: addresses.escrow, SIRIUS_USDC_ADDRESS: musd, SIRIUS_USDC_CODE_HASH: musdCodeHash,
       SIRIUS_KYB_ADDRESS: addresses.kyb, SIRIUS_DATASET_ADDRESS: addresses.datasets, SIRIUS_LOCK_AUTHORIZER: lockAuthorizer,
       SIRIUS_LEGACY_ESCROW_ADDRESSES: legacyEscrowAddresses(process.env.SIRIUS_LEGACY_ESCROW_ADDRESSES, retiredEscrows, addresses.escrow),
+      ...(feeRouter && feePolicy ? { SIRIUS_FEE_ROUTER_ADDRESS: feeRouter, SIRIUS_FEE_POLICY_ADDRESS: feePolicy } : {}),
+      ...(checkout ? { SIRIUS_CHECKOUT_ADDRESS: checkout, NEXT_PUBLIC_SIRIUS_CHECKOUT_ADDRESS: checkout } : {}),
     });
     mkdirSync(resolve(ROOT, "deployments"), { recursive: true });
     const manifest = nextManifest(saved, {
       chainId: chain.id, explorer: chain.blockExplorers?.default.url,
       deployedAt: new Date().toISOString(), deployer: deployer.address, lockAuthorizer,
       settlementToken: { symbol: "MUSD", address: musd, decimals: 18, codeHash: musdCodeHash },
-      contracts: { ...addresses, kybMode: "open", escrowVersion, ...(features.length ? { escrowFeatures: features } : {}) },
+      contracts: { ...addresses, kybMode: "open", escrowVersion, ...(features.length ? { escrowFeatures: features } : {}), ...feeContracts },
     });
     writeFileSync(DEPLOYMENT_FILE, JSON.stringify(manifest, null, 2) + "\n");
     console.log(`\nAdresses écrites dans deployments/mezo-testnet.json et .env.local (escrow ${escrowVersion}${features.length ? `, ${features.join(", ")}` : ""})`);

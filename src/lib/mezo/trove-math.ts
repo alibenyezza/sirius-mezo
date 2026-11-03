@@ -15,6 +15,8 @@ const UINT256_MAX = (BigInt(1) << BigInt(256)) - BigInt(1);
 
 export const REASON_NO_TROVE = "No active trove";
 export const REASON_BELOW_THRESHOLD = "Collateral ratio would fall below the safe threshold";
+export const REASON_RECOVERY_MODE = "Mezo is in Recovery Mode: a draw must keep the ratio above 150 %";
+export const REASON_CAPACITY = "Draw exceeds this trove's maximum borrowing capacity";
 
 function assertNonNegative(value: bigint, name: string): void {
   if (value < BigInt(0)) throw new RangeError(`${name} must be non-negative`);
@@ -65,6 +67,15 @@ export interface DrawQuoteInput {
   mcr: bigint;
   /** Marge de sécurité au-dessus du MCR, en points de base (1 000 = +10 %). */
   safetyMarginBps: number | bigint;
+  /**
+   * Système en Recovery Mode (TCR sous le CCR) : le protocole n'accepte alors une hausse de
+   * dette que si le ratio du trove reste au-dessus du CCR.
+   */
+  recoveryMode?: boolean;
+  /** Ratio critique du système (1e18), 150 % sur MUSD. */
+  ccr?: bigint;
+  /** Plafond de dette du trove fixé par MUSD (`getTroveMaxBorrowingCapacity`), 0 = inconnu. */
+  maxBorrowingCapacity?: bigint;
 }
 
 export interface DrawQuote {
@@ -105,6 +116,12 @@ export function drawQuote(input: DrawQuoteInput): DrawQuote {
   }
   if (newIcr < threshold) {
     return { fee, newDebt, newIcr, threshold, allowed: false, reason: REASON_BELOW_THRESHOLD };
+  }
+  if (input.recoveryMode && input.ccr !== undefined && newIcr < input.ccr) {
+    return { fee, newDebt, newIcr, threshold: input.ccr, allowed: false, reason: REASON_RECOVERY_MODE };
+  }
+  if (input.maxBorrowingCapacity !== undefined && input.maxBorrowingCapacity > BigInt(0) && newDebt > input.maxBorrowingCapacity) {
+    return { fee, newDebt, newIcr, threshold, allowed: false, reason: REASON_CAPACITY };
   }
   return { fee, newDebt, newIcr, threshold, allowed: true, reason: null };
 }

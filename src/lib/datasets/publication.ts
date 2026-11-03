@@ -1,5 +1,5 @@
 /**
- * Règles de publication d'un dataset (docs/passage-mainnet/07-upload.md, 01 §3 et §4).
+ * Règles de publication d'un dataset.
  *
  * Module pur, sans dépendance serveur : il est importé par le formulaire (affichage des
  * choix) et par la route de création (validation). La route ne fait **jamais** confiance
@@ -78,8 +78,8 @@ export const ESCROW_CHALLENGE_DAYS = 3;
  * enregistrée en base identifie le texte exact que le fournisseur a accepté.
  */
 export const TRAINING_CONSENT_TEXT_KEY =
-  "Autoriser Sirius à utiliser ce dataset, uniquement dans l’enclave, pour évaluer et développer de nouveaux modèles. Vous pouvez retirer ce consentement à tout moment pour les usages futurs.";
-export const TRAINING_CONSENT_VERSION = "2026-10-04";
+  "Autoriser Sirius à utiliser ce dataset, uniquement sur son runner d’entraînement, pour évaluer et développer de nouveaux modèles. Vous pouvez retirer ce consentement à tout moment pour les usages futurs.";
+export const TRAINING_CONSENT_VERSION = "2026-11-03";
 
 /**
  * Consentement reçu du formulaire : `true` ou `false` uniquement. Absent vaut « non »

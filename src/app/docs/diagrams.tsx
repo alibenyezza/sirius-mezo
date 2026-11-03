@@ -84,7 +84,7 @@ export function OverviewDiagram({ d }: { d: Translate }) {
           <path d="M278 75 H260 V300 H385 V356" />
         </g>
         <Box x={20} y={20} w={210} h={70} title="Provider" sub={d("propriétaire du dataset")} />
-        <Box x={280} y={20} w={210} h={70} title="Runner" sub={d("stub ou TEE attesté")} strong />
+        <Box x={280} y={20} w={210} h={70} title="Runner" sub={d("runner de testnet")} strong />
         <Box x={530} y={20} w={210} h={70} title="Borrower" sub={d("entraîne un modèle")} />
         <Box x={280} y={180} w={210} h={70} title="IPFS / Pinata" sub={d("stockage chiffré")} />
         <Box x={20} y={360} w={720} h={80} title="Mezo · EVM" sub={d("DatasetRegistry · KYB · Escrow\nCrédits en stablecoin · retraits séparés")} />

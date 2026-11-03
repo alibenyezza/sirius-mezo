@@ -62,11 +62,31 @@ export const MEZO_TOKEN_ADDRESS: Address = "0x7b7c000000000000000000000000000000
 /** Précompilé ERC-20 du BTC natif (même adresse sur testnet et mainnet). */
 export const BTC_TOKEN_ADDRESS: Address = "0x7b7c000000000000000000000000000000000000";
 
+/**
+ * Ce que le paiement en BTC (`SiriusCheckout`) appelle sur le testnet : routeur et fabrique
+ * des pools de base Mezo Pools (pool BTC/MUSD volatil `0xd16A…6AA9`, profond) et oracle
+ * BTC/USD Skip exposé en précompilé façon Chainlink (18 décimales, mis à jour à chaque bloc).
+ * Vérifiés on-chain le 3 nov. 2026 (`getAmountsOut`, `latestRoundData`, simulation complète
+ * du swap). Testnet seulement : l'instance Mezo de Sirius ne vise pas le mainnet.
+ */
+export const MEZO_CHECKOUT_TESTNET = {
+  poolsRouter: "0x9a1ff7FE3a0F69959A3fBa1F1e5ee18e1A9CD7E9",
+  poolFactory: "0x4947243CC818b627A5D06d14C4eCe7398A23Ce1A",
+  btcMusdPool: "0xd16A5Df82120ED8D626a1a15232bFcE2366d6AA9",
+  btcUsdFeed: "0x7b7c000000000000000000000000000000000015",
+  /** Écart maximal du swap sous le prix de l'oracle. */
+  maxSlippageBps: 300,
+  /** Âge maximal de l'oracle accepté, en secondes. */
+  maxFeedAge: 3600,
+} as const satisfies Record<string, string | number>;
+
 /** Constantes du protocole, lues on-chain le 31 oct. 2026 (identiques sur les deux réseaux). */
 export const MUSD_GAS_COMPENSATION = BigInt("200000000000000000000");
 export const MUSD_MIN_NET_DEBT = BigInt("1800000000000000000000");
 /** Ratio de collatéralisation minimal d'un trove, en 1e18. */
 export const MUSD_MCR = BigInt("1100000000000000000");
+/** Ratio critique du système : sous ce TCR, MUSD passe en Recovery Mode (lu on-chain, `CCR()`). */
+export const MUSD_CCR = BigInt("1500000000000000000");
 /** Frais d'emprunt : 0,1 % du MUSD tiré, ajoutés à la dette du trove. */
 export const MUSD_BORROWING_RATE_BPS = 10;
 

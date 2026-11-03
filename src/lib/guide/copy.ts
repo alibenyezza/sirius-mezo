@@ -28,7 +28,7 @@ export const GUIDE_UI = {
 export const GUIDE_ARRIVAL = {
   title: "Salut, je suis {name}.",
   body: [
-    "Sirius permet d’entraîner un modèle sur des données confidentielles sans jamais les voir, et d’être payé quand on prête les siennes.",
+    "Sirius permet de louer des données privées pour un entraînement, payé en MUSD, sans jamais recevoir la donnée brute, et d’être payé quand on prête les siennes.",
     "Je te montre comment ça marche en quelques étapes — tu peux passer à tout moment.",
   ],
 } as const;
@@ -55,7 +55,7 @@ export const GUIDE_VERIFY = {
   mode: {
     loading: "Je regarde si ton wallet est déjà vérifié…",
     instant: "Une seule transaction à confirmer dans ton wallet, et c’est fait.",
-    "needs-gas": "Il te faut un peu d’ETH pour payer le gas de cette transaction : ajoute des fonds d’abord, je t’attends ici.",
+    "needs-gas": "Il te faut un peu de BTC pour payer le gas de cette transaction : ajoute des fonds d’abord, je t’attends ici.",
     invitation: "L’accès instantané n’est pas ouvert : colle le code d’invitation reçu de l’équipe, ou écris-nous.",
     unknown: "Je n’arrive pas à lire ton statut pour l’instant. Tu peux le vérifier sur la page Vérification, ou continuer.",
   } satisfies Record<GuideVerifyMode, string>,
@@ -75,10 +75,9 @@ export function guideVerifyWhy(network: EvmNetwork): string {
 /** Une phrase par page du menu. `{token}` : jeton de règlement. */
 export const GUIDE_TOUR_COPY: Record<GuideTourStopKey, { title: string; body: string }> = {
   marketplace: { title: "Marketplace", body: "Parcours les datasets publiés, et emprunte celui qu’il te faut : le prix est bloqué en escrow, jamais versé d’avance." },
-  train: { title: "Entraîner", body: "Lance tes entraînements et récupère tes modèles ici. Après le paiement, compte ~15 minutes de finalité avant de lancer le job." },
+  train: { title: "Entraîner", body: "Lance tes entraînements et récupère tes modèles ici. Après le paiement, quelques secondes suffisent pour que le lock soit confirmé." },
   datasets: { title: "Mes datasets", body: "Dépose un CSV : il est chiffré dans ton navigateur, et tu es payé·e en {token} à chaque entraînement réglé." },
   explorer: { title: "Explorer", body: "Tes emprunts, règlements et remboursements, chacun vérifiable sur l’explorateur de la chaîne." },
-  phala: { title: "Phala", body: "L’enclave qui entraîne sans voir les données : son identité est attestée à chaque requête." },
   dashboard: { title: "Tableau de bord", body: "Ton solde, ta liste « Bien démarrer » et tes raccourcis. On y revient quand tu veux." },
 };
 

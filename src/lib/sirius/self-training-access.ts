@@ -10,7 +10,7 @@ import type { Session } from "@/lib/auth/session";
 export const SELF_TRAINING_UNAVAILABLE = "Bientôt disponible";
 
 /**
- * Instance de démonstration Phala ([12](docs/passage-mainnet/12-test-phala.md)) : la démo
+ * Instance de démonstration Phala : la démo
  * publique EST un self training sur ses propres données, porté par les mêmes routes
  * `/api/train`. Mêmes conditions que `demoEnabled` dans `src/lib/phala-demo/runner-session.ts`
  * (drapeau exact, testnet, enclave Phala sans simulateur), mais sans lever : une configuration

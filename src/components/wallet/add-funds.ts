@@ -1,7 +1,7 @@
 import type { EvmNetwork } from "@/lib/evm/networks";
 
 /**
- * Parcours d'ajout de fonds selon le réseau (docs/passage-mainnet/05-wallet.md).
+ * Parcours d'ajout de fonds selon le réseau.
  *
  * - testnet : le parcours actuel, le faucet de démonstration (`/api/faucet`).
  * - mainnet : carte (MoonPay, si clés live) et réception par transfert ; le pont a été retiré

@@ -23,7 +23,7 @@ export const ASSISTANT_MESSAGES_EN: Record<string, string> = {
   // Panneau de chat
   "Pose ta question sur Sirius": "Ask anything about Sirius",
   "Comment emprunter un dataset ?": "How do I borrow a dataset?",
-  "Pourquoi attendre ~15 minutes ?": "Why wait ~15 minutes?",
+  "Pourquoi attendre avant l’entraînement ?": "Why wait before training?",
   "Comment publier des données ?": "How do I publish data?",
   "Mes données sont-elles en sécurité ?": "Is my data safe?",
   "Écris ta question…": "Type your question…",
@@ -40,14 +40,14 @@ export const ASSISTANT_MESSAGES_EN: Record<string, string> = {
     "Sirio answers questions about Sirius and how to use the site. It gives no financial advice and never asks for a private key.",
   "Le chat n’est pas activé sur cette instance. Voici les réponses les plus demandées :":
     "Chat is not enabled on this instance. Here are the most common answers:",
-  "Ouvre la Marketplace, choisis un dataset et clique sur Emprunter : le prix et le compute sont bloqués en escrow, puis l’entraînement tourne dans un TEE.":
-    "Open the Marketplace, pick a dataset and click Borrow: the price and compute are locked in escrow, then training runs in a TEE.",
-  "Après le paiement, la chaîne doit atteindre la finalité (~15 min) avant que le job puisse démarrer. Laisse la page Entraîner ouverte ou reviens cliquer sur Lancer le job.":
-    "After payment, the chain must reach finality (~15 min) before the job can start. Keep the Train page open or come back and click Run job.",
+  "Ouvre la Marketplace, choisis un dataset et clique sur Emprunter : le prix est bloqué en escrow en MUSD, puis l’entraînement tourne sur le runner de testnet.":
+    "Open the Marketplace, pick a dataset and click Borrow: the price is locked in escrow in MUSD, then the training run happens on the testnet runner.",
+  "Après le paiement, la chaîne doit confirmer le lock avant que l’entraînement démarre : sur Mezo, quelques secondes suffisent. Laisse la page Entraîner ouverte ou reviens cliquer sur Lancer l’entraînement.":
+    "After payment, the chain must confirm the lock before training starts: on Mezo this takes a few seconds. Keep the Train page open or come back and click Run training.",
   "Dans Mes datasets, importe un CSV : il est chiffré dans ton navigateur, puis publie son titre on-chain pour le rendre empruntable.":
     "In My datasets, upload a CSV: it is encrypted in your browser, then publish its on-chain title to make it borrowable.",
-  "Les données brutes ne quittent jamais le chiffrement : l’entraînement tourne dans une enclave et l’emprunteur ne reçoit que le modèle.":
-    "Raw data never leaves encryption: training runs inside an enclave and the borrower only receives the model.",
+  "L’emprunteur ne reçoit jamais la donnée brute, seulement le modèle entraîné. Sur ce testnet, l’entraînement tourne sur le runner du serveur : publie uniquement des données synthétiques ou non sensibles.":
+    "The borrower never receives the raw data, only the trained model. On this testnet, training runs on the server’s runner: publish only synthetic or non-sensitive data.",
   "Conversation avec Sirio": "Conversation with Sirio",
   "Fermer le panneau": "Close panel",
   "Revoir la visite guidée": "Replay the guided tour",
@@ -85,9 +85,9 @@ export const ASSISTANT_MESSAGES_EN: Record<string, string> = {
   "Comment ajouter des fonds ?": "How do I add funds?",
   "Clique sur Ajouter des fonds : par carte, depuis un autre wallet ou depuis une autre chaîne sur mainnet ; un robinet de test sur le testnet.":
     "Click Add funds: by card, from another wallet or from another chain on mainnet; a test faucet on the testnet.",
-  "Pourquoi me faut-il du BTC ?": "Why do I need ETH?",
-  "Le gas (frais réseau) se paie toujours en ETH sur Mezo, séparément du stablecoin qui règle les emprunts.":
-    "Gas (network fees) is always paid in ETH on Mezo, separately from the stablecoin that pays for loans.",
+  "Pourquoi me faut-il du BTC ?": "Why do I need BTC?",
+  "Le gas (frais réseau) se paie toujours en BTC sur Mezo, séparément du stablecoin qui règle les emprunts.":
+    "Gas (network fees) is always paid in BTC on Mezo, separately from the stablecoin that pays for loans.",
   "Comment retirer mes règlements ?": "How do I withdraw my settlements?",
   "Les règlements et remboursements sont crédités dans l’escrow : sur la page Wallet, clique sur Retirer pour les ramener dans ton wallet.":
     "Settlements and refunds are credited in the escrow: on the Wallet page, click Withdraw to move them to your wallet.",
@@ -95,15 +95,15 @@ export const ASSISTANT_MESSAGES_EN: Record<string, string> = {
   "Tes emprunts, règlements et remboursements, chacun vérifiable sur l’explorateur de la chaîne. Jamais le contenu des datasets.":
     "Your borrowings, settlements and refunds, each verifiable on the chain explorer. Never the contents of datasets.",
   "Qu’est-ce qu’un reçu d’audit ?": "What is an audit receipt?",
-  "Chaque entraînement produit un reçu d’audit et un certificat qui lient le titre du dataset, le prêt, l’attestation TEE et l’empreinte du modèle livré.":
-    "Every training run produces an audit receipt and a certificate binding the dataset title, the loan, the TEE attestation and the fingerprint of the delivered model.",
+  "Chaque entraînement produit un reçu d’audit et un certificat vérifiable qui lient le titre du dataset, le prêt, le résultat signé avec la clé de règlement de l’escrow et l’empreinte du modèle livré.":
+    "Every training run produces an audit receipt and a verifiable certificate binding the dataset title, the loan, the result signed with the escrow’s settlement key and the fingerprint of the delivered model.",
   "Pourquoi vérifier mon wallet ?": "Why verify my wallet?",
   "Chaque prêteur et chaque emprunteur est vérifié on-chain : ça protège les données et l’argent de tout le monde sur la marketplace.":
     "Every lender and borrower is verified on-chain: it protects everyone’s data and money on the marketplace.",
   "Comment obtenir l’accès instantané ?": "How do I get instant access?",
-  "Quand il est ouvert, Sirius signe une attestation de 30 jours pour ton wallet : une seule transaction à confirmer, avec un peu d’BTC pour le gas.":
+  "Quand il est ouvert, Sirius signe une attestation de 30 jours pour ton wallet : une seule transaction à confirmer, avec un peu de BTC pour le gas.":
     "When it is open, Sirius signs a 30-day attestation for your wallet: a single transaction to confirm, with a little BTC for gas.",
-  "Qu’est-ce qu’une attestation TEE ?": "What is a TEE attestation?",
-  "La preuve, vérifiée à chaque requête, que le code qui entraîne tourne bien dans l’enclave attendue : son identité est épinglée et comparée.":
-    "The proof, checked on every request, that the training code runs inside the expected enclave: its identity is pinned and compared.",
+  "Comment vérifier un entraînement ?": "How do I verify a training run?",
+  "Ouvre son certificat : le résultat est signé avec la clé de règlement de l’escrow, et la page compare ce signataire au lockAuthorizer inscrit on-chain dans l’escrow.":
+    "Open its certificate: the result is signed with the escrow’s settlement key, and the page checks that signer against the lockAuthorizer recorded on-chain in the escrow.",
 };

@@ -21,7 +21,7 @@ test("réception par transfert : adresse validée, QR code, explication et lien 
   assert.ok(mainnet.includes(`>${CHECKSUM}</p>`), "l'adresse affichée est celle à somme de contrôle");
   assert.match(mainnet, /Receive MUSD by transfer/);
   assert.match(mainnet, /Only send MUSD, on Mezo/);
-  assert.match(mainnet, /Network fees are paid in ETH/);
+  assert.match(mainnet, /Network fees are paid in BTC/);
   assert.ok(mainnet.includes(`href="https://explorer.mezo.org/address/${CHECKSUM}"`));
   assert.match(mainnet, /target="_blank" rel="noopener noreferrer"/);
   assert.doesNotMatch(mainnet, /<script|<img|onerror/i);
@@ -41,7 +41,7 @@ test("réception par transfert dans la fenêtre « Ajouter des fonds » : QR, ad
   assert.match(embedded, />Copy address</);
   assert.doesNotMatch(embedded, /<h2|<h3/, "la fenêtre porte son propre titre");
   assert.doesNotMatch(embedded, /bridge button/i);
-  assert.match(embedded, /Network fees are paid in ETH/);
+  assert.match(embedded, /Network fees are paid in BTC/);
 });
 
 test("réception par transfert : une adresse invalide n'affiche ni adresse, ni QR code, ni lien", () => {

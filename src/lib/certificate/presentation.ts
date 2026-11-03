@@ -30,9 +30,20 @@ export interface RetiredEnclaveView {
   retiredAt: Date;
 }
 
+/** Reçu signé hors enclave, vérifié contre le `lockAuthorizer` on-chain de l'escrow. */
+export interface ReceiptVerificationView {
+  signer: string | null;
+  lockAuthorizer: string | null;
+  escrow: string;
+  /** null : le lockAuthorizer n'a pas pu être lu. */
+  matches: boolean | null;
+}
+
 export type VerificationOutcome =
-  /** Aucune quote enregistrée pour ce prêt. */
+  /** Aucune quote ni reçu enregistré pour ce prêt. */
   | { status: "absent" }
+  /** Entraînement hors enclave : reçu signé par le compte de règlement de l'escrow. */
+  | { status: "receipt"; receipt: ReceiptVerificationView }
   /** Vérification complète, matériel compris (ou simulateur). */
   | { status: "complete"; verification: QuoteVerificationView; retiredEnclave?: RetiredEnclaveView }
   /** Contrôles locaux seulement : vérification matérielle plafonnée, lente, échouée ou abandonnée. */
@@ -61,7 +72,7 @@ export interface CertificateMeasurement {
   pin: PinState;
 }
 
-export type CertificateVerdict = "verified" | "failed" | "incomplete" | "unattested";
+export type CertificateVerdict = "verified" | "signed" | "failed" | "incomplete" | "unattested";
 
 export interface CertificatePresentation {
   verdict: CertificateVerdict;
@@ -177,13 +188,77 @@ function eventLogCheck(verification: QuoteVerificationView): CertificateCheck {
   return { label, state: "unknown", detail: "No usable event log was recorded for this run." };
 }
 
+export const SIGNED_HEADLINE = "Signed by the escrow's settlement key";
+
+function presentReceipt(receipt: ReceiptVerificationView): CertificatePresentation {
+  const enclave: CertificateCheck = {
+    label: "Hardware enclave",
+    state: "unknown",
+    detail: "Not used on this testnet instance: training runs on the Sirius Mezo server. The receipt below is a signed commitment, not hardware isolation.",
+  };
+  const binding: CertificateCheck = {
+    label: "Bound to this run",
+    state: "pass",
+    detail: "The signed hash is the SHA-256 of this loan's result: loan key, escrow, dataset root, model and fingerprint.",
+  };
+  if (receipt.matches === true) {
+    return {
+      verdict: "signed",
+      headline: SIGNED_HEADLINE,
+      summary:
+        "This training ran on the testnet runner. Its result is signed by the same key the escrow contract trusts to authorize every lock, read on-chain, so the operator cannot later deny or alter it.",
+      checks: [
+        binding,
+        {
+          label: "Signer",
+          state: "pass",
+          detail: `Recovered ${receipt.signer}, equal to lockAuthorizer() of escrow ${receipt.escrow}.`,
+        },
+        enclave,
+      ],
+      measurements: [],
+    };
+  }
+  if (receipt.matches === false) {
+    return {
+      verdict: "failed",
+      headline: "Receipt signature does not match",
+      summary: "The recorded receipt was not signed by the escrow's settlement key. Do not rely on this certificate.",
+      checks: [
+        binding,
+        {
+          label: "Signer",
+          state: "fail",
+          detail: receipt.signer
+            ? `Recovered ${receipt.signer}, but the escrow trusts ${receipt.lockAuthorizer ?? "another key"}.`
+            : "The signature could not be recovered.",
+        },
+        enclave,
+      ],
+      measurements: [],
+    };
+  }
+  return {
+    verdict: "incomplete",
+    headline: "Receipt not checked yet",
+    summary: "The escrow could not be read on-chain right now. Reload this page in a minute, or verify the downloaded receipt yourself.",
+    checks: [
+      binding,
+      { label: "Signer", state: "unknown", detail: `Recovered ${receipt.signer}; lockAuthorizer() of escrow ${receipt.escrow} could not be read.` },
+      enclave,
+    ],
+    measurements: [],
+  };
+}
+
 export function presentVerification(outcome: VerificationOutcome): CertificatePresentation {
+  if (outcome.status === "receipt") return presentReceipt(outcome.receipt);
   if (outcome.status === "absent") {
     return {
       verdict: "unattested",
-      headline: "No hardware attestation recorded",
+      headline: "No signed receipt recorded",
       summary:
-        "This training settled on-chain, but no Intel TDX quote was stored for it. Its execution inside an enclave cannot be shown here.",
+        "This training settled on-chain before signed receipts were added. Its settlement, the released preimage and the trained model's hash are still checkable on-chain and in the export below.",
       checks: [],
       measurements: [],
     };

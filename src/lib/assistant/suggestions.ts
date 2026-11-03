@@ -13,11 +13,11 @@ export interface AssistantSuggestion {
 
 const BORROW: AssistantSuggestion = {
   question: "Comment emprunter un dataset ?",
-  answer: "Ouvre la Marketplace, choisis un dataset et clique sur Emprunter : le prix et le compute sont bloqués en escrow, puis l’entraînement tourne dans un TEE.",
+  answer: "Ouvre la Marketplace, choisis un dataset et clique sur Emprunter : le prix est bloqué en escrow en MUSD, puis l’entraînement tourne sur le runner de testnet.",
 };
 const FINALITY: AssistantSuggestion = {
-  question: "Pourquoi attendre ~15 minutes ?",
-  answer: "Après le paiement, la chaîne doit atteindre la finalité (~15 min) avant que le job puisse démarrer. Laisse la page Entraîner ouverte ou reviens cliquer sur Lancer le job.",
+  question: "Pourquoi attendre avant l’entraînement ?",
+  answer: "Après le paiement, la chaîne doit confirmer le lock avant que l’entraînement démarre : sur Mezo, quelques secondes suffisent. Laisse la page Entraîner ouverte ou reviens cliquer sur Lancer l’entraînement.",
 };
 const PUBLISH: AssistantSuggestion = {
   question: "Comment publier des données ?",
@@ -25,7 +25,7 @@ const PUBLISH: AssistantSuggestion = {
 };
 const SAFETY: AssistantSuggestion = {
   question: "Mes données sont-elles en sécurité ?",
-  answer: "Les données brutes ne quittent jamais le chiffrement : l’entraînement tourne dans une enclave et l’emprunteur ne reçoit que le modèle.",
+  answer: "L’emprunteur ne reçoit jamais la donnée brute, seulement le modèle entraîné. Sur ce testnet, l’entraînement tourne sur le runner du serveur : publie uniquement des données synthétiques ou non sensibles.",
 };
 const LIVE_COUNT: AssistantSuggestion = { question: "Combien de datasets sur la marketplace ?" };
 const LIVE_STATUS: AssistantSuggestion = { question: "Quels sont les plafonds de prêt ?" };
@@ -63,7 +63,7 @@ const BY_PAGE: readonly { prefix: string; suggestions: readonly AssistantSuggest
     prefix: "/wallet",
     suggestions: [
       { question: "Comment ajouter des fonds ?", answer: "Clique sur Ajouter des fonds : par carte, depuis un autre wallet ou depuis une autre chaîne sur mainnet ; un robinet de test sur le testnet." },
-      { question: "Pourquoi me faut-il du BTC ?", answer: "Le gas (frais réseau) se paie toujours en ETH sur Mezo, séparément du stablecoin qui règle les emprunts." },
+      { question: "Pourquoi me faut-il du BTC ?", answer: "Le gas (frais réseau) se paie toujours en BTC sur Mezo, séparément du stablecoin qui règle les emprunts." },
       { question: "Comment retirer mes règlements ?", answer: "Les règlements et remboursements sont crédités dans l’escrow : sur la page Wallet, clique sur Retirer pour les ramener dans ton wallet." },
     ],
   },
@@ -71,7 +71,7 @@ const BY_PAGE: readonly { prefix: string; suggestions: readonly AssistantSuggest
     prefix: "/explorer",
     suggestions: [
       { question: "Que montre l’Explorer ?", answer: "Tes emprunts, règlements et remboursements, chacun vérifiable sur l’explorateur de la chaîne. Jamais le contenu des datasets." },
-      { question: "Qu’est-ce qu’un reçu d’audit ?", answer: "Chaque entraînement produit un reçu d’audit et un certificat qui lient le titre du dataset, le prêt, l’attestation TEE et l’empreinte du modèle livré." },
+      { question: "Qu’est-ce qu’un reçu d’audit ?", answer: "Chaque entraînement produit un reçu d’audit et un certificat vérifiable qui lient le titre du dataset, le prêt, le résultat signé avec la clé de règlement de l’escrow et l’empreinte du modèle livré." },
       SAFETY,
     ],
   },
@@ -79,15 +79,14 @@ const BY_PAGE: readonly { prefix: string; suggestions: readonly AssistantSuggest
     prefix: "/kyb",
     suggestions: [
       { question: "Pourquoi vérifier mon wallet ?", answer: "Chaque prêteur et chaque emprunteur est vérifié on-chain : ça protège les données et l’argent de tout le monde sur la marketplace." },
-      { question: "Comment obtenir l’accès instantané ?", answer: "Quand il est ouvert, Sirius signe une attestation de 30 jours pour ton wallet : une seule transaction à confirmer, avec un peu d’BTC pour le gas." },
+      { question: "Comment obtenir l’accès instantané ?", answer: "Quand il est ouvert, Sirius signe une attestation de 30 jours pour ton wallet : une seule transaction à confirmer, avec un peu de BTC pour le gas." },
       SAFETY,
     ],
   },
   {
-    prefix: "/phala",
+    prefix: "/certificate",
     suggestions: [
-      SAFETY,
-      { question: "Qu’est-ce qu’une attestation TEE ?", answer: "La preuve, vérifiée à chaque requête, que le code qui entraîne tourne bien dans l’enclave attendue : son identité est épinglée et comparée." },
+      { question: "Comment vérifier un entraînement ?", answer: "Ouvre son certificat : le résultat est signé avec la clé de règlement de l’escrow, et la page compare ce signataire au lockAuthorizer inscrit on-chain dans l’escrow." },
       BORROW,
     ],
   },

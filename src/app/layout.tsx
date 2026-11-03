@@ -24,7 +24,7 @@ import { PREVIEW_GATE_HEADER, PREVIEW_GATE_HEADER_CLOSED } from "@/lib/preview-g
 export const dynamic = "force-dynamic";
 
 // Les métadonnées restent en anglais dès le rendu serveur, y compris les aperçus de lien.
-const ORIGINE_PAR_DEFAUT = "https://sirius-data.tech";
+const ORIGINE_PAR_DEFAUT = "https://sirius-mezo.vercel.app";
 
 /**
  * Origine publique du site, pour les aperçus de lien.
@@ -46,9 +46,9 @@ function origineDuSite(): string {
 }
 
 const ORIGINE = origineDuSite();
-const TITRE = "Sirius — confidential data lending on EVM";
+const TITRE = "Sirius — rent private data for one training run, paid in MUSD on Mezo";
 const DESCRIPTION =
-  "Lend valuable datasets without ever exposing them. Training inside a TEE, stablecoin settlement, and an audit trail on EVM.";
+  "Pay in MUSD, the Bitcoin-backed stablecoin, to rent a private dataset for one training run on Mezo testnet. Payment waits in an on-chain escrow, you receive only the trained model, and every run gets a signed, verifiable certificate.";
 
 export const metadata: Metadata = {
   // Sans base, Next rend les URL d'images en relatif — et un réseau social qui lit
@@ -69,18 +69,6 @@ export const metadata: Metadata = {
     title: TITRE,
     description: DESCRIPTION,
   },
-  // Preuve de propriété du domaine demandée par Virtuals Protocol avant de rattacher
-  // le site à la page d'agent. Le jeton n'ouvre aucun accès et ne révèle rien : il
-  // atteste seulement qu'on peut modifier le contenu servi sur cette origine.
-  //
-  // Passe par le champ `verification` plutôt qu'une balise écrite à la main : Next
-  // rend alors la balise dans le <head> de chaque page, y compris celles ajoutées
-  // plus tard, sans que personne ait à y penser.
-  verification: {
-    other: {
-      "virtual-protocol-site-verification": "ccdcd5a78bc4867c2b4b0a4313b6a8e2",
-    },
-  },
 };
 
 export default async function RootLayout({
@@ -91,7 +79,7 @@ export default async function RootLayout({
   // Page d'attente du passage mainnet (src/lib/preview-gate/gate.ts) : le proxy pose cet
   // en-tête — et l'efface s'il vient du client — quand il sert /coming-soon, ou /terms à qui
   // n'a pas le cookie d'aperçu. La page est alors rendue nue : ni connecteur de portefeuille,
-  // ni blob WebGL, ni réhydratation de store, ni titre réécrit côté client. Le public n'a rien
+  // ni blob WebGL, ni réhydratation de store. Le public n'a rien
   // à charger de plus qu'une phrase et un lien.
   const gateClosed = (await headers()).get(PREVIEW_GATE_HEADER) === PREVIEW_GATE_HEADER_CLOSED;
   if (gateClosed) {

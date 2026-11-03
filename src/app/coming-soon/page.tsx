@@ -19,9 +19,6 @@ export const metadata: Metadata = {
   robots: { index: false, follow: false, nocache: true },
 };
 
-/** Compte X du projet, le même que sur la page d'accueil. */
-const X_HANDLE = "Sirius_data";
-
 export default function ComingSoonPage() {
   return (
     <main className="flex min-h-screen flex-1 flex-col items-center justify-center px-6 py-16 text-center">
@@ -35,18 +32,7 @@ export default function ComingSoonPage() {
       <p className="mt-5 max-w-md text-base leading-relaxed text-muted sm:text-lg">
         Sirius is going live on Mezo mainnet very soon.
       </p>
-      <a
-        href={`https://x.com/${X_HANDLE}`}
-        target="_blank"
-        rel="noopener noreferrer"
-        className="mt-10 inline-flex items-center gap-2 rounded-full border border-border bg-surface px-5 py-3 text-sm text-foreground transition-colors hover:border-muted"
-      >
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden>
-          <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
-        </svg>
-        <span>Follow @{X_HANDLE} for the launch</span>
-      </a>
-      <p className="mt-16 text-xs text-muted-foreground">Confidential data lending on EVM.</p>
+      <p className="mt-16 text-xs text-muted-foreground">Rent private data for one training run, paid in MUSD on Mezo.</p>
       {/* Pages légales : en liste blanche de la porte, lisibles avant l'ouverture. */}
       <LegalLinks className="mt-4" />
     </main>

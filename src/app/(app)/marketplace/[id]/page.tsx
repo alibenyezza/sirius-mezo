@@ -208,7 +208,7 @@ export default function MarketplaceListingPage() {
                   label={t("Le fournisseur reçoit")}
                   value={(dataset.providerPriceAtomic && formatTokenWithSymbol(dataset.providerPriceAtomic, token)) || "—"}
                 />
-                <Fact label={t("Frais de calcul (enclave Phala)")} value={t("Indiqués dans le devis")} />
+                <Fact label={t("Frais de calcul (runner de testnet)")} value={t("Indiqués dans le devis")} />
               </dl>
               <p className="mt-3 text-xs text-muted">
                 {t("Les frais de calcul et le total sont affichés dans le devis, avant tout paiement.")}
@@ -220,7 +220,7 @@ export default function MarketplaceListingPage() {
         <Card>
           <CardTitle>{t("Ce que vous obtenez")}</CardTitle>
           <p className="mt-2 text-sm text-muted">
-            {t("Un accès à cette donnée et un entraînement dans l’enclave. Vous recevez le modèle entraîné, jamais la donnée. Chaque nouvel entraînement est un nouvel emprunt.")}
+            {t("Un accès à cette donnée pour un entraînement sur le runner de testnet. Vous recevez le modèle entraîné, jamais la donnée. Chaque nouvel entraînement est un nouvel emprunt.")}
           </p>
         </Card>
 

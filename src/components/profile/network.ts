@@ -1,7 +1,7 @@
 import type { EvmNetwork } from "@/lib/evm/networks";
 
 /**
- * Réseau affiché dans le bouton profil (docs/passage-mainnet/02-general.md, section 5).
+ * Réseau affiché dans le bouton profil.
  *
  * Le réseau d'un site est fixé par son environnement (`NEXT_PUBLIC_EVM_NETWORK`) : la
  * production est sur mainnet, le staging sur testnet. Le badge reflète ce réseau, et
@@ -41,7 +41,7 @@ export function networkBadge(network: EvmNetwork): NetworkBadge {
 
 /**
  * Libellé du jeton de règlement affiché à côté d'un solde : MUSD sur mainnet
- * (docs/passage-mainnet/01-decisions-avant-samedi.md), jeton de test sur testnet.
+ * jeton de test sur testnet.
  * Clé de traduction.
  */
 export function stablecoinSymbol(network: EvmNetwork): string {

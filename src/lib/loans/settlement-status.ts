@@ -12,4 +12,4 @@ export const SETTLEMENT_FINALITY_PENDING_FAST = "Règlement envoyé : le réseau
  * (`assertBlockStable` dans `prepareLoanResult`). La page Train le reconnaît pour passer en
  * attente de finalité au lieu d'afficher une erreur.
  */
-export const LOCK_FINALITY_PENDING = "Paiement en attente de finalité du réseau : l’entraînement pourra démarrer dans quelques minutes";
+export const LOCK_FINALITY_PENDING = "Paiement en attente de finalité du réseau : l’entraînement pourra démarrer dans quelques secondes";

@@ -62,7 +62,7 @@ export function ReceiveFunds({ network, address, embedded = false }: { network: 
         {!embedded && <li>{t("N’envoie que des {token}, sur Mezo. Un autre jeton ou un autre réseau peut être perdu définitivement.", { token })}</li>}
         <li>{t("Pour un premier transfert, envoie d’abord un petit montant et vérifie qu’il arrive.")}</li>
         <li>{t("Compare le début et la fin de l’adresse dans ton wallet avant de confirmer.")}</li>
-        <li>{t("Les frais réseau se paient en ETH : garde un peu d’ETH sur la même adresse.")}</li>
+        <li>{t("Les frais réseau se paient en BTC : garde un peu de BTC sur la même adresse.")}</li>
         {!embedded && <li>{t("Le bouton de pont ci-dessus ouvre un service tiers : vérifie qu’il supporte {token} avant de l’utiliser.", { token })}</li>}
       </ul>
     </>

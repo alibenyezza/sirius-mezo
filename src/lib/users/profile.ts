@@ -68,7 +68,7 @@ export interface ProfileSettings {
 }
 
 /** Arrêts du tour du menu du guide : borne de `tourIndex` (même liste que `GUIDE_TOUR_STOPS`). */
-const GUIDE_TOUR_STOP_COUNT = 6;
+const GUIDE_TOUR_STOP_COUNT = 5;
 
 /** Pages vues bien formées (clés connues, valeur `true`), ou `null` si la forme est inattendue. */
 function readGuidePages(value: unknown): Partial<Record<GuidePageKey, true>> | null {

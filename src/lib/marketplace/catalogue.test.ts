@@ -352,3 +352,13 @@ test("GET /api/marketplace/[id] : fiche d'un dataset en ligne, 404 identique pou
     assert.deepEqual(await response.json(), { error: "Dataset introuvable" });
   }
 });
+
+test("catalogue : un titre qui n'est plus vivant sur le registre configuré sort de la liste et de la fiche", async () => {
+  const live = async (ids: readonly string[]) => new Set(ids.filter((id) => id !== "listed"));
+  const result = await loadCatalogue(q(), deps(fakeDb(ROWS).db, { liveOnRegistry: live }));
+  assert.deepEqual(result.items.map((item) => item.id).sort(), ["future", "unknown-kyb"]);
+  assert.equal(await loadListingDetail("listed", deps(fakeDb(ROWS).db, { liveOnRegistry: live })), null);
+  // Registre illisible : rien n'est caché.
+  const unreadable = await loadCatalogue(q(), deps(fakeDb(ROWS).db, { liveOnRegistry: async () => null }));
+  assert.deepEqual(unreadable.items.map((item) => item.id).sort(), ["future", "listed", "unknown-kyb"]);
+});

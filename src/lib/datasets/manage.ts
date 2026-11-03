@@ -324,7 +324,7 @@ export function validateDetailsPatch(input: unknown): DetailsPatch {
   const patch: DetailsPatch = {};
   for (const key of Object.keys(input)) {
     if (key === "priceUsdcAtomic" || key === "priceUsdc" || key === "price") {
-      throw new AppError("Le prix n'est pas modifiable : il est inscrit dans le reçu signé par l'enclave", 400);
+      throw new AppError("Le prix n'est pas modifiable : il est inscrit dans le reçu signé par le runner", 400);
     }
     if (key !== "name" && key !== "description") throw new AppError("Champ de dataset non modifiable", 400);
   }
@@ -371,6 +371,14 @@ export interface LoanForStats {
   amountUsdcAtomic: string;
   datasetAmountUsdcAtomic?: string | null;
   cancelTxHash?: string | null;
+  /** Escrow du prêt : seul l'escrow qui prélève des frais les retire de la part du fournisseur. */
+  evmEscrowAddress?: string | null;
+}
+
+/** Frais de plateforme d'un escrow : taux de base retenu à la libération. */
+export interface EscrowFee {
+  escrow: string;
+  bps: number;
 }
 
 export interface WeeklyBorrows {
@@ -417,12 +425,23 @@ export function isCountedBorrow(loan: Pick<LoanForStats, "status" | "cancelTxHas
  * Part du fournisseur : `datasetAmountUsdcAtomic` pour un prêt v7 (le calcul va à
  * l'enclave), sinon le montant total (prêts antérieurs au devis, sans frais de calcul).
  */
-export function providerShareAtomic(loan: Pick<LoanForStats, "amountUsdcAtomic" | "datasetAmountUsdcAtomic">): bigint | null {
+/**
+ * Ce que le fournisseur reçoit d'un prêt. Sur un escrow qui prélève des frais, le taux de base
+ * est retiré (une remise veMEZO n'est pas comptée : le chiffre reste un plancher). Les prêts
+ * des escrows sans frais restent bruts.
+ */
+export function providerShareAtomic(
+  loan: Pick<LoanForStats, "amountUsdcAtomic" | "datasetAmountUsdcAtomic" | "evmEscrowAddress">,
+  fee: EscrowFee | null = null,
+): bigint | null {
   const raw = loan.datasetAmountUsdcAtomic ?? loan.amountUsdcAtomic;
-  return typeof raw === "string" && ATOMIC_RE.test(raw) ? BigInt(raw) : null;
+  if (typeof raw !== "string" || !ATOMIC_RE.test(raw)) return null;
+  const gross = BigInt(raw);
+  if (!fee || fee.bps <= 0 || !loan.evmEscrowAddress || loan.evmEscrowAddress.toLowerCase() !== fee.escrow.toLowerCase()) return gross;
+  return gross - (gross * BigInt(fee.bps)) / BigInt(10_000);
 }
 
-export function aggregateLoanStats(loans: readonly LoanForStats[], now: number = Date.now()): LoanStats {
+export function aggregateLoanStats(loans: readonly LoanForStats[], now: number = Date.now(), fee: EscrowFee | null = null): LoanStats {
   let borrowCount = 0;
   let inFlightCount = 0;
   let trainingsSucceeded = 0;
@@ -454,7 +473,7 @@ export function aggregateLoanStats(loans: readonly LoanForStats[], now: number =
     if (loan.status === "SETTLED") trainingsSucceeded += 1;
     if (loan.status === "CANCELLED") trainingsRefunded += 1;
     if (loan.status === "SETTLED" || inFlight) {
-      const share = providerShareAtomic(loan);
+      const share = providerShareAtomic(loan, fee);
       if (share === null) unreadableAmounts += 1;
       else if (loan.status === "SETTLED") earned += share;
       else inEscrow += share;
@@ -798,14 +817,20 @@ export async function readOwnerView(
 }
 
 /** Statistiques privées d'un dataset ; le contrôle de propriété est fait avant toute lecture des prêts. */
-export async function readDatasetStats(db: ManageDb, id: unknown, owner: string, now: number = Date.now()): Promise<LoanStats & { truncated: boolean }> {
+export async function readDatasetStats(
+  db: ManageDb,
+  id: unknown,
+  owner: string,
+  now: number = Date.now(),
+  fee: EscrowFee | null = null,
+): Promise<LoanStats & { truncated: boolean }> {
   const row = await loadOwnedDataset(db, id, owner);
   const loans: LoanForStats[] = await db.loan.findMany({
     where: { datasetId: row.id },
-    select: { status: true, createdAt: true, amountUsdcAtomic: true, datasetAmountUsdcAtomic: true, cancelTxHash: true },
+    select: { status: true, createdAt: true, amountUsdcAtomic: true, datasetAmountUsdcAtomic: true, cancelTxHash: true, evmEscrowAddress: true },
     orderBy: [{ createdAt: "desc" }, { id: "desc" }],
     take: MAX_STATS_LOANS + 1,
   });
   const truncated = loans.length > MAX_STATS_LOANS;
-  return { ...aggregateLoanStats(truncated ? loans.slice(0, MAX_STATS_LOANS) : loans, now), truncated };
+  return { ...aggregateLoanStats(truncated ? loans.slice(0, MAX_STATS_LOANS) : loans, now, fee), truncated };
 }

@@ -256,11 +256,11 @@ export function VerificationDialog({ requestId, reason, role, address }: {
             <div id={descriptionId} className="mt-3 space-y-2 text-sm leading-relaxed text-muted">
               <p>{t(verificationIntro(reason, NETWORK))}</p>
               {mode === "instant" && (
-                <p>{t("Sirius signe une attestation de 30 jours pour ce wallet ; tu la confirmes dans ton wallet. La transaction coûte un peu d’ETH de gas.")}</p>
+                <p>{t("Sirius signe une attestation de 30 jours pour ce wallet ; tu la confirmes dans ton wallet. La transaction coûte un peu de BTC de gas.")}</p>
               )}
               {mode === "needs-gas" && (
                 <p className="text-foreground">
-                  {t("Ton wallet n’a pas encore d’ETH sur Mezo. Il en faut un peu pour payer le gas de la transaction : ajoute-en d’abord, puis reviens ici.")}
+                  {t("Ton wallet n’a pas encore de BTC sur Mezo. Il en faut un peu pour payer le gas de la transaction : ajoute-en d’abord, puis reviens ici.")}
                 </p>
               )}
               {mode === "invitation" && (

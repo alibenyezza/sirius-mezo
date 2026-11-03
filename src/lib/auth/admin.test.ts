@@ -3,18 +3,18 @@ import assert from "node:assert/strict";
 import { adminAddresses, adminAllowed, MAX_ADMIN_ADDRESSES } from "./admin";
 
 const ALI = `0x${"ab".repeat(20)}`;
-const NOE = `0x${"cd".repeat(20)}`;
+const SECOND_ADMIN = `0x${"cd".repeat(20)}`;
 const STRANGER = `0x${"ef".repeat(20)}`;
 const ZERO = `0x${"00".repeat(20)}`;
 const MIXED = "0xAbCdEfAbCdEfAbCdEfAbCdEfAbCdEfAbCdEfAbCd";
 
 test("une adresse de la liste est administratrice, les autres non", () => {
-  const configured = `${ALI},${NOE}`;
+  const configured = `${ALI},${SECOND_ADMIN}`;
   assert.equal(adminAllowed(ALI, configured), true);
-  assert.equal(adminAllowed(NOE, configured), true);
+  assert.equal(adminAllowed(SECOND_ADMIN, configured), true);
   assert.equal(adminAllowed(STRANGER, configured), false);
   assert.equal(adminAllowed(ZERO, configured), false);
-  assert.deepEqual(adminAddresses(configured), [ALI, NOE]);
+  assert.deepEqual(adminAddresses(configured), [ALI, SECOND_ADMIN]);
 });
 
 test("la casse ne compte ni dans la variable ni dans l'adresse comparée", () => {
@@ -29,8 +29,8 @@ test("la casse ne compte ni dans la variable ni dans l'adresse comparée", () =>
 });
 
 test("les espaces autour des virgules sont tolérés, les doublons fusionnés", () => {
-  assert.deepEqual(adminAddresses(` ${ALI} , ${NOE} ,${ALI}`), [ALI, NOE]);
-  assert.equal(adminAllowed(NOE, ` ${ALI} , ${NOE} `), true);
+  assert.deepEqual(adminAddresses(` ${ALI} , ${SECOND_ADMIN} ,${ALI}`), [ALI, SECOND_ADMIN]);
+  assert.equal(adminAllowed(SECOND_ADMIN, ` ${ALI} , ${SECOND_ADMIN} `), true);
 });
 
 test("liste vide ou absente : personne n'est administrateur", () => {
@@ -49,9 +49,9 @@ test("une entrée invalide refuse la liste entière, même si les autres sont va
     `${ALI},${ZERO}`,
     `${ALI},`,
     `,${ALI}`,
-    `${ALI},,${NOE}`,
-    `${ALI};${NOE}`,
-    `${ALI} ${NOE}`,
+    `${ALI},,${SECOND_ADMIN}`,
+    `${ALI};${SECOND_ADMIN}`,
+    `${ALI} ${SECOND_ADMIN}`,
     "équipe",
     `0x${"ab".repeat(21)}`,
     `0x${"ab".repeat(19)}`,
@@ -63,7 +63,7 @@ test("une entrée invalide refuse la liste entière, même si les autres sont va
     for (const configured of invalid) {
       assert.deepEqual(adminAddresses(configured), [], configured);
       assert.equal(adminAllowed(ALI, configured), false, configured);
-      assert.equal(adminAllowed(NOE, configured), false, configured);
+      assert.equal(adminAllowed(SECOND_ADMIN, configured), false, configured);
     }
   } finally {
     console.warn = warn;
@@ -80,13 +80,13 @@ test("au-delà du plafond d'adresses, la liste est refusée", () => {
   const atLimit = many.map((value) => value.replace(`0x${"00".repeat(20)}`, ALI)).join(",");
   assert.equal(adminAddresses(atLimit).length, MAX_ADMIN_ADDRESSES);
   assert.equal(adminAllowed(ALI, atLimit), true);
-  const overLimit = `${atLimit},${NOE}`;
+  const overLimit = `${atLimit},${SECOND_ADMIN}`;
   const duplicates = Array(MAX_ADMIN_ADDRESSES + 1).fill(ALI).join(",");
   const warn = console.warn;
   console.warn = () => {};
   try {
     assert.deepEqual(adminAddresses(overLimit), []);
-    assert.equal(adminAllowed(NOE, overLimit), false);
+    assert.equal(adminAllowed(SECOND_ADMIN, overLimit), false);
     assert.equal(adminAllowed(ALI, overLimit), false);
     assert.deepEqual(adminAddresses(duplicates), [], "le plafond compte les entrées, doublons compris");
     assert.equal(adminAllowed(ALI, duplicates), false);
@@ -96,7 +96,7 @@ test("au-delà du plafond d'adresses, la liste est refusée", () => {
 });
 
 test("une adresse comparée invalide n'est jamais administratrice", () => {
-  const configured = `${ALI},${NOE}`;
+  const configured = `${ALI},${SECOND_ADMIN}`;
   for (const address of [undefined, null, 42, "", "0x", "ab".repeat(20), `${ALI}0`, { address: ALI }, [ALI]]) {
     assert.equal(adminAllowed(address, configured), false, String(address));
   }

@@ -4,7 +4,7 @@
  * Sur Mezo mainnet, le bloc `finalized` suit la finalité L1 et traîne un quart d'heure
  * derrière la tête. Un prêt attend donc deux fois : avant l'entraînement (le lock doit être sous
  * le bloc stable) et après le release (le règlement n'est « réglé » qu'une fois finalisé). Décision
- * des fondateurs (risque accepté, voir docs/passage-mainnet/20-finalite-rapide.md) : les petits
+ * des fondateurs (risque accepté) : les petits
  * prêts peuvent être acceptés après N confirmations L2, avec contrôle du hash canonique, tant que
  * l'argent exposé à ce régime reste borné.
  *

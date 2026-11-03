@@ -88,7 +88,7 @@ test("l'attestation historique reste accessible seulement pour les escrows autor
     "server-only": {}, viem, "@/lib/app-error": errors,
     "@/lib/tee/evm-binding": { evmEscrowBinding: () => ({ chainId: 31611, escrow: CURRENT }) },
     "./address": addresses, "./client": {}, "./loan-key": {}, "./abi/siriusescrow": { siriusescrowAbi },
-    "./abi/siriusescrowv7": { siriusescrowv7Abi },
+    "./abi/siriusescrowv7": { siriusescrowv7Abi }, "./abi/siriuscheckout": { siriuscheckoutAbi: [] },
   }, { process: { env } });
   const route = load<typeof import("../app/api/loans/[id]/attestation/route")>("src/app/api/loans/[id]/attestation/route.ts", {
     ...base(), "@/lib/db": { prisma: { loan: { findUnique: async () => loan } } },

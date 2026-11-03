@@ -29,6 +29,9 @@ const verificationSchema = z.object({
     escrow: contractVerificationSchema.optional(),
     datasets: contractVerificationSchema.optional(),
     kyb: contractVerificationSchema.optional(),
+    feeRouter: contractVerificationSchema.optional(),
+    feePolicy: contractVerificationSchema.optional(),
+    checkout: contractVerificationSchema.optional(),
   }),
 });
 
@@ -38,6 +41,8 @@ const evidenceSchema = z.object({
   value: z.string().min(1),
   note: z.string().optional(),
   date: z.string().optional(),
+  /** Qui est derrière la transaction : un wallet de l'équipe (défaut) ou un utilisateur externe. */
+  party: z.enum(["team", "external"]).optional(),
 });
 
 /**
@@ -52,6 +57,10 @@ const previousDeploymentSchema = z.object({
   kybMode: z.string().optional(),
   escrowVersion: z.string().optional(),
   escrowFeatures: z.array(z.string()).optional(),
+  feeRouter: hexAddress.optional(),
+  feePolicy: hexAddress.optional(),
+  feeBps: z.number().int().nonnegative().optional(),
+  checkout: hexAddress.optional(),
   lockAuthorizer: hexAddress.optional(),
   deployedAt: z.string().optional(),
   deployer: hexAddress.optional(),
@@ -87,6 +96,14 @@ export const deploymentManifestSchema = z.object({
     escrowVersion: z.string().optional(),
     /** Fonctions optionnelles présentes dans l'escrow déployé (ex. `lockWithSignature`). */
     escrowFeatures: z.array(z.string()).optional(),
+    /** Routeur qui reçoit les frais de plateforme et les verse en bribe MUSD sur Mezo. */
+    feeRouter: hexAddress.optional(),
+    /** Politique de remise veMEZO lue par l'escrow à la libération. */
+    feePolicy: hexAddress.optional(),
+    /** Taux de base des frais, en points de base. */
+    feeBps: z.number().int().nonnegative().optional(),
+    /** Paiement en BTC : swap Mezo Pools puis verrouillage signé, en une transaction. */
+    checkout: hexAddress.optional(),
   }),
   demo: z
     .object({
@@ -114,7 +131,7 @@ export const deploymentManifestSchema = z.object({
 export type DeploymentManifest = z.infer<typeof deploymentManifestSchema>;
 export type ManifestEvidence = z.infer<typeof evidenceSchema>;
 export type PreviousDeployment = z.infer<typeof previousDeploymentSchema>;
-export type ManifestContractKey = "escrow" | "datasets" | "kyb";
+export type ManifestContractKey = "escrow" | "datasets" | "kyb" | "feeRouter" | "feePolicy" | "checkout";
 
 export const DEPLOYMENT_MANIFEST_PATH = "deployments/mezo-testnet.json";
 

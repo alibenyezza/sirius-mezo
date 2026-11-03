@@ -3,9 +3,8 @@
  * `GET /api/loans/[id]/finality` et la page Train. Fonctions pures, sans accès réseau.
  *
  * Sur Mezo (EVM Bitcoin), le bloc `finalized` suit la finalité L1 et reste
- * environ un quart d'heure derrière la tête (docs/passage-mainnet/19-mise-en-production.md :
- * ≈ 8 500 blocs, 14 min, relevé du 5 octobre ; docs/MAINNET-RUNBOOKS.md : « environ
- * 16 minutes »). `prepareLoanResult` refuse l'entraînement tant que le bloc stable n'a pas
+ * environ un quart d'heure derrière la tête (≈ 8 500 blocs, 14 à 16 min, relevé du
+ * 5 octobre). `prepareLoanResult` refuse l'entraînement tant que le bloc stable n'a pas
  * atteint le bloc de lock (`assertBlockStable`). Plutôt qu'une constante qui vieillirait,
  * l'estimation lit la chaîne : le pointeur stable avance au rythme de l'horloge, donc le temps
  * qu'il atteigne le bloc de lock vaut à peu près l'écart entre l'horodatage du lock et celui

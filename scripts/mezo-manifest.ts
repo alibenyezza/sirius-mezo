@@ -15,7 +15,7 @@ const ADDRESS = /^0x[0-9a-fA-F]{40}$/;
 
 export const DEFAULT_ESCROW_VERSION = "sirius-escrow-usdc-v6";
 /** Fonctions optionnelles de l'escrow dont la présence dans l'ABI vaut déclaration. */
-export const ESCROW_FEATURE_FUNCTIONS = ["lockWithSignature"] as const;
+export const ESCROW_FEATURE_FUNCTIONS = ["lockWithSignature", "feeBpsFor"] as const;
 
 export interface ManifestContracts {
   escrow: string;
@@ -24,6 +24,12 @@ export interface ManifestContracts {
   kybMode?: string;
   escrowVersion?: string;
   escrowFeatures?: string[];
+  /** Frais de plateforme : routeur qui reçoit les frais, politique veMEZO, taux de base. */
+  feeRouter?: string;
+  feePolicy?: string;
+  feeBps?: number;
+  /** Paiement en BTC : swap Mezo Pools puis verrouillage signé, en une transaction. */
+  checkout?: string;
 }
 
 export interface ManifestTransactions {

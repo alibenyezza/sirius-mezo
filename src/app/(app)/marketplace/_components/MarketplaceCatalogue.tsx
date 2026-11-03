@@ -101,7 +101,7 @@ export function MarketplaceCatalogue() {
         title={t("Datasets disponibles")}
         description={
           <>
-            <p>{t("Un emprunt = l’accès à un dataset et un entraînement dans l’enclave. Vous recevez le modèle entraîné, jamais la donnée.")}</p>
+            <p>{t("Un emprunt = l’accès à un dataset pour un entraînement sur le runner de testnet. Vous recevez le modèle entraîné, jamais la donnée.")}</p>
             <p className="mt-1 text-xs">{t("Consultation libre, sans wallet. La connexion n’est demandée qu’au moment d’emprunter.")}</p>
           </>
         }

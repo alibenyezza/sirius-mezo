@@ -1,10 +1,10 @@
 # Sirius on Mezo
 
-**Train on confidential datasets, pay in MUSD, receive only the model.**
+**Rent private data for one training run, pay in MUSD, receive only the model.**
 
-Sirius is a confidential data marketplace. A data provider keeps their dataset encrypted; a borrower pays for a training job that runs inside a hardware enclave (Intel TDX via Phala dstack) and receives **only the trained model**, never the raw data. Settlement and audit trail live on **Mezo**, with **MUSD**, Mezo's Bitcoin-backed stablecoin, as the only settlement asset.
+Sirius is a data marketplace on Mezo. A data provider keeps their dataset encrypted; a buyer pays in **MUSD**, Mezo's Bitcoin-backed stablecoin, to rent it for one training run and receives **only the trained model**, never the raw data. The payment waits in an on-chain escrow on **Mezo**: it is released to the provider on delivery, or refunded after the deadline. On this testnet instance, training runs on the server's testnet runner and each result is signed with the escrow's settlement key; the public certificate page checks that signer against the escrow's on-chain `lockAuthorizer`.
 
-Built for the **Mezo Buildathon, Wave 1** (October 2026). Sirius is an existing product, live in production on another EVM chain; this repository is the port of its contracts and application to Mezo, with MUSD as the escrow currency.
+Built for the **Mezo Buildathon** (October 2026), Wave 1 then Wave 2, in **Track 1 (DeFi) and Track 2 (Access and Distribution)**. MUSD is the escrow currency and the only settlement asset.
 
 ## Why MUSD
 
@@ -21,7 +21,7 @@ Provider                        Mezo                         Borrower
   ├─ SiriusDatasetRegistry.mint   │                               │
   │                               │◄── SiriusEscrow.lock (MUSD) ───┤  hashlock + EIP-712 authorization
   │                               │                               │
-  │          Phala TEE: decrypts in the enclave, trains, attests  │
+  │  testnet runner: decrypts, trains, signs with settlement key  │
   │                               │                               │
   │◄── SiriusEscrow.release ──────┼── settlement confirmed ───────►│  model key delivered
   │    provider credited in MUSD  │                               │
@@ -29,11 +29,11 @@ Provider                        Mezo                         Borrower
 ```
 
 1. The provider encrypts a CSV in the browser (AES-256-GCM), pins it to IPFS and mints a non-transferable dataset title on Mezo, bound to the file hash, Merkle root and training profile.
-2. The borrower locks MUSD in `SiriusEscrow` with a SHA-256 hashlock and an EIP-712 authorization signed by the enclave.
-3. The enclave decrypts the dataset, trains the model, produces a signed attestation and the preimage.
+2. The borrower locks MUSD in `SiriusEscrow` with a SHA-256 hashlock and an EIP-712 authorization signed by the escrow's settlement key (`lockAuthorizer`).
+3. The testnet runner decrypts the dataset, trains the model, signs the result with the same settlement key and produces the preimage.
 4. `release` pays the provider in MUSD and publishes the preimage that opens the model capsule. Payments are pull-only: provider and treasury withdraw their MUSD credits.
 5. If the model is never delivered, anyone can call `refund` after the deadline and the borrower gets their MUSD back.
-6. Every run produces a public execution certificate (`/certificate/<id>`) that anyone can verify.
+6. Every run produces a public execution certificate (`/certificate/<id>`) that anyone can verify: it checks the result signature against the escrow's on-chain `lockAuthorizer` and links the settlement transaction.
 
 ## Mezo deployment
 
@@ -82,7 +82,7 @@ With `NEXT_PUBLIC_MEZO_PASSPORT=true`, the connect menu offers **Bitcoin wallet 
 
 ## Contracts
 
-- `SiriusEscrow` v6: MUSD escrow per loan, EIP-712 lock authorization from the enclave, SHA-256 hashlock, locked training profile, KYB check on both parties, atomic release before deadline, refund after deadline, pull-only payouts. Reads `decimals()` on-chain so the minimum amount follows the token.
+- `SiriusEscrow` v6: MUSD escrow per loan, EIP-712 lock authorization from the settlement key (`lockAuthorizer`), SHA-256 hashlock, locked training profile, KYB check on both parties, atomic release before deadline, refund after deadline, pull-only payouts. Reads `decimals()` on-chain so the minimum amount follows the token.
 - `SiriusEscrowV7`: signed quote, dataset + compute prepayment, separate provider / treasury credits, refund with capped retention of attested fees. Integrated locally, explicit opt-in.
 - `SiriusKybRegistry` v3: EIP-712 KYB attestations, consented by the subject, expirable, revocable. `SiriusOpenKybRegistry` validates everyone for the hackathon testnet instance.
 - `SiriusDatasetRegistry` v4: non-transferable title of an encrypted dataset, bound to the CID hash, Merkle root, size and training profile.
@@ -96,7 +96,7 @@ Sources, tests and scripts live in [`contracts/`](contracts). TypeScript ABIs ar
 | Application | Next.js 16 · React 19 · Tailwind 4 · Prisma / PostgreSQL |
 | Chain | Mezo (EVM compatible, Bitcoin-backed) · testnet `31611` · mainnet `31612` |
 | Contracts | Solidity `0.8.24` · Hardhat · viem |
-| Confidential compute | Phala dstack (Intel TDX), isolated HTTP runner, RA-TLS |
+| Training | Testnet runner on the application server (no hardware isolation: use synthetic or non-sensitive data), each result signed with the escrow's settlement key |
 | Storage | IPFS / Pinata · AES-256-GCM |
 | Agents | MCP server (`/api/mcp`): catalogue search, dataset detail, protocol status, certificate verification |
 
@@ -140,10 +140,13 @@ Sirius account spend gas are off by default and documented in `.env.example`.
 | Integration | What it does | Where |
 |---|---|---|
 | **One-signature payment** (`SiriusEscrow.lockWithSignature`) | The buyer signs an EIP-2612 `permit` on MUSD and an EIP-712 `LockRequest`; Sirius's settlement account submits the lock and pays the gas in BTC. No approve transaction, no BTC needed by the buyer. Per-borrower nonce, deadline, permit front-running tolerated when the allowance already covers the amount. | `contracts/src/SiriusEscrow.sol`, `src/lib/sirius/gasless-lock.ts`, `POST /api/loans/[id]/lock-with-signature`, flag `SIRIUS_GASLESS_LOCK` |
-| **Borrow & Buy** (`BorrowerOperationsSignatures.withdrawMUSDWithSignature`) | A buyer who holds a Mezo trove pays a training run by drawing the exact price in MUSD against their BTC collateral: one signature, relayed by Sirius, MUSD minted straight to the buyer, then the normal escrow lock. The UI shows debt and collateral ratio before and after, and refuses draws that would push the ratio under 1.21. | `src/lib/mezo/trove.ts`, `draw-relay.ts`, `GET /api/trove`, `POST /api/trove/draw`, flag `SIRIUS_BORROW_AND_BUY` |
+| **Pay with BTC** (`SiriusCheckout.buyWithBtc`) | One transaction: the BTC sent is swapped to MUSD on the Mezo Pools BTC/MUSD pool, checked against Mezo's Skip BTC/USD oracle (at most 3 % below, at most one hour old), and locked in the escrow through the buyer's signed request. The MUSD left over stays with the buyer; the contract holds nothing between calls and has no owner. Simulated against live testnet state before deployment. | `contracts/src/SiriusCheckout.sol`, `src/lib/sirius/btc-checkout.ts`, `GET /api/mezo/btc-quote`, `POST /api/loans/[id]/pay-with-btc`, flag `SIRIUS_PAY_WITH_BTC` |
+| **Borrow & Buy** (`BorrowerOperationsSignatures.withdrawMUSDWithSignature`) | A buyer who holds a Mezo trove pays a training run by drawing only the missing MUSD against their BTC collateral: one signature, relayed by Sirius, MUSD minted straight to the buyer, then the escrow lock (in one signature when enabled). The UI shows debt and collateral ratio before and after, and refuses draws that would push the ratio under 1.21, exceed the trove's maximum borrowing capacity, or go against Recovery Mode (ratio under 150 % while the system is below its CCR). Insert hints come from `HintHelpers` and `SortedTroves`. | `src/lib/mezo/trove.ts`, `draw-relay.ts`, `GET /api/trove`, `POST /api/trove/draw`, flag `SIRIUS_BORROW_AND_BUY` |
 | **Earnings put to work** | Providers route the MUSD they earned into the MUSD Stability Pool (earn seized BTC from liquidations) or the sMUSD savings vault (protocol yield), and back, from the wallet page. Live positions, honest copy, no invented APY. | `src/lib/mezo/earn*.ts`, `GET /api/wallet/earn`, `src/components/wallet/EarnCard.tsx`, flag `SIRIUS_MEZO_EARN` |
 | **Bitcoin wallets via Mezo Passport** | Connect Unisat, OKX or Xverse through `@mezo-org/passport`; the smart account is bridged into the existing wallet layer and server-side signature checks accept ERC-1271/6492 signatures. | `src/lib/wallet/passport*.ts`, flag `NEXT_PUBLIC_MEZO_PASSPORT` |
 | **Verified contracts and public proof** | All deployed contracts are source-verified on the Mezo explorer; `/proof` lists network, contracts, live escrow accounting, every demo transaction and previous deployments, with no account needed. | `/proof`, `deployments/mezo-testnet.json`, `docs/MEZO-TESTNET.md` |
+| **Platform fee that feeds Mezo** | The escrow keeps 2 % of each released payment, never of a refund. Providers holding veMEZO pay 1 %, read from Mezo's vote-escrow at release. `SiriusFeeRouter` sends half to the treasury and posts the other half as a MUSD incentive on Mezo's BTC/MUSD gauge, so veBTC voters earn from every training run sold. Permissionless, immutable, live on `/proof`. | `contracts/src/SiriusFeeRouter.sol`, `SiriusMezoFeePolicy.sol`, `src/lib/mezo/governance.ts`, `scripts/mezo-distribute-fees.ts` |
+| **Try to break it** | `/break` replays a dozen attacks live against the deployed contracts (forged Sirius authorization, forged or malleable buyer signature, endless signed request, early refund, double release, rogue escrow binding, BTC parked in the checkout, admin key on the fee router) and shows the error each contract returned. Simulations only, from a keyless attacker address. | `src/lib/proof/attacks.ts`, `/break` |
 | **Faucet on canonical MUSD** | The in-app faucet transfers 10 test MUSD from a funded reserve instead of calling `mint` on the canonical token (which only the protocol may do). | `src/lib/sirius/faucet.ts` |
 
 Protocol addresses (testnet and mainnet proxies, verified on-chain) live in `src/lib/mezo/protocol.ts`.
@@ -153,17 +156,16 @@ Protocol addresses (testnet and mainnet proxies, verified on-chain) live in `src
 ## Roadmap
 
 1. Mezo mainnet deployment with real MUSD, provider earnings routed to sMUSD, first data providers, KYB.
-2. Phala enclave wired to the Mezo escrow with signed execution certificates.
+2. A hardware-isolated training runner for real data, keeping the same signed, verifiable certificates.
 3. Platform fees payable in MEZO, with a discount for veBTC / veMEZO holders.
 
 ## Documentation
 
 - [Architecture](docs/ARCHITECTURE.md)
-- [Escrow v6](docs/ESCROW-V6.md) · [Escrow v7](docs/ESCROW-V7.md) · [Billing integration](docs/BILLING-INTEGRATION.md)
+- [Escrow v6](docs/ESCROW-V6.md)
 - [MCP server for agents](docs/MCP.md)
-- [Confidential runner (Phala)](docs/PHALA.md) · [Runner budgets](docs/RUNNER-BUDGETS.md)
-- [Roadmap](docs/ROADMAP.md) · [Decisions](docs/DECISIONS.md)
+- [Mezo testnet deployment](docs/MEZO-TESTNET.md)
 
 ## Team
 
-Ali Ben Yezza — founder, full-stack and smart contracts. GitHub [@alibenyezza](https://github.com/alibenyezza) · X [@sirius_data](https://x.com/sirius_data).
+Ali Ben Yezza — founder, full-stack and smart contracts. GitHub [@alibenyezza](https://github.com/alibenyezza).

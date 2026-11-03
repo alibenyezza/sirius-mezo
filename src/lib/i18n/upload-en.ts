@@ -1,5 +1,5 @@
 /**
- * Traductions de la publication en deux étapes (slice N2, docs/passage-mainnet/07-upload.md) :
+ * Traductions de la publication en deux étapes (slice N2) :
  * formulaire `src/app/(app)/datasets/new/`, contrôle du CSV, termes de publication et
  * erreurs de la route de création. Fichier séparé, fusionné dans `EN_MESSAGES`, pour ne pas
  * entrer en conflit avec les autres slices qui complètent `english.ts`.
@@ -18,8 +18,8 @@ export const UPLOAD_MESSAGES_EN: Record<string, string> = {
   "Autre": "Other",
 
   // Consentement (07-upload.md)
-  "Autoriser Sirius à utiliser ce dataset, uniquement dans l’enclave, pour évaluer et développer de nouveaux modèles. Vous pouvez retirer ce consentement à tout moment pour les usages futurs.":
-    "Allow Sirius to use this dataset, inside the enclave only, to evaluate and develop new models. You can withdraw this consent at any time for future use.",
+  "Autoriser Sirius à utiliser ce dataset, uniquement sur son runner d’entraînement, pour évaluer et développer de nouveaux modèles. Vous pouvez retirer ce consentement à tout moment pour les usages futurs.":
+    "Allow Sirius to use this dataset, on its training runner only, to evaluate and develop new models. You can withdraw this consent at any time for future use.",
 
   // En-tête et étapes
   "Étape {step} / 2": "Step {step} of 2",
@@ -35,8 +35,8 @@ export const UPLOAD_MESSAGES_EN: Record<string, string> = {
   "Lignes de données": "Data rows",
   "Colonnes numériques": "Numeric columns",
   "Colonne cible": "Target column",
-  "L’enclave entraîne sur la dernière colonne numérique du fichier et utilise les autres colonnes numériques comme variables ({count}). Réordonne les colonnes si la cible n’est pas la bonne.":
-    "The enclave trains on the last numeric column of the file and uses the other numeric columns as input features ({count}). Reorder the columns if the target is not the right one.",
+  "Le runner entraîne sur la dernière colonne numérique du fichier et utilise les autres colonnes numériques comme variables ({count}). Réordonne les colonnes si la cible n’est pas la bonne.":
+    "The runner trains on the last numeric column of the file and uses the other numeric columns as input features ({count}). Reorder the columns if the target is not the right one.",
   "Voir les colonnes numériques": "Show numeric columns",
   "Catégorie": "Category",
   "Choisir une catégorie": "Choose a category",
@@ -69,8 +69,8 @@ export const UPLOAD_MESSAGES_EN: Record<string, string> = {
   "Sécurisation sur ton appareil": "Securing on your device",
   "Fichier lu dans la mémoire de ce navigateur, sans envoi.": "File loaded into this browser’s memory, nothing sent.",
   "Empreinte SHA-256 calculée sur ton appareil.": "SHA-256 fingerprint computed on your device.",
-  "Le chiffrement aura lieu ici, à la publication, pour la clé de l’enclave : la donnée en clair ne quitte jamais ton navigateur.":
-    "Encryption happens here, at publication, for the enclave key: your plain data never leaves your browser.",
+  "Le chiffrement aura lieu ici, à la publication, pour la clé du runner de testnet : la donnée en clair ne quitte jamais ton navigateur.":
+    "Encryption happens here, at publication, for the testnet runner's key: your plain data never leaves your browser.",
   "Empreinte locale : {fingerprint}": "Local fingerprint: {fingerprint}",
 
   // Étape 2 — prix
@@ -101,14 +101,14 @@ export const UPLOAD_MESSAGES_EN: Record<string, string> = {
   "Taille chiffrée (environ)": "Encrypted size (approx.)",
 
   // Étape 2 — consentement et publication
-  "Facultatif. Ton choix est enregistré avec sa date et la version du texte ({version}). La donnée n’est jamais déchiffrée hors de l’enclave, y compris pour cet usage. Tu pourras le retirer depuis la fiche du dataset.":
-    "Optional. Your choice is recorded with its date and the text version ({version}). Data is never decrypted outside the enclave, including for this use. You will be able to withdraw it from the dataset page.",
-  "Le dataset est scellé par l’enclave.": "The dataset is sealed by the enclave.",
+  "Facultatif. Ton choix est enregistré avec sa date et la version du texte ({version}). La donnée n’est déchiffrée que par le runner d’entraînement, y compris pour cet usage. Tu pourras le retirer depuis la fiche du dataset.":
+    "Optional. Your choice is recorded with its date and the text version ({version}). Data is only decrypted by the training runner, including for this use. You will be able to withdraw it from the dataset page.",
+  "Le dataset est scellé par le runner.": "The dataset is sealed by the runner.",
   "Terminer l’inscription on-chain depuis Mes actifs data": "Finish the on-chain registration from My data assets",
   "Progression de la publication": "Publication progress",
   "Création du brouillon": "Creating the draft",
   "Chiffrement sur ton appareil": "Encrypting on your device",
-  "Envoi et scellement par l’enclave": "Uploading and sealing in the enclave",
+  "Envoi et scellement par le runner": "Uploading and sealing by the runner",
   "Inscription du titre on-chain": "Registering the title on-chain",
   "préparation du titre": "preparing the title",
   "signe la transaction dans ton wallet": "sign the transaction in your wallet",

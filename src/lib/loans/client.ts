@@ -148,7 +148,7 @@ export async function runLoanJob(input: RunLoanInput): Promise<{ modelCid: strin
     error?: string;
   };
   if (!response.ok || !body.modelCid || !body.runnerReceipt) {
-    throw new Error(body.error ?? "Échec du job confidentiel");
+    throw new Error(body.error ?? "Échec de l’entraînement");
   }
   if (body.releaseEnvelope) await persistAtomicLoanEnvelope(address, input.loanId, body.releaseEnvelope);
   await settleLoan(input.loanId, body.runnerReceipt);

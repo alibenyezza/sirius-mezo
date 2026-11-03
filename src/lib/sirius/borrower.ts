@@ -3,7 +3,7 @@ import type { Hex } from "viem";
 import { prisma, serializableTransaction } from "@/lib/db";
 import { AppError } from "@/lib/errors";
 import { addressesEqual, normalizeAddress } from "@/lib/evm/address";
-import { datasetRegistryAddress, escrowAddress } from "@/lib/evm/addresses";
+import { checkoutAddress, datasetRegistryAddress, escrowAddress } from "@/lib/evm/addresses";
 import { siriusdatasetregistryAbi } from "@/lib/evm/abi/siriusdatasetregistry";
 import { getPublicClient } from "@/lib/evm/client";
 import { requireCurrentEvmDeployment } from "@/lib/evm/deployment";
@@ -298,7 +298,7 @@ export async function finalizeLoan(loanId: string, borrower: string, lockTxHash?
   ]);
   try {
     if (receipt.status !== "success") throw new AppError("Transaction de lock de paiement rejetée", 409);
-    assertLoanLockTransaction(transaction, { loanId, borrower: borrowerAddress, escrow: escrowAddress() });
+    assertLoanLockTransaction(transaction, { loanId, borrower: borrowerAddress, escrow: escrowAddress(), checkout: checkoutAddress() });
   } catch (error) {
     // Un hash prouvé invalide ne doit pas empêcher la saisie du vrai lock.
     // Les erreurs RPC, avant cette validation, conservent au contraire SUBMITTING.

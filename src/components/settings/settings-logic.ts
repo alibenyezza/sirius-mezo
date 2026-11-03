@@ -1,6 +1,6 @@
 import type { EvmNetwork } from "@/lib/evm/networks";
 
-/** Site de staging, lié au testnet (docs/passage-mainnet/13-reglages.md). */
+/** Site de staging, lié au testnet. */
 export const TESTNET_SITE_URL = "https://sirius-mezo-staging.vercel.app";
 
 /** Adresse d'écriture pour une entreprise sans invitation KYB. */

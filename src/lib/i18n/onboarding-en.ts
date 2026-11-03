@@ -23,20 +23,20 @@ export const ONBOARDING_MESSAGES_EN: Record<string, string> = {
   "Obligatoire pour prêter et emprunter. Une seule transaction à confirmer.": "Required to lend and borrow. One transaction to confirm.",
   "Avant de prêter ou d’emprunter un dataset, ton wallet doit être vérifié. Ça prend une seule transaction.":
     "Before you lend or borrow a dataset, your wallet must be verified. It takes a single transaction.",
-  "Ajoute du BTC et des {token}": "Add ETH and {token}",
-  "L’ETH paie le gas de chaque transaction ; les {token} paient l’emprunt.": "ETH pays the gas for each transaction; {token} pays for the loan.",
+  "Ajoute du BTC et des {token}": "Add BTC and {token}",
+  "Le BTC paie le gas de chaque transaction ; les {token} paient l’emprunt.": "BTC pays the gas for each transaction; {token} pays for the loan.",
   "Choisis un dataset": "Pick a dataset",
   "Parcours la marketplace et ouvre la fiche d’un dataset.": "Browse the marketplace and open a dataset page.",
   "Emprunte-le": "Borrow it",
   "Sur la fiche, clique sur Emprunter : le prix du dataset et le compute sont bloqués en escrow.": "On the dataset page, click Borrow: the dataset price and compute are locked in escrow.",
   "Récupère ton modèle": "Get your model",
-  "L’entraînement tourne dans une enclave TEE ; ton modèle t’attend sur la page Entraîner.": "Training runs in a TEE enclave; your model waits for you on the Train page.",
+  "L’entraînement tourne sur le runner de testnet ; ton modèle t’attend sur la page Entraîner.": "Training runs on the testnet runner; your model waits for you on the Train page.",
   "Voir mon statut de vérification": "Check my verification status",
   "Saisir un code d’invitation": "Enter an invitation code",
   "Ouvrir la marketplace": "Open the marketplace",
   "Ouvrir Entraîner": "Open Train",
   "Il te manque : {items}.": "Still missing: {items}.",
-  "de l’BTC pour le gas": "BTC for gas",
+  "du BTC pour le gas": "BTC for gas",
   "des {token} pour emprunter": "{token} to borrow",
   " et ": " and ",
 
@@ -49,17 +49,17 @@ export const ONBOARDING_MESSAGES_EN: Record<string, string> = {
     "To borrow this dataset, your wallet must first be verified. Once done, the loan continues on its own.",
   "Pour publier un dataset, ton wallet doit d’abord être vérifié. Une fois fait, la publication reprend toute seule.":
     "To publish a dataset, your wallet must first be verified. Once done, publishing continues on its own.",
-  "Sirius signe une attestation de 30 jours pour ce wallet ; tu la confirmes dans ton wallet. La transaction coûte un peu d’ETH de gas.":
+  "Sirius signe une attestation de 30 jours pour ce wallet ; tu la confirmes dans ton wallet. La transaction coûte un peu de BTC de gas.":
     "Sirius signs a 30-day attestation for this wallet; you confirm it in your wallet. The transaction costs a little BTC for gas.",
-  "Ton wallet n’a pas encore d’ETH sur Mezo. Il en faut un peu pour payer le gas de la transaction : ajoute-en d’abord, puis reviens ici.":
-    "Your wallet has no ETH on Mezo yet. You need a little to pay the transaction gas: add some first, then come back here.",
+  "Ton wallet n’a pas encore de BTC sur Mezo. Il en faut un peu pour payer le gas de la transaction : ajoute-en d’abord, puis reviens ici.":
+    "Your wallet has no BTC on Mezo yet. You need a little to pay the transaction gas: add some first, then come back here.",
   "L’accès instantané n’est pas ouvert en ce moment. Colle le code d’invitation reçu de l’équipe Sirius, ou écris-nous pour en obtenir un.":
     "Instant access is not open right now. Paste the invitation code you received from the Sirius team, or write to us to get one.",
   "Vérification de ton wallet…": "Checking your wallet…",
   "Pas d’invitation ? Écris-nous :": "No invitation? Write to us:",
   "Plus tard": "Not now",
-  "J’ai ajouté du BTC": "I added ETH",
-  "Ajouter du BTC": "Add ETH",
+  "J’ai ajouté du BTC": "I added BTC",
+  "Ajouter du BTC": "Add BTC",
   "Tu peux maintenant prêter et emprunter des datasets. Prochaine étape : ajouter des fonds, puis choisir un dataset.":
     "You can now lend and borrow datasets. Next step: add funds, then pick a dataset.",
   "Continuer": "Continue",

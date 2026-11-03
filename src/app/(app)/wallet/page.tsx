@@ -120,7 +120,7 @@ function WalletPageContent() {
             </div>
             {gas && (
               <p className={`mt-1.5 text-xs ${gas.low ? "text-negative" : "text-muted"}`}>
-                {gas.low ? t("{eth} ETH — plus assez pour payer le gas", { eth: gas.eth }) : t("{eth} BTC pour le gas", { eth: gas.eth })}
+                {gas.low ? t("{eth} BTC — plus assez pour payer le gas", { eth: gas.eth }) : t("{eth} BTC pour le gas", { eth: gas.eth })}
               </p>
             )}
             {balError && <p className="mt-2 text-xs text-negative">{t("Solde indisponible.")}</p>}

@@ -135,7 +135,7 @@ export function DataStep({
                   </div>
                 </dl>
                 <p className="mt-2 text-muted">
-                  {t("L’enclave entraîne sur la dernière colonne numérique du fichier et utilise les autres colonnes numériques comme variables ({count}). Réordonne les colonnes si la cible n’est pas la bonne.", {
+                  {t("Le runner entraîne sur la dernière colonne numérique du fichier et utilise les autres colonnes numériques comme variables ({count}). Réordonne les colonnes si la cible n’est pas la bonne.", {
                     count: formatCount(summary.features.length),
                   })}
                 </p>

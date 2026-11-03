@@ -14,13 +14,11 @@ const proxy = read("../../proxy.ts");
 const layout = read("../layout.tsx");
 const route = read("../preview/route.ts");
 
-test("page d'attente : texte annoncé, lien X, noindex", () => {
+test("page d'attente : texte annoncé, aucun réseau social, noindex", () => {
   assert.match(page, /Something&apos;s cooking/);
   assert.match(page, /👀/);
   assert.match(page, /Sirius is going live on Mezo mainnet very soon\./);
-  assert.match(page, /https:\/\/x\.com\/\$\{X_HANDLE\}/);
-  assert.match(page, /const X_HANDLE = "Sirius_data"/);
-  assert.match(page, /rel="noopener noreferrer"/);
+  assert.doesNotMatch(page, /x\.com|twitter\.com|X_HANDLE|Sirius_data/i);
   assert.match(page, /robots: \{ index: false, follow: false/);
 });
 

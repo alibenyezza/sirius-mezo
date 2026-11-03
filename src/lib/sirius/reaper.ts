@@ -144,7 +144,7 @@ async function reapBatch(now: Date): Promise<ReaperPassResult> {
  */
 async function reviewFastSettledLoan(loan: Loan, now: Date): Promise<void> {
   const open = async (reason: string) => {
-    console.error(`[reaper] ALERTE finalité rapide : prêt EVM ${loan.id} — ${reason} ; revue manuelle requise (docs/passage-mainnet/20-finalite-rapide.md)`);
+    console.error(`[reaper] ALERTE finalité rapide : prêt EVM ${loan.id} — ${reason} ; revue manuelle requise`);
     await prisma.loan.updateMany({
       where: { id: loan.id, status: "SETTLED", finalityTier: "FAST", finalityReview: null },
       data: { finalityReview: reason, finalityReviewAt: now },

@@ -11,8 +11,8 @@ import { useWalletStore } from "@/stores/wallet";
  * Carte « Payer depuis mon Bitcoin » de la fiche d'un dataset.
  *
  * Affichée quand l'acheteur connecté a un trove MUSD actif et que son solde MUSD ne couvre
- * pas le prix : il signe un tirage sur son trove (relayé, sans gas) puis l'emprunt classique
- * reprend. Sans trove, une ligne discrète renvoie vers l'ouverture d'un trove sur Mezo.
+ * pas le prix : il signe un tirage du seul montant manquant sur son trove (relayé, sans gas),
+ * puis l'emprunt reprend (en une signature quand l'instance le permet). Sans trove, une ligne discrète renvoie vers l'ouverture d'un trove sur Mezo.
  */
 
 function ratio(value: string): string {
@@ -50,7 +50,13 @@ export function BorrowAndBuyCard({
   useEffect(() => {
     if (!authenticated || !address || !priceUsdcAtomic) return;
     let actif = true;
+    // Premier devis au prix pour lire le solde, puis devis du seul manque.
     fetchTroveQuote(priceUsdcAtomic)
+      .then(async (q) => {
+        if (!q) return q;
+        const shortfall = BigInt(priceUsdcAtomic) - BigInt(q.position.musdBalance);
+        return shortfall > BigInt(0) && shortfall < BigInt(priceUsdcAtomic) ? fetchTroveQuote(shortfall.toString()) : q;
+      })
       .then((q) => { if (actif) { setQuote(q); setQuoteOwner(address); } })
       .catch(() => { if (actif) { setQuote(null); setQuoteOwner(address); } });
     return () => { actif = false; };
@@ -76,7 +82,7 @@ export function BorrowAndBuyCard({
     setBusy(true);
     setError(null);
     try {
-      const result = await drawMusdFromTrove(priceUsdcAtomic);
+      const result = await drawMusdFromTrove(draw.amount);
       setTxHash(result.txHash);
       await onDrawn();
     } catch (err) {

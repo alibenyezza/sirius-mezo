@@ -7,9 +7,9 @@ export const FUNDING_MESSAGES_EN: Record<string, string> = {
   // Fenêtre et choix
   "Fermer": "Close",
   "Par carte bancaire": "By card",
-  "Achète des MUSD ou du BTC avec MoonPay.": "Buy MUSD or ETH with MoonPay.",
+  "Achète des MUSD ou du BTC avec MoonPay.": "Buy MUSD or BTC with MoonPay.",
   "Depuis un autre wallet": "From another wallet",
-  "Envoie des MUSD ou du BTC depuis l’app Mezo, Kraken ou ton wallet.": "Send MUSD or ETH from the Mezo app, Kraken or your wallet.",
+  "Envoie des MUSD ou du BTC depuis l’app Mezo, Kraken ou ton wallet.": "Send MUSD or BTC from the Mezo app, Kraken or your wallet.",
   "Depuis une autre chaîne": "From another chain",
   "Ton USDC sur Base arrive en MUSD, ou en BTC pour le gas, sur Mezo.": "Your USDC on Base arrives as MUSD, or as BTC for gas, on Mezo.",
   "Les fonds arrivent sur l’adresse de ton compte, sur Mezo. Le solde affiché est celui lu sur la chaîne : il change quand les fonds sont arrivés.":
@@ -18,8 +18,8 @@ export const FUNDING_MESSAGES_EN: Record<string, string> = {
   "Chargement des options…": "Loading options…",
 
   // Autre wallet
-  "N’envoie que de le MUSD ou du BTC, sur le réseau Mezo. Tout autre jeton, ou un autre réseau, et les fonds sont perdus définitivement.":
-    "Only send MUSD or ETH, on the Mezo network. Any other token, or any other network, and the funds are lost for good.",
+  "N’envoie que du MUSD ou du BTC, sur le réseau Mezo. Tout autre jeton, ou un autre réseau, et les fonds sont perdus définitivement.":
+    "Only send MUSD or BTC, on the Mezo network. Any other token, or any other network, and the funds are lost for good.",
   "Sources confirmées : l’app Mezo et Kraken. Au moment du retrait, choisis le réseau « Mezo ».":
     "Confirmed sources: the Mezo app and Kraken. When you withdraw, choose the “Mezo” network.",
 
@@ -27,10 +27,10 @@ export const FUNDING_MESSAGES_EN: Record<string, string> = {
   "Le paiement se fait chez MoonPay, dans un nouvel onglet. MoonPay vérifie ton identité avant le premier achat.":
     "Payment happens on MoonPay, in a new tab. MoonPay verifies your identity before your first purchase.",
   "L’MUSD arrive directement sur l’adresse de ton compte, sur Mezo.": "MUSD arrives directly at your account address, on Mezo.",
-  "Garde un peu d’ETH pour payer les frais réseau.": "Keep a little ETH to pay network fees.",
+  "Garde un peu de BTC pour payer les frais réseau.": "Keep a little BTC to pay network fees.",
   "Le pont s’ouvre dans un nouvel onglet. Connecte-y le wallet qui détient tes fonds sur Base.":
     "The bridge opens in a new tab. Connect the wallet that holds your funds on Base.",
-  "Tu paies en USDC sur Base. Tu reçois de le MUSD, ou de l’BTC pour le gas, sur l’adresse de ton compte, sur Mezo.":
+  "Tu paies en USDC sur Base. Tu reçois du MUSD, ou du BTC pour le gas, sur l’adresse de ton compte, sur Mezo.":
     "You pay in USDC on Base. You receive MUSD, or BTC for gas, at your account address, on Mezo.",
   "Vérifie l’adresse de destination sur le pont avant de confirmer.": "Check the destination address on the bridge before you confirm.",
   "Recevoir": "Receive",

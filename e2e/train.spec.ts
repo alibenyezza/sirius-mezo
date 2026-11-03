@@ -150,7 +150,7 @@ test("Refund n'apparaît que pour un échec sans modèle livré, avec l'explicat
   const failed = card(page, "Dataset failed");
   await expect(failed.getByRole("button", { name: "Refund", exact: true })).toBeVisible({ timeout: 30_000 });
   await expect(failed.getByTestId("refund-explanation")).toContainText("no model was delivered");
-  await expect(failed.getByTestId("refund-explanation")).toContainText("everything you paid except, where applicable, the compute actually consumed, as measured by the enclave");
+  await expect(failed.getByTestId("refund-explanation")).toContainText("everything you paid except, where applicable, the compute actually consumed, as measured by the runner");
   // Échu avec capsule (avec ou sans reçu) et sans release diffusé : le contrat refuse désormais le
   // règlement, remboursement de secours et plus de bouton « Finalize settlement » (audit A-05, A-10).
   for (const name of ["rescue", "prepared"]) {

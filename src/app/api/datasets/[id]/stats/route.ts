@@ -4,7 +4,9 @@ import { requireAuth } from "@/lib/auth/require-auth";
 import { errorResponse } from "@/lib/errors";
 import { enforceRateLimit, FixedWindowRateLimiter } from "@/lib/http/rate-limit";
 import { USDC_DECIMALS } from "@/lib/evm/usdc";
-import { readDatasetStats } from "@/lib/datasets/manage";
+import { readDatasetStats, type EscrowFee } from "@/lib/datasets/manage";
+import { escrowAddress } from "@/lib/evm/addresses";
+import { readPlatformFee } from "@/lib/mezo/platform-fee";
 
 export const runtime = "nodejs";
 
@@ -23,7 +25,10 @@ export async function GET(req: Request, { params }: { params: Promise<{ id: stri
     const session = requireAuth(req);
     enforceRateLimit(limiter, `subject:${session.address}`);
     const { id } = await params;
-    const stats = await readDatasetStats(prisma, id, session.address);
+    // Revenus nets : le taux de base de l'escrow courant, s'il prélève des frais.
+    const platformFee = await readPlatformFee().catch(() => null);
+    const fee: EscrowFee | null = platformFee && platformFee.baseBps > 0 ? { escrow: escrowAddress(), bps: platformFee.baseBps } : null;
+    const stats = await readDatasetStats(prisma, id, session.address, Date.now(), fee);
     return NextResponse.json({ ...stats, tokenDecimals: USDC_DECIMALS }, { headers: { "cache-control": "private, no-store" } });
   } catch (err) {
     return errorResponse(err);

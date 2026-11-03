@@ -5,7 +5,7 @@ import { USDC_DECIMALS } from "@/lib/evm/usdc";
 import { mockSigningWallet, walletAddress } from "./helpers/wallet";
 
 /**
- * Publication en deux étapes (docs/passage-mainnet/07-upload.md), API simulée.
+ * Publication en deux étapes, API simulée.
  *
  * Le wallet signe réellement le challenge d'authentification (délégation runner comprise) ;
  * le fichier est réellement chiffré dans le navigateur pour une clé P-256 générée par le
@@ -66,7 +66,7 @@ async function mockPublicationApi(page: Page, options: { challengeDays?: number 
             listingDays: 90,
             listingExpiresAt: "2027-01-02T10:00:00.000Z",
             trainingConsentAt: "2026-10-04T10:00:00.000Z",
-            trainingConsentVersion: "2026-10-04",
+            trainingConsentVersion: "2026-11-03",
           },
         });
       }
@@ -166,7 +166,7 @@ test("publie en deux étapes : contrôle, sécurisation, prix décomposé, conse
   await expect(page.getByRole("radio", { name: "30 days (default)" })).toBeChecked();
   await page.getByRole("radio", { name: "90 days", exact: true }).check();
   await expect(page.getByText(/Sirius currently trains baseline models/)).toBeVisible();
-  const consent = page.getByRole("checkbox", { name: /Allow Sirius to use this dataset, inside the enclave only/ });
+  const consent = page.getByRole("checkbox", { name: /Allow Sirius to use this dataset, on its training runner only/ });
   await expect(consent).not.toBeChecked();
   await consent.check();
 

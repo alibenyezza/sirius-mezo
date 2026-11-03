@@ -23,6 +23,21 @@ export const siriusescrowAbi = [
         "internalType": "address",
         "name": "lockAuthorizer_",
         "type": "address"
+      },
+      {
+        "internalType": "address",
+        "name": "feeRecipient_",
+        "type": "address"
+      },
+      {
+        "internalType": "uint256",
+        "name": "feeBps_",
+        "type": "uint256"
+      },
+      {
+        "internalType": "contract ISiriusFeePolicy",
+        "name": "feePolicy_",
+        "type": "address"
       }
     ],
     "stateMutability": "nonpayable",
@@ -93,6 +108,11 @@ export const siriusescrowAbi = [
   {
     "inputs": [],
     "name": "InvalidDataset",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "InvalidFee",
     "type": "error"
   },
   {
@@ -261,6 +281,43 @@ export const siriusescrowAbi = [
       {
         "indexed": true,
         "internalType": "address",
+        "name": "provider",
+        "type": "address"
+      },
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "recipient",
+        "type": "address"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "fee",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "feeBps",
+        "type": "uint256"
+      }
+    ],
+    "name": "FeeCharged",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "bytes32",
+        "name": "loanKey",
+        "type": "bytes32"
+      },
+      {
+        "indexed": true,
+        "internalType": "address",
         "name": "borrower",
         "type": "address"
       },
@@ -383,6 +440,25 @@ export const siriusescrowAbi = [
     "inputs": [
       {
         "indexed": true,
+        "internalType": "address",
+        "name": "borrower",
+        "type": "address"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "cancelledNonce",
+        "type": "uint256"
+      }
+    ],
+    "name": "LockNonceCancelled",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
         "internalType": "bytes32",
         "name": "hashlock",
         "type": "bytes32"
@@ -443,6 +519,32 @@ export const siriusescrowAbi = [
         "internalType": "uint8",
         "name": "",
         "type": "uint8"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "MAX_FEE_BPS",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "MAX_LOCK_REQUEST_TTL",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
       }
     ],
     "stateMutability": "view",
@@ -535,6 +637,19 @@ export const siriusescrowAbi = [
     "type": "function"
   },
   {
+    "inputs": [],
+    "name": "cancelLockNonce",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "cancelled",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
     "inputs": [
       {
         "internalType": "address",
@@ -574,6 +689,64 @@ export const siriusescrowAbi = [
         "internalType": "uint64",
         "name": "",
         "type": "uint64"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "feeBps",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "provider",
+        "type": "address"
+      }
+    ],
+    "name": "feeBpsFor",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "bps",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "feePolicy",
+    "outputs": [
+      {
+        "internalType": "contract ISiriusFeePolicy",
+        "name": "",
+        "type": "address"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "feeRecipient",
+    "outputs": [
+      {
+        "internalType": "address",
+        "name": "",
+        "type": "address"
       }
     ],
     "stateMutability": "view",

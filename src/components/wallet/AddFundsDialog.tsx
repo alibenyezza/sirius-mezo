@@ -211,7 +211,7 @@ function TransferPanel({ network, address }: { network: EvmNetwork; address: str
     <div className="space-y-4">
       <DisclaimerNote variant="warning" messages={[]}>
         <p className="font-medium">
-          {t("N’envoie que de le MUSD ou du BTC, sur le réseau Mezo. Tout autre jeton, ou un autre réseau, et les fonds sont perdus définitivement.")}
+          {t("N’envoie que du MUSD ou du BTC, sur le réseau Mezo. Tout autre jeton, ou un autre réseau, et les fonds sont perdus définitivement.")}
         </p>
         <p className="mt-1">
           {t("Sources confirmées : l’app Mezo et Kraken. Au moment du retrait, choisis le réseau « Mezo ».")}
@@ -268,12 +268,12 @@ function PurchasePanel({ method, minCardUsd }: { method: OnrampMethod; minCardUs
         <ul className="list-disc space-y-1.5 pl-5 text-xs text-muted">
           <li>{t("Le paiement se fait chez MoonPay, dans un nouvel onglet. MoonPay vérifie ton identité avant le premier achat.")}</li>
           <li>{t("L’MUSD arrive directement sur l’adresse de ton compte, sur Mezo.")}</li>
-          <li>{t("Garde un peu d’ETH pour payer les frais réseau.")}</li>
+          <li>{t("Garde un peu de BTC pour payer les frais réseau.")}</li>
         </ul>
       ) : (
         <ul className="list-disc space-y-1.5 pl-5 text-xs text-muted">
           <li>{t("Le pont s’ouvre dans un nouvel onglet. Connecte-y le wallet qui détient tes fonds sur Base.")}</li>
-          <li>{t("Tu paies en USDC sur Base. Tu reçois de le MUSD, ou de l’BTC pour le gas, sur l’adresse de ton compte, sur Mezo.")}</li>
+          <li>{t("Tu paies en USDC sur Base. Tu reçois du MUSD, ou du BTC pour le gas, sur l’adresse de ton compte, sur Mezo.")}</li>
           <li>{t("Vérifie l’adresse de destination sur le pont avant de confirmer.")}</li>
         </ul>
       )}

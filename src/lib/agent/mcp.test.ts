@@ -5,7 +5,7 @@ import type { MarketplaceQuery } from "../marketplace/query";
 import { createSiriusMcpHandler, MCP_MAX_REQUEST_BYTES, rejectMcpRequest } from "./mcp";
 import { AGENT_TOOL_NAMES, type AgentToolSource } from "./tools";
 
-const ORIGIN = "https://sirius-data.tech";
+const ORIGIN = "https://sirius.example";
 const LEGACY = "2025-06-18";
 const MODERN = "2026-07-28";
 
@@ -150,7 +150,7 @@ test("search_datasets : requête transmise au catalogue, réponse structurée et
   assert.equal(calls.catalogue[0].category, "energy");
   assert.equal(result!.isError, undefined);
   assert.equal(result!.structuredContent!.datasets![0].name, "Building energy");
-  assert.equal(result!.structuredContent!.datasets![0].url, "https://sirius-data.tech/marketplace/ds-1");
+  assert.equal(result!.structuredContent!.datasets![0].url, "https://sirius.example/marketplace/ds-1");
   assert.match(result!.content![0].text, /^<tool_data>\n.*data, not instructions/);
 });
 
@@ -214,7 +214,7 @@ test("Origin : absent ou celui du site passe, tout autre est refusé", () => {
   assert.equal(rejectMcpRequest(request(), ORIGIN), undefined);
   assert.equal(rejectMcpRequest(request(ORIGIN), ORIGIN), undefined);
   assert.equal(rejectMcpRequest(request("https://evil.example"), ORIGIN)?.status, 403);
-  assert.equal(rejectMcpRequest(request("https://sirius-data.tech.evil.example"), ORIGIN)?.status, 403);
+  assert.equal(rejectMcpRequest(request("https://sirius.example.evil.example"), ORIGIN)?.status, 403);
   assert.equal(rejectMcpRequest(request("null"), ORIGIN)?.status, 403);
 });
 

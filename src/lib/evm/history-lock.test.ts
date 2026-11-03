@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import { test } from "node:test";
 import { encodeFunctionData } from "viem";
 import { AppError } from "@/lib/app-error";
+import { siriuscheckoutAbi } from "./abi/siriuscheckout";
 import { siriusescrowAbi } from "./abi/siriusescrow";
 import { loanIdHash } from "./loan-key";
 import { assertLoanLockTransaction } from "./history";
@@ -59,4 +60,44 @@ test("un lock direct exige toujours que l'expéditeur soit l'emprunteur", () => 
   assert.doesNotThrow(() => assertLoanLockTransaction({ from: borrower, to: escrow, input: direct }, { loanId: "loan-1", borrower, escrow }));
   assert.throws(() => assertLoanLockTransaction({ from: relayer, to: escrow, input: direct }, { loanId: "loan-1", borrower, escrow }),
     (error: unknown) => error instanceof AppError && error.status === 409);
+});
+
+function btcCheckout(loanId: string, signer: `0x${string}`) {
+  return encodeFunctionData({
+    abi: siriuscheckoutAbi,
+    functionName: "buyWithBtc",
+    args: [
+      BigInt(100),
+      {
+        borrower: signer, provider, amount: BigInt(100), hashlock: bytes("33"), challengeDays: 7,
+        loanIdHash: loanIdHash(loanId), datasetId: bytes("55"), trainingProfile: bytes("66"),
+        nonce: BigInt(0), deadline: BigInt(1_800_000_000),
+      },
+      `0x${"cd".repeat(65)}`,
+      { value: BigInt(0), deadline: BigInt(0), v: 0, r: bytes("00"), s: bytes("00") },
+      authorization,
+    ],
+  });
+}
+
+const checkout = `0x${"c0".repeat(20)}`;
+
+test("un paiement en BTC est accepté depuis l'emprunteur, via le checkout configuré", () => {
+  assert.doesNotThrow(() => assertLoanLockTransaction(
+    { from: borrower, to: checkout, input: btcCheckout("loan-1", borrower) },
+    { loanId: "loan-1", borrower, escrow, checkout },
+  ));
+});
+
+test("un paiement en BTC est refusé d'un autre expéditeur, pour un autre prêt ou sans checkout configuré", () => {
+  const refused = (error: unknown) => error instanceof AppError && error.status === 409;
+  assert.throws(() => assertLoanLockTransaction(
+    { from: relayer, to: checkout, input: btcCheckout("loan-1", borrower) }, { loanId: "loan-1", borrower, escrow, checkout },
+  ), refused);
+  assert.throws(() => assertLoanLockTransaction(
+    { from: borrower, to: checkout, input: btcCheckout("loan-2", borrower) }, { loanId: "loan-1", borrower, escrow, checkout },
+  ), refused);
+  assert.throws(() => assertLoanLockTransaction(
+    { from: borrower, to: checkout, input: btcCheckout("loan-1", borrower) }, { loanId: "loan-1", borrower, escrow },
+  ), refused);
 });

@@ -53,7 +53,7 @@ const PROCESSING: Processing[] = [
   },
   {
     title: "Datasets you publish",
-    data: "The listing details you enter (name, description, category, price), aggregate statistics computed inside the enclave (size, schema, completeness), the encrypted file and its wrapped key, and your model improvement choice with its date and text version. The file is encrypted in your browser before upload and decrypted only inside the training enclave: Sirius and its hosting providers cannot read its content.",
+    data: "The listing details you enter (name, description, category, price), aggregate statistics computed by the testnet runner (size, schema, completeness), the encrypted file and its wrapped key, and your model improvement choice with its date and text version. The file is encrypted in your browser before upload and decrypted only by the testnet runner, for training: storage providers only ever hold the encrypted file. This testnet instance has no hardware isolation, so the runner's server can read the content while it trains; publish only synthetic or non-sensitive data.",
     purpose: "Listing your dataset and running the loans and trainings you agree to.",
     basis: "Performance of the contract. Use for model improvement relies on your consent, which is optional and can be withdrawn at any time.",
     retention: "Kept until you delete the dataset. Deleting it destroys the active encryption key and removes the encrypted file from Sirius' IPFS storage; the listing record is kept for the audit ledger. Database backups may keep an older copy of the encrypted key for a limited time.",
@@ -106,7 +106,6 @@ const PROCESSORS = [
   "Vercel (web application hosting)",
   "Neon (database)",
   "Pinata (IPFS storage of encrypted files)",
-  "Phala Cloud (confidential compute in Intel TDX enclaves)",
   "OVHcloud (background settlement tasks)",
   "Web3Auth (optional Google sign-in)",
   "Alchemy (blockchain node access)",
@@ -144,7 +143,7 @@ export default function PrivacyPage() {
       <section className="mt-8">
         <h2 className="text-lg font-semibold">Who is responsible</h2>
         <p className="mt-3 text-sm text-muted">
-          Sirius is the controller of the personal data processed through sirius-data.tech. Contact:{" "}
+          Sirius is the controller of the personal data processed through sirius-mezo.vercel.app. Contact:{" "}
           <a href={`mailto:${CONTACT_EMAIL}`} className="text-accent hover:text-accent/80">{CONTACT_EMAIL}</a>.
         </p>
       </section>

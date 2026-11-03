@@ -1,4 +1,5 @@
 import "server-only";
+import { verifyExecutionReceipt } from "./receipt-verification";
 import { createHash } from "node:crypto";
 import { verifyTdxQuote, type QuoteVerification } from "@/lib/tee/quote";
 import type { CertificateRecord } from "./resolve";
@@ -302,8 +303,14 @@ export function verificationCacheKey(record: CertificateRecord, env: Record<stri
 
 /** Résultat affichable de la vérification pour un certificat prêt. */
 export async function verifyCertificate(record: CertificateRecord, keepAlive?: KeepAlive): Promise<VerificationOutcome> {
-  const { quote, payloadHash, eventLog, composeHash } = record.evidence;
-  if (!quote) return { status: "absent" };
+  const { quote, payloadHash, eventLog, composeHash, signature } = record.evidence;
+  if (!quote) {
+    if (!signature) return { status: "absent" };
+    const receipt = await verifyExecutionReceipt({
+      payloadHash, signature, chainId: record.settlement.chainId, escrow: record.evidence.escrow,
+    });
+    return { status: "receipt", receipt };
+  }
   const evidence = eventLog && composeHash ? { eventLog, composeHash } : undefined;
   const outcome = await certificateVerifier().check(verificationCacheKey(record), { quote, payloadHash, evidence }, keepAlive);
   const retired = retiredEnclaveFor(record.settlement.chainId, composeHash, record.settledAt);

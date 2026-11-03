@@ -5,7 +5,7 @@ import type { TranslationVariables } from "@/lib/i18n/english";
 import { formatCount, formatLimitBytes } from "./numbers";
 
 /**
- * Textes d'avertissement communs (docs/passage-mainnet/16-socle-technique.md, section 4).
+ * Textes d'avertissement communs.
  *
  * Un seul fichier source : le même texte apparaît partout et se modifie en un endroit.
  * Les clés sont les phrases françaises, traduites en anglais dans

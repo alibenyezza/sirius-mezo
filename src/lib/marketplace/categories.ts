@@ -1,5 +1,5 @@
 /**
- * Catégories de la marketplace : liste fixe de l'upload (docs/passage-mainnet/07-upload.md),
+ * Catégories de la marketplace : liste fixe de l'upload,
  * dans l'ordre du cahier des charges.
  *
  * La base stocke la catégorie en texte libre (`Dataset.category`) et la liste est tenue par le

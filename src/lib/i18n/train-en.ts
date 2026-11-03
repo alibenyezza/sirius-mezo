@@ -19,8 +19,8 @@ export const TRAIN_MESSAGES_EN: Record<string, string> = {
     "Training can start in ~{minutes} min — you can close this page, your payment is safe in escrow.",
   "Le réseau finalise ton paiement : l’entraînement pourra démarrer d’une minute à l’autre. Ton paiement est en sécurité dans l’escrow.":
     "The network is finalizing your payment: training can start any minute now. Your payment is safe in escrow.",
-  "Si cette page reste ouverte, l’entraînement démarre automatiquement dès la finalité. Sinon, reviens lancer le job : inutile d’emprunter à nouveau.":
-    "If this page stays open, training starts automatically once finality is reached. Otherwise, come back and run the job: no need to borrow again.",
+  "Si cette page reste ouverte, l’entraînement démarre automatiquement dès la finalité. Sinon, reviens lancer l’entraînement : inutile d’emprunter à nouveau.":
+    "If this page stays open, training starts automatically once the payment is final. Otherwise, come back and click Run training: no need to borrow again.",
   "Le réseau met plus de temps que prévu à finaliser ton paiement. Reviens plus tard lancer le job : ton paiement est en sécurité dans l’escrow.":
     "The network is taking longer than expected to finalize your payment. Come back later to run the job: your payment is safe in escrow.",
   // Palier rapide (petits prêts, src/lib/evm/fast-finality.ts) : l'attente se compte en secondes
@@ -60,6 +60,6 @@ export const TRAIN_MESSAGES_EN: Record<string, string> = {
   "L’échéance est dépassée et le règlement ne peut plus être finalisé : aucun modèle n’a été livré.":
     "The deadline has passed and the settlement can no longer be completed: no model was delivered.",
   "Entraînement échoué : aucun modèle n’a été livré.": "Training failed: no model was delivered.",
-  "Le remboursement te rend tout ce que tu as payé, sauf, le cas échéant, le calcul réellement consommé et mesuré par l’enclave. Il est confirmé dans ton wallet ; les frais réseau ETH sont payés séparément.":
-    "The refund returns everything you paid except, where applicable, the compute actually consumed, as measured by the enclave. You confirm it in your wallet; ETH network fees are paid separately.",
+  "Le remboursement te rend tout ce que tu as payé, sauf, le cas échéant, le calcul réellement consommé et mesuré par le runner. Il est confirmé dans ton wallet ; les frais réseau, en BTC, sont payés séparément.":
+    "The refund returns everything you paid except, where applicable, the compute actually consumed, as measured by the runner. You confirm it in your wallet; network fees, in BTC, are paid separately.",
 };

@@ -14,7 +14,7 @@ export type PriceBreakdownPerspective = "neutral" | "provider" | "borrower";
 interface PriceBreakdownProps {
   /** Montant que reçoit le fournisseur par emprunt, en unités atomiques. */
   providerAtomic: AtomicAmount;
-  /** Frais de calcul (enclave Phala), en unités atomiques. */
+  /** Frais de calcul du runner, en unités atomiques. */
   computeAtomic: AtomicAmount;
   token: TokenInfo;
   /** Minimum imposé par le tarif sur la part du fournisseur, en unités atomiques. */
@@ -52,7 +52,7 @@ export function PriceBreakdown({
           <dd className="ml-auto text-right font-mono tabular-nums text-foreground">{show(ok ? breakdown.provider : null)}</dd>
         </div>
         <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
-          <dt className="text-muted">{t("Frais de calcul (enclave Phala)")}</dt>
+          <dt className="text-muted">{t("Frais de calcul (runner de testnet)")}</dt>
           <dd className="ml-auto text-right font-mono tabular-nums text-foreground">{show(ok ? breakdown.compute : null)}</dd>
         </div>
         <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1 border-t border-border pt-2">

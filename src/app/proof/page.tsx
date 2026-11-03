@@ -3,6 +3,8 @@ import type { Metadata } from "next";
 import type { ReactNode } from "react";
 import { createPublicClient, formatUnits, http, parseAbi, type Address, type PublicClient } from "viem";
 import { siriusescrowAbi } from "@/lib/evm/abi/siriusescrow";
+import { siriusfeerouterAbi } from "@/lib/evm/abi/siriusfeerouter";
+import { mezoGovernance } from "@/lib/mezo/governance";
 import { getPublicClient } from "@/lib/evm/client";
 import { EVM_CHAINS, resolveServerNetwork } from "@/lib/evm/networks";
 import {
@@ -92,6 +94,57 @@ async function readLiveEscrow(manifest: DeploymentManifest): Promise<LiveEscrow 
   }
 }
 
+interface LiveFees {
+  feeBps: bigint;
+  pendingCredit: bigint;
+  pendingIncentive: bigint;
+  totalToTreasury: bigint;
+  totalIncentivized: bigint;
+  incentiveBps: bigint;
+  deferral: number;
+  bribe: Address;
+  treasury: Address;
+}
+
+/** Lecture live des frais : taux de l'escrow, crédit en attente, cumul versé par le routeur. */
+async function readLiveFees(manifest: DeploymentManifest): Promise<LiveFees | null> {
+  const routerAddress = manifest.contracts.feeRouter as Address | undefined;
+  if (!routerAddress) return null;
+  try {
+    const client = manifestClient(manifest);
+    if (!client) return null;
+    const router = { address: routerAddress, abi: siriusfeerouterAbi } as const;
+    const escrow = { address: manifest.contracts.escrow as Address, abi: siriusescrowAbi } as const;
+    const [feeBps, pendingCredit, pendingIncentive, totalToTreasury, totalIncentivized, incentiveBps, deferral, bribe, treasury] =
+      await Promise.all([
+        client.readContract({ ...escrow, functionName: "feeBps" }),
+        client.readContract({ ...escrow, functionName: "creditOf", args: [routerAddress] }),
+        client.readContract({ ...router, functionName: "pendingIncentive" }),
+        client.readContract({ ...router, functionName: "totalToTreasury" }),
+        client.readContract({ ...router, functionName: "totalIncentivized" }),
+        client.readContract({ ...router, functionName: "incentiveBps" }),
+        client.readContract({ ...router, functionName: "incentiveDeferral" }),
+        client.readContract({ ...router, functionName: "bribe" }),
+        client.readContract({ ...router, functionName: "treasury" }),
+      ]);
+    return { feeBps, pendingCredit, pendingIncentive, totalToTreasury, totalIncentivized, incentiveBps, deferral, bribe, treasury };
+  } catch {
+    return null;
+  }
+}
+
+const DEFERRAL_LABELS = [
+  "Ready: the next distribution posts it",
+  "Nothing waiting to be posted",
+  "Held: the gauge is not alive",
+  "Held: nobody votes for the gauge yet",
+  "Held: first or last hour of a Mezo epoch",
+];
+
+function bps(value: bigint): string {
+  return `${(Number(value) / 100).toLocaleString("en-US", { maximumFractionDigits: 2 })} %`;
+}
+
 async function readLiveToken(manifest: DeploymentManifest): Promise<LiveToken | null> {
   try {
     const client = manifestClient(manifest);
@@ -115,6 +168,7 @@ async function readLiveToken(manifest: DeploymentManifest): Promise<LiveToken | 
 async function sourceVerified(manifest: DeploymentManifest, key: ManifestContractKey): Promise<boolean> {
   const declared = manifest.verification?.contracts[key];
   if (declared) return declared.verified;
+  if (!manifest.contracts[key]) return false;
   try {
     const response = await fetch(`${explorerApiBase(manifest.explorer)}/api/v2/smart-contracts/${manifest.contracts[key]}`, {
       next: { revalidate: 300 },
@@ -149,6 +203,9 @@ const CONTRACTS: Array<{ key: ManifestContractKey; label: string }> = [
   { key: "escrow", label: "Escrow" },
   { key: "datasets", label: "Dataset registry" },
   { key: "kyb", label: "KYB registry" },
+  { key: "feeRouter", label: "Fee router" },
+  { key: "feePolicy", label: "veMEZO fee policy" },
+  { key: "checkout", label: "BTC checkout (Mezo Pools)" },
 ];
 
 /** Une ligne par transaction du cycle : ce qu'elle fait et qui l'envoie. */
@@ -221,11 +278,14 @@ export default async function ProtocolProofPage() {
   const chain = Object.values(EVM_CHAINS).find((candidate) => candidate.id === manifest.chainId);
   const rpcUrl = chain?.rpcUrls.default.http[0] ?? "unavailable";
 
-  const [escrow, token, ...verified] = await Promise.all([
+  const contracts = CONTRACTS.filter(({ key }) => Boolean(manifest.contracts[key]));
+  const [escrow, token, fees, ...verified] = await Promise.all([
     readLiveEscrow(manifest),
     readLiveToken(manifest),
-    ...CONTRACTS.map(({ key }) => sourceVerified(manifest, key)),
+    readLiveFees(manifest),
+    ...contracts.map(({ key }) => sourceVerified(manifest, key)),
   ]);
+  const governance = mezoGovernance(manifest.chainId === 31612 ? "mainnet" : "testnet");
 
   const symbol = token?.symbol ?? manifest.settlementToken.symbol;
   const decimals = token?.decimals ?? manifest.settlementToken.decimals;
@@ -238,6 +298,12 @@ export default async function ProtocolProofPage() {
   const previous = manifest.previous ?? [];
   const features = manifest.contracts.escrowFeatures ?? [];
   const evidence = manifest.evidence ?? [];
+  // Wallets de l'équipe, tels que le manifeste public les nomme : déclarés, jamais comptés comme clients.
+  const teamWallets = [
+    { label: "Deployer", address: manifest.deployer },
+    { label: "Settlement and lock signer", address: manifest.lockAuthorizer },
+    ...(demo ? [{ label: "Demo provider", address: demo.provider }, { label: "Demo buyer", address: demo.borrower }] : []),
+  ].filter((wallet, index, all) => all.findIndex((other) => other.address.toLowerCase() === wallet.address.toLowerCase()) === index);
 
   return (
     <main className="relative z-10 mx-auto w-full max-w-2xl px-6 py-12">
@@ -282,10 +348,10 @@ export default async function ProtocolProofPage() {
           {manifest.verification?.verifiedAt ? ` Sources verified on ${formatDate(manifest.verification.verifiedAt)}.` : ""}
         </p>
         <div className="mt-3 flex flex-col gap-3">
-          {CONTRACTS.map(({ key, label }, index) => (
+          {contracts.map(({ key, label }, index) => (
             <dl key={key} className="rounded-xl border border-border bg-surface px-5 py-1">
               <Row label="Contract" value={label} />
-              <Row label="Address" value={manifest.contracts[key]} href={addressUrl(manifest, manifest.contracts[key])} mono />
+              <Row label="Address" value={manifest.contracts[key] as string} href={addressUrl(manifest, manifest.contracts[key] as string)} mono />
               {key === "escrow" && features.length > 0 && <Row label="Features" value={features.join(", ")} mono />}
               <div className="flex flex-col gap-1 border-b border-border py-3 last:border-b-0 sm:flex-row sm:items-baseline sm:gap-6">
                 <dt className="shrink-0 text-xs uppercase tracking-wider text-muted sm:w-52">Source</dt>
@@ -325,6 +391,37 @@ export default async function ProtocolProofPage() {
           )}
         </dl>
       </Section>
+
+      {manifest.contracts.feeRouter && (
+        <Section title="Platform fee, routed back to Mezo">
+          <p className="mt-2 max-w-prose text-sm text-muted">
+            The escrow keeps a fixed share of each released payment, never of a refund, and credits it to the fee router.
+            Providers who lock MEZO as veMEZO pay a lower rate, read from Mezo&apos;s vote-escrow at release. Anyone can
+            call <code className="font-mono">distribute</code> on the router: it pays the treasury share and posts the
+            rest as a {symbol} incentive on Mezo&apos;s BTC/MUSD gauge, so veBTC holders who vote for that pool earn from
+            every training run sold. Figures read live.
+          </p>
+          <dl className="mt-3 rounded-xl border border-border bg-surface px-5 py-1">
+            {fees ? (
+              <>
+                <Row label="Base fee" value={bps(fees.feeBps)} />
+                <Row label="Share to Mezo incentives" value={bps(fees.incentiveBps)} />
+                <Row label="Fees awaiting distribution" value={amount(fees.pendingCredit)} mono />
+                <Row label="Incentive held for next post" value={amount(fees.pendingIncentive)} mono />
+                <Row label="Posted as incentives, total" value={amount(fees.totalIncentivized)} mono />
+                <Row label="Paid to treasury, total" value={amount(fees.totalToTreasury)} mono />
+                <Row label="Next post" value={DEFERRAL_LABELS[fees.deferral] ?? "unknown"} />
+                <Row label="Treasury" value={fees.treasury} href={addressUrl(manifest, fees.treasury)} mono />
+              </>
+            ) : (
+              <Row label="Status" value="unavailable — the RPC did not answer" />
+            )}
+            <Row label="BTC/MUSD gauge" value={governance.btcMusdGauge} href={addressUrl(manifest, governance.btcMusdGauge)} mono />
+            <Row label="Gauge incentives (bribe)" value={governance.btcMusdBribe} href={addressUrl(manifest, governance.btcMusdBribe)} mono />
+            <Row label="veMEZO" value={governance.veMezo} href={addressUrl(manifest, governance.veMezo)} mono />
+          </dl>
+        </Section>
+      )}
 
       {demo && (
         <Section title="Settlement cycle replayed on testnet">
@@ -406,10 +503,25 @@ export default async function ProtocolProofPage() {
         </Section>
       )}
 
-      {evidence.length > 0 && (
-        <Section title="Evidence">
+      <Section title="Team wallets">
+        <p className="mt-2 max-w-prose text-sm text-muted">
+          These addresses belong to the Sirius team. Payments between them are tests of the flows, not revenue. Purchases
+          by other wallets are listed separately below.
+        </p>
+        <dl className="mt-3 rounded-xl border border-border bg-surface px-5 py-1">
+          {teamWallets.map(({ label, address }) => (
+            <Row key={`${label}-${address}`} label={label} value={address} href={addressUrl(manifest, address)} mono />
+          ))}
+        </dl>
+      </Section>
+
+      {[
+        { title: "External wallets", items: evidence.filter((item) => item.party === "external") },
+        { title: "Evidence from team wallets", items: evidence.filter((item) => item.party !== "external") },
+      ].filter((group) => group.items.length > 0).map((group) => (
+        <Section key={group.title} title={group.title}>
           <dl className="mt-3 rounded-xl border border-border bg-surface px-5 py-1">
-            {evidence.map((item, index) => (
+            {group.items.map((item, index) => (
               <div key={`${item.kind}-${item.value}-${index}`} className="flex flex-col gap-1 border-b border-border py-3 last:border-b-0 sm:flex-row sm:items-baseline sm:gap-6">
                 <dt className="shrink-0 text-xs uppercase tracking-wider text-muted sm:w-52">
                   {item.label}
@@ -425,7 +537,7 @@ export default async function ProtocolProofPage() {
             ))}
           </dl>
         </Section>
-      )}
+      ))}
 
       <Section title="Reproduce it">
         <p className="mt-2 max-w-prose text-sm text-muted">
@@ -438,6 +550,14 @@ export default async function ProtocolProofPage() {
         <ul className="mt-4 flex flex-col gap-2 text-sm">
           <li>
             <External href="https://github.com/alibenyezza/sirius-mezo">Source code on GitHub ↗</External>
+          </li>
+          <li>
+            <Link href="/break" className="text-accent hover:text-accent/80">Try to break it</Link>
+            <span className="text-muted"> — attacks replayed live against these contracts, each refused by the contract.</span>
+          </li>
+          <li>
+            <Link href="/try" className="text-accent hover:text-accent/80">Try it in five minutes</Link>
+            <span className="text-muted"> — the same flows from the live app, step by step.</span>
           </li>
           <li>
             <Link href="/status" className="text-accent hover:text-accent/80">Protocol status</Link>

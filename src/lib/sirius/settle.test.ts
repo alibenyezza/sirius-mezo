@@ -201,6 +201,7 @@ function settlementFixture(
     "@/lib/loans/settlement-status": { LOCK_FINALITY_PENDING: "attente" },
     "./finality-tier": { assignLoanFinalityTier: async () => "FULL", effectiveLoanFinalityTier: (tier: string) => tier },
     "./settlement-evidence": { recordSettlementEvidence: async () => false },
+    "@/lib/tee/receipt": { executionReceiptSignature: async () => null },
   });
   return { api, updates };
 }

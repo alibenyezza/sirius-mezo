@@ -209,9 +209,11 @@ test("export JSON : pièces de vérification uniquement, aucun champ interne", (
   ]);
   assert.deepEqual(Object.keys(exported.attestation).sort(), [
     "composeHash",
+    "escrow",
     "eventLog",
     "payload",
     "payloadSha256",
+    "settlementSignature",
     "tdxQuote",
   ]);
   // Le payload exporté est la chaîne exacte : son SHA-256 est celui de la quote.

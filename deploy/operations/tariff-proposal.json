@@ -5,8 +5,6 @@
   "preparedBy": "Ali",
   "costPlan": "deploy/operations/testnet-plan.json",
   "sources": [
-    "docs/BUSINESS-PLAN.md#52-grille-de-travail-à-tester-commercialement",
-    "docs/BUSINESS-PLAN.md#32-budget-mensuel-de-référence-pour-un-petit-pilote",
     "docs/OPERATIONS-PREPARATION.md#benchmarks-locaux",
     "src/lib/billing/config.ts"
   ],

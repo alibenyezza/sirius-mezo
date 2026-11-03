@@ -5,8 +5,7 @@ import { CONTACT_EMAIL } from "@/lib/copy/disclaimers";
 /**
  * Conditions de la bêta mainnet. Texte en anglais, page serveur publique.
  *
- * Chaque clause décrit un comportement réel du produit (docs/passage-mainnet, 01, 06, 07,
- * 15 et 16 section 6) : délai de sécurité de 3 jours, remboursement hors calcul consommé,
+ * Chaque clause décrit un comportement réel du produit : délai de sécurité de 3 jours, remboursement hors calcul consommé,
  * traçage déclaré, consentement facultatif, suspension. Si l'un de ces comportements
  * change, la clause correspondante change dans la même modification, et `LAST_UPDATED` avec.
  * `terms.test.ts` vérifie que les clauses clés sont présentes.
@@ -36,7 +35,7 @@ const SECTIONS: [string, string[]][] = [
   ["Payments and MUSD", [
     "Payments on the mainnet beta are made in MUSD, a stablecoin issued by the Mezo protocol. Sirius does not issue, control or guarantee MUSD or its value.",
     "Like any stablecoin, MUSD can be subject to protocol-level restrictions. If your address is frozen, you may be unable to move your MUSD, including amounts held in or owed by the Sirius escrow, and Sirius cannot undo a freeze. A freeze of the escrow contract's own address would block every loan's funds until the restriction is lifted.",
-    "You also need a small amount of ETH on Mezo to pay network fees. On testnet, tokens have no value.",
+    "You also need a small amount of BTC on Mezo to pay network fees. On testnet, tokens have no value.",
     "Sirius is non-custodial: payments sit in the escrow smart contract, not with Sirius, and Sirius never holds your funds or your keys.",
   ]],
   ["Safety period and refunds", [
@@ -50,7 +49,7 @@ const SECTIONS: [string, string[]][] = [
     "For each access this means the wallet address, the loan, the date, the delivered model and its fingerprint (a hash, not the model itself). The records are used for that purpose only, are visible only to Sirius administrators, and are kept for 24 months after the access, then deleted. Wallet addresses and loans are also visible on-chain.",
   ]],
   ["Model improvement, only with your consent", [
-    "When you publish a dataset, you can choose to allow Sirius to use it, inside the secure enclave only, to evaluate and develop new models. This choice is optional and off by default, and publishing does not depend on it.",
+    "When you publish a dataset, you can choose to allow Sirius to use it, inside the training environment only, to evaluate and develop new models. This choice is optional and off by default, and publishing does not depend on it.",
     "You can withdraw your consent at any time from the dataset page. Withdrawal applies to future use. Sirius keeps the date and the version of the text you agreed to.",
     "Without your consent, Sirius does not use your dataset to develop its own models.",
   ]],
@@ -78,7 +77,7 @@ const SECTIONS: [string, string[]][] = [
     "Publishing illegal data, or personal data without a lawful basis.",
     "Uploading malware or any content designed to harm the service or its users.",
     "Using Sirius to evade sanctions.",
-    "Attempting to extract or leak a dataset, or to bypass the training enclave.",
+    "Attempting to extract or leak a dataset, or to bypass the training environment.",
   ]],
   ["What Sirius commits to", [
     "Datasets are encrypted in your browser before upload and decrypted only inside the training environment described on the status page.",

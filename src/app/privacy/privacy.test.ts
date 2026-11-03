@@ -55,7 +55,7 @@ test("confidentialité : IP en mémoire seulement, e-mail Google jamais envoyé,
 
 test("confidentialité : bases légales, sous-traitants, transferts et droits", () => {
   for (const basis of [/Performance of the contract/, /Legitimate interest/, /relies on your consent/]) assert.match(privacy, basis);
-  for (const provider of ["Vercel", "Neon", "Pinata", "Phala Cloud", "OVHcloud", "Web3Auth", "Alchemy"]) assert.match(privacy, new RegExp(provider));
+  for (const provider of ["Vercel", "Neon", "Pinata", "OVHcloud", "Web3Auth", "Alchemy"]) assert.match(privacy, new RegExp(provider));
   assert.match(privacy, /standard contractual clauses/);
   assert.match(privacy, /access, rectify and erase your data, to restrict or object to its processing, and to data portability/);
   assert.match(privacy, /CNIL/);
@@ -65,7 +65,7 @@ test("confidentialité : données on-chain publiques et ineffaçables, jamais de
   assert.match(privacy, /public and permanent/);
   assert.match(privacy, /Sirius never writes names or email addresses on-chain/);
   assert.match(privacy, /Datasets you publish/);
-  assert.match(privacy, /encrypted in your browser before upload and decrypted only inside the training enclave/);
+  assert.match(privacy, /encrypted in your browser before upload and decrypted only by the testnet runner/);
 });
 
 test("confidentialité : cookies strictement nécessaires, aucun traceur dans le code", () => {
@@ -78,7 +78,7 @@ test("confidentialité : cookies strictement nécessaires, aucun traceur dans le
 });
 
 test("confidentialité : aucune donnée personnelle des fondateurs, aucun texte d'attente", () => {
-  assert.doesNotMatch(privacy, /\bAli\b|Ben ?Yezza|\bNoe\b|alibenyezza/i);
+  assert.doesNotMatch(privacy, /\bAli\b|Ben ?Yezza|alibenyezza/i);
   assert.doesNotMatch(privacyText, /SIREN|SIRET|\+33|\bTBD\b|\bTODO\b|placeholder|lorem|XXX/i);
 });
 

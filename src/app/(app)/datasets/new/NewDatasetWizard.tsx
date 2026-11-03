@@ -272,7 +272,7 @@ export function NewDatasetWizard({ tariff, token }: NewDatasetWizardProps) {
           })}
         </ol>
         <p className="text-sm text-muted">
-          {t("Chiffré dans ton navigateur → ouvert et rescellé dans le TEE → IPFS. Next.js ne reçoit jamais la donnée brute.")}
+          {t("Chiffré dans ton navigateur → ouvert et rescellé par le runner de testnet → IPFS.")}
         </p>
       </PageHeader>
 
@@ -307,7 +307,7 @@ export function NewDatasetWizard({ tariff, token }: NewDatasetWizardProps) {
               {[
                 t("Fichier lu dans la mémoire de ce navigateur, sans envoi."),
                 t("Empreinte SHA-256 calculée sur ton appareil."),
-                t("Le chiffrement aura lieu ici, à la publication, pour la clé de l’enclave : la donnée en clair ne quitte jamais ton navigateur."),
+                t("Le chiffrement aura lieu ici, à la publication, pour la clé du runner de testnet : la donnée en clair ne quitte jamais ton navigateur."),
               ].map((line, index) => {
                 const shown = index < securingLines;
                 const active = index === securingLines;

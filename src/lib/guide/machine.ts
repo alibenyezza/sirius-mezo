@@ -27,7 +27,6 @@ export const GUIDE_TOUR_STOPS = [
   { key: "train", href: "/train" },
   { key: "datasets", href: "/datasets" },
   { key: "explorer", href: "/explorer" },
-  { key: "phala", href: "/phala" },
   { key: "dashboard", href: "/dashboard" },
 ] as const;
 export type GuideTourStopKey = (typeof GUIDE_TOUR_STOPS)[number]["key"];

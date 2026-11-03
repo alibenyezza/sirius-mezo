@@ -125,7 +125,7 @@ export async function uploadAndPublishDataset(
       },
       body: JSON.stringify({ envelope }),
     });
-    if (!uploadRes.ok) throw new Error(errorText(await responseJson(uploadRes), "Échec de l’upload confidentiel"));
+    if (!uploadRes.ok) throw new Error(errorText(await responseJson(uploadRes), "Échec de l’upload chiffré"));
     sealedDatasetId = draft.datasetId;
 
     step = "register";

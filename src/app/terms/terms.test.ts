@@ -6,7 +6,7 @@ import { CONTACT_EMAIL } from "@/lib/copy/disclaimers";
 
 /**
  * Tests par inspection de source : la page des conditions est un composant serveur, on
- * vérifie que ses clauses clés sont présentes (docs/passage-mainnet/16, section 6) et que
+ * vérifie que ses clauses clés sont présentes et que
  * les encarts d'avertissement sont branchés sur les pages concernées.
  */
 
@@ -18,8 +18,8 @@ test("conditions : traçage des accès et des empreintes de modèles déclaré",
   assert.match(terms, /Sirius records dataset accesses and the fingerprint of each delivered model in order to detect and investigate leaks/);
 });
 
-test("conditions : consentement facultatif, décoché par défaut, enclave seule, révocable", () => {
-  assert.match(terms, /inside the secure enclave only/);
+test("conditions : consentement facultatif, décoché par défaut, environnement d’entraînement seul, révocable", () => {
+  assert.match(terms, /inside the training environment only/);
   assert.match(terms, /optional and off by default/);
   assert.match(terms, /withdraw your consent at any time/);
   assert.match(terms, /Without your consent, Sirius does not use your dataset/);

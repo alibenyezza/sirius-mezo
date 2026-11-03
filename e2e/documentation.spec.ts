@@ -94,8 +94,8 @@ for (const screen of [
       });
       await page.route("**/api/**", (route) => route.abort());
       await openLayoutPage(page, "/docs", screen.fontSize);
-      await expect(page.getByRole("heading", { name: "Demo and confidentiality" })).toBeVisible();
-      await expect(page.locator("main [role=note]")).toContainText("there is no hardware enclave");
+      await expect(page.getByRole("heading", { name: "Testnet runner" })).toBeVisible();
+      await expect(page.locator("main [role=note]")).toContainText("without hardware isolation");
       await expect(page.getByRole("heading", { name: "Dataset training profile" })).toBeVisible();
       await expect(page.locator("#profils")).toContainText("linear_regression · v1.0.0");
       await expect(page.locator("#profils")).toContainText("logistic_regression · v1.0.0");
@@ -117,7 +117,7 @@ test("la page MCP donne l’adresse du serveur et la connexion par client", asyn
   await page.route("**/api/**", (route) => route.abort());
   await openLayoutPage(page, "/docs/mcp", 16);
   await expect(page.getByRole("heading", { name: "Use Sirius from your AI agent" })).toBeVisible();
-  await expect(page.locator("main")).toContainText("https://sirius-data.tech/api/mcp");
+  await expect(page.locator("main")).toContainText("https://sirius-mezo.vercel.app/api/mcp");
   await expect(page.locator("#outils")).toContainText("verify_certificate");
   await page.getByRole("tab", { name: "Cursor" }).click();
   await expect(page.getByRole("tabpanel")).toContainText("mcpServers");

@@ -56,7 +56,7 @@ export function readProtocolStatus(env: Readonly<Record<string, string | undefin
     enclave,
     confidentialCompute: enclave
       ? "Hardware enclave (Intel TDX), attested on every request against pinned measurements"
-      : "Demonstration mode: training is not yet isolated in an enclave on this instance",
+      : "Testnet runner: training runs on this server, not in a hardware enclave. Each result is signed with the escrow's settlement key and can be checked on its certificate",
     settlement: PROTOCOL_SETTLEMENT,
     externalAudit: PROTOCOL_EXTERNAL_AUDIT,
     limits: {

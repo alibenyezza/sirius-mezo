@@ -18,22 +18,22 @@ const DOCUMENTATION_EN: Record<string, string> = {
   "État de l’implémentation": "Implementation status",
   "Garanties & limites de sécurité": "Security guarantees & limits",
   "Sirius est un protocole de": "Sirius is a protocol for",
-  "data lending confidentiel sur une chaîne EVM": "confidential data lending on an EVM chain",
+  "location de données privées, réglée en MUSD sur Mezo": "private data rental, settled in MUSD on Mezo",
   "Le provider propose son dataset pour entraîner un modèle ; le borrower reçoit le modèle, pas le CSV source.": "The provider offers a dataset for model training; the borrower receives the model, not the source CSV.",
   "Le règlement est libellé en": "Settlement is denominated in",
   "stablecoin": "a stablecoin",
-  "(MUSD de Mezo sur mainnet) et vérifiable on-chain.": "(Mezo MUSD on mainnet) and verifiable on-chain.",
+  "(MUSD de Mezo, ici sur le testnet) et vérifiable on-chain.": "(Mezo MUSD, here on testnet) and verifiable on-chain.",
   "Escrow en stablecoin": "Stablecoin escrow",
   "Les données les plus précieuses sont aussi les plus verrouillées : santé, finance, données personnelles ou secrets métier. Elles ne peuvent pas être partagées en clair sans perdre le contrôle.": "The most valuable data is often the most restricted: health, finance, personal data, or trade secrets. It cannot be shared in plaintext without losing control.",
   "Sirius inverse le flux :": "Sirius reverses the flow:",
   "le modèle vient à la donnée": "the model comes to the data",
-  ", avec une isolation matérielle du calcul lorsque le runner utilise un TEE attesté. Le provider conserve sa donnée source.": ", with hardware isolation of computation when the runner uses an attested TEE. The provider keeps their source data.",
+  " : le borrower ne reçoit que le modèle entraîné, jamais les lignes brutes. Le provider conserve sa donnée source.": ": the borrower receives only the trained model, never the raw rows. The provider keeps their source data.",
   "Le navigateur chiffre le dataset avant son envoi au runner. Celui-ci stocke le dataset chiffré sur IPFS, entraîne le modèle et prépare sa livraison chiffrée. Le règlement EVM publie le préimage nécessaire à l’ouverture de la capsule.": "The browser encrypts the dataset before sending it to the runner. The runner stores the encrypted dataset on IPFS, trains the model, and prepares encrypted delivery. EVM settlement publishes the preimage needed to open the capsule.",
-  "Après l’envoi, le runner déchiffre le CSV pour calculer. Seul le mode Phala attesté isole ce calcul matériellement ; le mode stub ne le fait pas.": "After upload, the runner decrypts the CSV to compute. Only attested Phala mode provides hardware isolation for this computation; stub mode does not.",
+  "Après l’envoi, le runner de testnet déchiffre le CSV pour calculer, sur le serveur de Sirius et sans isolation matérielle. Chaque résultat est signé avec la clé de règlement de l’escrow.": "After upload, the testnet runner decrypts the CSV to compute, on Sirius’s server and without hardware isolation. Each result is signed with the escrow’s settlement key.",
   "publie un dataset chiffré et reçoit le règlement.": "publishes an encrypted dataset and receives settlement.",
   "choisit un dataset, finance le prêt et récupère le modèle.": "chooses a dataset, funds the loan, and receives the model.",
-  "ouvre le dataset, calcule et détient le préimage ; l’attestation matérielle dépend du mode de déploiement.": "opens the dataset, computes, and holds the preimage; hardware attestation depends on the deployment mode.",
-  "orchestre le parcours. Avec un runner distant attesté, Next ne reçoit ni CSV en clair ni clés de dataset ; ce n’est pas une garantie du mode stub local.": "orchestrates the flow. With a remote attested runner, Next receives neither plaintext CSV nor dataset keys; local stub mode does not provide this guarantee.",
+  "ouvre le dataset, calcule et détient le préimage ; sur cette instance, c’est le runner de testnet du serveur, qui signe chaque résultat avec la clé de règlement de l’escrow.": "opens the dataset, computes, and holds the preimage; on this instance it is the server’s testnet runner, which signs each result with the escrow’s settlement key.",
+  "orchestre le parcours. Le runner de testnet tourne sur le serveur de Sirius : il voit le CSV en clair pendant l’entraînement. Utilisez uniquement des données synthétiques ou non sensibles.": "orchestrates the flow. The testnet runner runs on Sirius’s server: it sees the plaintext CSV during training. Use only synthetic or non-sensitive data.",
   "Dataset chiffré": "Encrypted dataset",
   "blob AES-256-GCM sur IPFS.": "AES-256-GCM blob on IPFS.",
   "Titre de dataset": "Dataset title",
@@ -49,7 +49,7 @@ const DOCUMENTATION_EN: Record<string, string> = {
   "Le provider inscrit le titre et l’empreinte du profil dans le registre EVM, sous contrôle KYB. Le CSV chiffré reste hors chaîne ; le titre publié fixe le profil utilisable.": "The provider registers the title and profile hash in the EVM registry, subject to KYB. The encrypted CSV stays off-chain; the published title fixes the allowed profile.",
   "Verrouiller": "Lock",
   "Le borrower utilise le profil fixé par le dataset, approuve le stablecoin puis signe lock. L’escrow vérifie le titre, le profil et les KYB, puis fixe le montant, le hashlock et l’échéance.": "The borrower uses the dataset’s fixed profile, approves the stablecoin, and signs lock. Escrow checks the title, profile, and KYB, then fixes the amount, hashlock, and expiry.",
-  "Le runner recoupe les KYB, le titre, le profil et les termes de l’escrow avant de déchiffrer et d’entraîner. L’isolation matérielle exige le mode Phala attesté.": "The runner cross-checks KYB, title, profile, and escrow terms before decrypting and training. Hardware isolation requires attested Phala mode.",
+  "Le runner recoupe les KYB, le titre, le profil et les termes de l’escrow avant de déchiffrer et d’entraîner, puis signe le résultat avec la clé de règlement de l’escrow.": "The runner cross-checks KYB, title, profile, and escrow terms before decrypting and training, then signs the result with the escrow’s settlement key.",
   "Régler": "Settle",
   "Une fois la capsule prête, le runner appelle release : le provider est crédité et le préimage est publié. Le navigateur peut ensuite ouvrir le modèle. Le crédit en stablecoin se retire séparément.": "Once the capsule is ready, the runner calls release: the provider is credited and the preimage is published. The browser can then open the model. Stablecoin credit is withdrawn separately.",
   "Implémenté": "Implemented",
@@ -64,10 +64,10 @@ const DOCUMENTATION_EN: Record<string, string> = {
   "Le parcours complet": "The complete flow",
   "Le fair-exchange atomique": "Atomic fair exchange",
   "Cycle de vie de l'escrow": "Escrow lifecycle",
-  "Confidentialité : qui voit quoi": "Confidentiality: who sees what",
+  "Qui voit quoi": "Who sees what",
   "Custody : qui détient quoi": "Custody: who holds what",
   "Les contrats EVM": "EVM contracts",
-  "Le runner TEE contrôle le release, pas les deux contreparties. Le borrower possède d’abord une capsule inutilisable ; le préimage qui l’ouvre n’est publié qu’avec le crédit du provider.": "The TEE runner controls release, not either counterparty. The borrower first holds an unusable capsule; its opening preimage is published only when the provider is credited.",
+  "Le runner de testnet contrôle le release, pas les deux contreparties. Le borrower possède d’abord une capsule inutilisable ; le préimage qui l’ouvre n’est publié qu’avec le crédit du provider.": "The testnet runner controls release, not either counterparty. The borrower first holds an unusable capsule; its opening preimage is published only when the provider is credited.",
   "`release` est autorisé uniquement avant l’échéance. Après celle-ci, seul `refund` peut créditer le borrower : aucun préimage ne peut alors être publié par l’escrow.": "`release` is allowed only before expiry. After that, only `refund` can credit the borrower: the escrow can no longer publish a preimage.",
   "Scénario": "Scenario",
   "Issue": "Outcome",
@@ -96,7 +96,7 @@ const DOCUMENTATION_EN: Record<string, string> = {
   "Donnée brute": "Raw data",
   "oui (la sienne)": "yes (their own)",
   "non": "no",
-  "oui, en enclave": "yes, in the enclave",
+  "oui, pendant l’entraînement": "yes, during training",
   "oui": "yes",
   "Clé du dataset (DEK)": "Dataset key (DEK)",
   "Titre et événements EVM": "EVM title and events",
@@ -107,15 +107,15 @@ const DOCUMENTATION_EN: Record<string, string> = {
   "Le titre du dataset": "The dataset title",
   "reste lié au provider. Le hash du CID, le Merkle root, la taille et l’empreinte du profil d’entraînement sont publics.": "remains bound to the provider. The CID hash, Merkle root, size, and training-profile hash are public.",
   "Les clés": "Keys",
-  "de dataset restent dans le runner ; la master key est scellée par dstack en mode Phala attesté. En mode stub local, le processus serveur accède aux clés. Le préimage devient public lors du release.": "for datasets remain in the runner; the master key is sealed by dstack in attested Phala mode. In local stub mode, the server process accesses the keys. The preimage becomes public on release.",
+  "de dataset restent dans le runner de testnet, sur le serveur : le processus serveur accède aux clés. Le préimage devient public lors du release.": "for datasets stay in the testnet runner, on the server: the server process can access the keys. The preimage becomes public on release.",
   "La suppression": "Deletion",
   "détruit la clé de dataset et laisse un tombstone vérifiable, sans rendre le contenu récupérable.": "destroys the dataset key and leaves a verifiable tombstone without making the content recoverable.",
   "Règlement": "Settlement",
-  "Pas d’admin, pas d’upgrade ni de frais. Montants exacts en stablecoin, hashlock SHA-256, KYB des deux parties, échéance stricte et crédits pull-only.": "No admin, upgrade, or fees. Exact stablecoin amounts, SHA-256 hashlock, KYB for both parties, strict expiry, and pull-only credits.",
+  "Pas d’admin ni d’upgrade. Montants exacts en MUSD, hashlock SHA-256, KYB des deux parties, échéance stricte, crédits pull-only, et des frais de plateforme figés au déploiement (2 %, 1 % pour les détenteurs de veMEZO), prélevés à la libération seulement.": "No admin and no upgrade. Exact MUSD amounts, SHA-256 hashlock, KYB for both parties, strict expiry, pull-only credits, and a platform fee fixed at deployment (2 %, 1 % for veMEZO holders), taken only at release.",
   "Attestations EIP-712 avec consentement, nonce anti-rejeu, expiration, révocation et époque de vérificateur. L’admin pilote les vérificateurs.": "EIP-712 attestations with consent, anti-replay nonce, expiry, revocation, and verifier epoch. The admin manages verifiers.",
   "Provenance": "Provenance",
   "Titre déterministe, contrôle KYB, hash du CID, Merkle root, taille, profil d’entraînement immuable et tombstone après destruction.": "Deterministic title, KYB checks, CID hash, Merkle root, size, immutable training profile, and tombstone after deletion.",
-  "Le profil d’entraînement utilise SiriusEscrow v5 et SiriusDatasetRegistry v4. Un changement de contrats nécessite une migration coordonnée de l’application, de la base et des services ; cette page n’atteste pas la configuration d’une instance.": "The training profile uses SiriusEscrow v5 and SiriusDatasetRegistry v4. Changing contracts requires a coordinated migration of the application, database, and services; this page does not attest to any instance’s configuration.",
+  "Le profil d’entraînement utilise SiriusEscrow v6 et SiriusDatasetRegistry v4. Un changement de contrats nécessite une migration coordonnée de l’application, de la base et des services ; cette page n’atteste pas la configuration d’une instance.": "The training profile uses SiriusEscrow v6 and SiriusDatasetRegistry v4. Changing contracts requires a coordinated migration of the application, database, and services; this page does not attest to any instance’s configuration.",
   "Ce que la chaîne garantit": "What the chain guarantees",
   "Un prêt ne passe qu’une fois de `Locked` vers `Released` ou `Refunded`.": "A loan transitions only once from `Locked` to `Released` or `Refunded`.",
   "Le provider ne peut être crédité sans que le préimage soit rendu public, et réciproquement.": "The provider cannot be credited without the preimage becoming public, and vice versa.",
@@ -125,11 +125,11 @@ const DOCUMENTATION_EN: Record<string, string> = {
   "La qualité, la licéité du dataset et la qualité du modèle restent hors de portée des contrats.": "Dataset quality and legality, and model quality, remain outside the scope of the contracts.",
   "Le hash du CID, le Merkle root, la taille et les identifiants de prêt sont publics et permanents : ils ne doivent contenir aucune donnée sensible.": "The CID hash, Merkle root, size, and loan identifiers are public and permanent: they must not contain sensitive data.",
   "L’émetteur KYB, sa clé de signature et l’administration du registre sont des points de gouvernance à protéger hors de Next et du runner.": "The KYB issuer, its signing key, and registry administration are governance points to protect outside Next and the runner.",
-  "Une démonstration testnet ne vaut ni audit indépendant, ni validation d’attestation Phala, ni autorisation d’utiliser des données sensibles ou des fonds réels.": "A testnet demo is not an independent audit, Phala attestation validation, or approval to use sensitive data or real funds.",
+  "Une démonstration testnet ne vaut ni audit indépendant, ni autorisation d’utiliser des données sensibles ou des fonds réels.": "A testnet demo is neither an independent audit nor approval to use sensitive data or real funds.",
   "← Retour à l’accueil": "← Back to home",
-  "Démo et confidentialité": "Demo and confidentiality",
-  "En mode stub (TEE_MODE=stub), il n’y a pas d’enclave matérielle : le processus qui exécute le runner accède au CSV en clair et aux clés. Sans RUNNER_URL, ce processus est celui du serveur Next. Utilisez uniquement des données synthétiques ou non sensibles.": "In stub mode (TEE_MODE=stub), there is no hardware enclave: the process running the runner accesses the plaintext CSV and keys. Without RUNNER_URL, this is the Next server process. Use only synthetic or non-sensitive data.",
-  "Les garanties d’isolation décrites ici exigent un runner Phala distant, une attestation RA-TLS vérifiée et des mesures épinglées. Le libellé Production de Vercel ne prouve pas cette attestation.": "The isolation guarantees described here require a remote Phala runner, verified RA-TLS attestation, and pinned measurements. Vercel’s Production label does not prove this attestation.",
+  "Runner de testnet": "Testnet runner",
+  "Sur cette instance, l’entraînement tourne sur le runner de testnet du serveur, sans isolation matérielle : le processus qui exécute le runner accède au CSV en clair et aux clés. Utilisez uniquement des données synthétiques ou non sensibles.": "On this instance, training runs on the server’s testnet runner, without hardware isolation: the process running the runner accesses the plaintext CSV and keys. Use only synthetic or non-sensitive data.",
+  "Chaque résultat est signé avec la clé de règlement de l’escrow. Le certificat vérifiable de chaque entraînement compare ce signataire au lockAuthorizer inscrit on-chain dans l’escrow.": "Each result is signed with the escrow’s settlement key. The verifiable certificate of each training run checks that signer against the lockAuthorizer recorded on-chain in the escrow.",
   "Un registre KYB ouvert de démonstration accepte toute adresse : il ne vérifie aucune entreprise. Un registre gouverné exige des attestations d’un émetteur externe.": "An open demo KYB registry accepts every address: it does not verify businesses. A governed registry requires attestations from an external issuer.",
   "Profil d’entraînement du dataset": "Dataset training profile",
   "Le profil est obligatoire à l’upload : il fixe l’algorithme et sa version. Le borrower ne peut pas remplacer ce choix par un autre modèle. Le titre on-chain, le prêt et le reçu du runner sont liés à la même empreinte de profil.": "The profile is required at upload: it fixes the algorithm and version. The borrower cannot replace this choice with a different model. The on-chain title, loan, and runner receipt are bound to the same profile hash.",
@@ -144,11 +144,11 @@ const DOCUMENTATION_EN: Record<string, string> = {
   "Un profil incompatible est refusé avant le verrouillage du stablecoin. Pour changer de profil, réimportez le dataset. L’auto-entraînement sur ses propres données respecte aussi ce profil, sans prêt.": "An incompatible profile is rejected before the stablecoin is locked. To change the profile, upload the dataset again. Self-training on your own data also respects this profile, without a loan.",
   "Préimage avant release": "Preimage before release",
   "Préimage publié au release": "Preimage published on release",
-  "Ce tableau décrit le mode Phala distant attesté, sans partage volontaire des artefacts par les participants. Il ne s’applique pas au mode stub local, où le serveur a accès à la donnée brute et aux clés. Le préimage public ne suffit pas à ouvrir la capsule sans la clé du navigateur destinataire.": "This table describes remote attested Phala mode, without participants voluntarily sharing artifacts. It does not apply to local stub mode, where the server has access to raw data and keys. The public preimage alone cannot open the capsule without the recipient browser’s key.",
+  "Ce tableau décrit les rôles du protocole, sans partage volontaire des artefacts par les participants. Sur cette instance, le runner de testnet tourne sur le serveur de Sirius : la colonne Runner vaut donc aussi pour le serveur. Le préimage public ne suffit pas à ouvrir la capsule sans la clé du navigateur destinataire.": "This table describes protocol roles, without participants voluntarily sharing artifacts. On this instance the testnet runner runs on Sirius’s server, so the Runner column also applies to the server. The public preimage alone cannot open the capsule without the recipient browser’s key.",
   "Sur petit écran, faites défiler le schéma horizontalement.": "On smaller screens, scroll the diagram horizontally.",
   "Flux du dataset et du règlement": "Dataset and settlement flow",
   "Le provider envoie le CSV chiffré au runner et publie le titre. Le runner utilise IPFS pour le stockage chiffré et livre le modèle chiffré au borrower. Le borrower verrouille le stablecoin ; le runner publie le préimage au règlement.": "The provider sends the encrypted CSV to the runner and publishes the title. The runner uses IPFS for encrypted storage and delivers the encrypted model to the borrower. The borrower locks the stablecoin; the runner publishes the preimage at settlement.",
-  "stub ou TEE attesté": "stub or attested TEE",
+  "runner de testnet": "testnet runner",
   "stockage chiffré": "encrypted storage",
   "DatasetRegistry · KYB · Escrow\nCrédits en stablecoin · retraits séparés": "DatasetRegistry · KYB · Escrow\nStablecoin credits · separate withdrawals",
   "CSV chiffré": "encrypted CSV",
@@ -182,7 +182,7 @@ const TOC = [
   { id: "etat", label: "État de l’implémentation" },
   { id: "fair-exchange", label: "Le fair-exchange atomique" },
   { id: "escrow", label: "Cycle de vie de l'escrow" },
-  { id: "confidentialite", label: "Confidentialité : qui voit quoi" },
+  { id: "confidentialite", label: "Qui voit quoi" },
   { id: "custody", label: "Custody : qui détient quoi" },
   { id: "evm", label: "Les contrats EVM" },
   { id: "securite", label: "Garanties & limites de sécurité" },
@@ -203,9 +203,9 @@ export default function DocsPage() {
       title={t("Comment fonctionne Sirius")}
       lead={(
         <p>
-          {d("Sirius est un protocole de")} <span className={strong}>{d("data lending confidentiel sur une chaîne EVM")}</span>.{" "}
+          {d("Sirius est un protocole de")} <span className={strong}>{d("location de données privées, réglée en MUSD sur Mezo")}</span>.{" "}
           {d("Le provider propose son dataset pour entraîner un modèle ; le borrower reçoit le modèle, pas le CSV source.")}{" "}
-          {d("Le règlement est libellé en")} <span className={strong}>{d("stablecoin")}</span> {d("(MUSD de Mezo sur mainnet) et vérifiable on-chain.")}
+          {d("Le règlement est libellé en")} <span className={strong}>{d("stablecoin")}</span> {d("(MUSD de Mezo, ici sur le testnet) et vérifiable on-chain.")}
         </p>
       )}
       actions={(
@@ -217,29 +217,29 @@ export default function DocsPage() {
       toc={TOC}
       tocLabel={(label) => d(t(label))}
     >
-      <Hint title={d("Démo et confidentialité")}>
-        <p>{d("En mode stub (TEE_MODE=stub), il n’y a pas d’enclave matérielle : le processus qui exécute le runner accède au CSV en clair et aux clés. Sans RUNNER_URL, ce processus est celui du serveur Next. Utilisez uniquement des données synthétiques ou non sensibles.")}</p>
-        <p>{d("Les garanties d’isolation décrites ici exigent un runner Phala distant, une attestation RA-TLS vérifiée et des mesures épinglées. Le libellé Production de Vercel ne prouve pas cette attestation.")}</p>
+      <Hint title={d("Runner de testnet")}>
+        <p>{d("Sur cette instance, l’entraînement tourne sur le runner de testnet du serveur, sans isolation matérielle : le processus qui exécute le runner accède au CSV en clair et aux clés. Utilisez uniquement des données synthétiques ou non sensibles.")}</p>
+        <p>{d("Chaque résultat est signé avec la clé de règlement de l’escrow. Le certificat vérifiable de chaque entraînement compare ce signataire au lockAuthorizer inscrit on-chain dans l’escrow.")}</p>
       </Hint>
 
       <div className="mt-12">
         <DocSection id="probleme" title={d("Le problème")}>
           <p>{d("Les données les plus précieuses sont aussi les plus verrouillées : santé, finance, données personnelles ou secrets métier. Elles ne peuvent pas être partagées en clair sans perdre le contrôle.")}</p>
-          <p>{d("Sirius inverse le flux :")} <span className={strong}>{d("le modèle vient à la donnée")}</span>{d(", avec une isolation matérielle du calcul lorsque le runner utilise un TEE attesté. Le provider conserve sa donnée source.")}</p>
+          <p>{d("Sirius inverse le flux :")} <span className={strong}>{d("le modèle vient à la donnée")}</span>{d(" : le borrower ne reçoit que le modèle entraîné, jamais les lignes brutes. Le provider conserve sa donnée source.")}</p>
         </DocSection>
 
         <DocSection id="solution" title={d("La solution en un coup d'œil")}>
           <p>{d("Le navigateur chiffre le dataset avant son envoi au runner. Celui-ci stocke le dataset chiffré sur IPFS, entraîne le modèle et prépare sa livraison chiffrée. Le règlement EVM publie le préimage nécessaire à l’ouverture de la capsule.")}</p>
           <OverviewDiagram d={d} />
-          <Caption>{d("Après l’envoi, le runner déchiffre le CSV pour calculer. Seul le mode Phala attesté isole ce calcul matériellement ; le mode stub ne le fait pas.")}</Caption>
+          <Caption>{d("Après l’envoi, le runner de testnet déchiffre le CSV pour calculer, sur le serveur de Sirius et sans isolation matérielle. Chaque résultat est signé avec la clé de règlement de l’escrow.")}</Caption>
         </DocSection>
 
         <DocSection id="acteurs" title={d("Les acteurs & artefacts")}>
           <ul className="ml-5 list-disc space-y-2 marker:text-muted">
             <li><span className={strong}>Provider</span> — {d("publie un dataset chiffré et reçoit le règlement.")}</li>
             <li><span className={strong}>Borrower</span> — {d("choisit un dataset, finance le prêt et récupère le modèle.")}</li>
-            <li><span className={strong}>Runner</span> — {d("ouvre le dataset, calcule et détient le préimage ; l’attestation matérielle dépend du mode de déploiement.")}</li>
-            <li><span className={strong}>Sirius</span> — {d("orchestre le parcours. Avec un runner distant attesté, Next ne reçoit ni CSV en clair ni clés de dataset ; ce n’est pas une garantie du mode stub local.")}</li>
+            <li><span className={strong}>Runner</span> — {d("ouvre le dataset, calcule et détient le préimage ; sur cette instance, c’est le runner de testnet du serveur, qui signe chaque résultat avec la clé de règlement de l’escrow.")}</li>
+            <li><span className={strong}>Sirius</span> — {d("orchestre le parcours. Le runner de testnet tourne sur le serveur de Sirius : il voit le CSV en clair pendant l’entraînement. Utilisez uniquement des données synthétiques ou non sensibles.")}</li>
           </ul>
           <ul className="ml-5 list-disc space-y-2 marker:text-muted">
             <li><span className={strong}>{d("Dataset chiffré")}</span> — {d("blob AES-256-GCM sur IPFS.")}</li>
@@ -278,7 +278,7 @@ export default function DocsPage() {
               ["01", d("Déposer"), d("Le provider choisit le profil d’entraînement, puis le navigateur chiffre le CSV pour le runner. Le runner valide sa compatibilité, calcule le Merkle root et stocke le blob chiffré sur IPFS.")],
               ["02", d("Publier"), d("Le provider inscrit le titre et l’empreinte du profil dans le registre EVM, sous contrôle KYB. Le CSV chiffré reste hors chaîne ; le titre publié fixe le profil utilisable.")],
               ["03", d("Verrouiller"), d("Le borrower utilise le profil fixé par le dataset, approuve le stablecoin puis signe lock. L’escrow vérifie le titre, le profil et les KYB, puis fixe le montant, le hashlock et l’échéance.")],
-              ["04", d("Entraîner"), d("Le runner recoupe les KYB, le titre, le profil et les termes de l’escrow avant de déchiffrer et d’entraîner. L’isolation matérielle exige le mode Phala attesté.")],
+              ["04", d("Entraîner"), d("Le runner recoupe les KYB, le titre, le profil et les termes de l’escrow avant de déchiffrer et d’entraîner, puis signe le résultat avec la clé de règlement de l’escrow.")],
               ["05", d("Régler"), d("Une fois la capsule prête, le runner appelle release : le provider est crédité et le préimage est publié. Le navigateur peut ensuite ouvrir le modèle. Le crédit en stablecoin se retire séparément.")],
             ].map(([n, title, description]) => (
               <li key={n} className="flex gap-4 rounded-[1.25rem] border border-white/10 bg-surface/50 backdrop-blur-xl p-4">
@@ -301,7 +301,7 @@ export default function DocsPage() {
         </DocSection>
 
         <DocSection id="fair-exchange" title={d("Le fair-exchange atomique")}>
-          <p>{d("Le runner TEE contrôle le release, pas les deux contreparties. Le borrower possède d’abord une capsule inutilisable ; le préimage qui l’ouvre n’est publié qu’avec le crédit du provider.")}</p>
+          <p>{d("Le runner de testnet contrôle le release, pas les deux contreparties. Le borrower possède d’abord une capsule inutilisable ; le préimage qui l’ouvre n’est publié qu’avec le crédit du provider.")}</p>
           <FairExchangeDiagram d={d} />
           <p>{d("`release` est autorisé uniquement avant l’échéance. Après celle-ci, seul `refund` peut créditer le borrower : aucun préimage ne peut alors être publié par l’escrow.")}</p>
           <div className="mt-4 overflow-x-auto">
@@ -338,14 +338,14 @@ export default function DocsPage() {
           </div>
         </DocSection>
 
-        <DocSection id="confidentialite" title={d("Confidentialité : qui voit quoi")}>
-          <p>{d("Ce tableau décrit le mode Phala distant attesté, sans partage volontaire des artefacts par les participants. Il ne s’applique pas au mode stub local, où le serveur a accès à la donnée brute et aux clés. Le préimage public ne suffit pas à ouvrir la capsule sans la clé du navigateur destinataire.")}</p>
+        <DocSection id="confidentialite" title={d("Qui voit quoi")}>
+          <p>{d("Ce tableau décrit les rôles du protocole, sans partage volontaire des artefacts par les participants. Sur cette instance, le runner de testnet tourne sur le serveur de Sirius : la colonne Runner vaut donc aussi pour le serveur. Le préimage public ne suffit pas à ouvrir la capsule sans la clé du navigateur destinataire.")}</p>
           <div className="mt-4 overflow-x-auto">
             <table className="w-full min-w-[560px] border-collapse text-sm">
-              <thead><tr className="border-b border-border text-left text-muted"><th className="py-2 pr-4 font-medium">{d("Artefact")}</th><th className="py-2 pr-4 font-medium">Provider</th><th className="py-2 pr-4 font-medium">Borrower</th><th className="py-2 pr-4 font-medium">Sirius</th><th className="py-2 font-medium">TEE</th></tr></thead>
+              <thead><tr className="border-b border-border text-left text-muted"><th className="py-2 pr-4 font-medium">{d("Artefact")}</th><th className="py-2 pr-4 font-medium">Provider</th><th className="py-2 pr-4 font-medium">Borrower</th><th className="py-2 pr-4 font-medium">Sirius</th><th className="py-2 font-medium">Runner</th></tr></thead>
               <tbody className="align-top">
                 {[
-                  [d("Donnée brute"), d("oui (la sienne)"), d("non"), d("non"), d("oui, en enclave")],
+                  [d("Donnée brute"), d("oui (la sienne)"), d("non"), d("non"), d("oui, pendant l’entraînement")],
                   [d("Dataset chiffré"), d("oui"), d("oui"), d("oui"), d("oui")],
                   [d("Clé du dataset (DEK)"), d("non"), d("non"), d("non"), d("oui")],
                   [d("Préimage avant release"), d("non"), d("non"), d("non"), d("oui")],
@@ -362,7 +362,7 @@ export default function DocsPage() {
           <ul className="ml-5 list-disc space-y-2 marker:text-muted">
             <li><span className={strong}>{d("Les fonds")}</span> {d("restent dans le wallet ou dans `SiriusEscrow` ; Sirius ne peut pas les déplacer discrétionnairement.")}</li>
             <li><span className={strong}>{d("Le titre du dataset")}</span> {d("reste lié au provider. Le hash du CID, le Merkle root, la taille et l’empreinte du profil d’entraînement sont publics.")}</li>
-            <li><span className={strong}>{d("Les clés")}</span> {d("de dataset restent dans le runner ; la master key est scellée par dstack en mode Phala attesté. En mode stub local, le processus serveur accède aux clés. Le préimage devient public lors du release.")}</li>
+            <li><span className={strong}>{d("Les clés")}</span> {d("de dataset restent dans le runner de testnet, sur le serveur : le processus serveur accède aux clés. Le préimage devient public lors du release.")}</li>
             <li><span className={strong}>{d("La suppression")}</span> {d("détruit la clé de dataset et laisse un tombstone vérifiable, sans rendre le contenu récupérable.")}</li>
           </ul>
         </DocSection>
@@ -370,12 +370,12 @@ export default function DocsPage() {
         <DocSection id="evm" title={d("Les contrats EVM")}>
           <div className="grid gap-3 sm:grid-cols-3">
             {[
-              ["SiriusEscrow", d("Règlement"), d("Pas d’admin, pas d’upgrade ni de frais. Montants exacts en stablecoin, hashlock SHA-256, KYB des deux parties, échéance stricte et crédits pull-only.")],
+              ["SiriusEscrow", d("Règlement"), d("Pas d’admin ni d’upgrade. Montants exacts en MUSD, hashlock SHA-256, KYB des deux parties, échéance stricte, crédits pull-only, et des frais de plateforme figés au déploiement (2 %, 1 % pour les détenteurs de veMEZO), prélevés à la libération seulement.")],
               ["SiriusKybRegistry", "KYB", d("Attestations EIP-712 avec consentement, nonce anti-rejeu, expiration, révocation et époque de vérificateur. L’admin pilote les vérificateurs.")],
               ["SiriusDatasetRegistry", d("Provenance"), d("Titre déterministe, contrôle KYB, hash du CID, Merkle root, taille, profil d’entraînement immuable et tombstone après destruction.")],
             ].map(([name, role, description]) => <div key={name} className="min-w-0 rounded-[1.25rem] border border-white/10 bg-surface/50 backdrop-blur-xl p-4 [overflow-wrap:anywhere]"><div className="text-xs font-medium tracking-widest text-muted">{role}</div><div className="mt-1 font-semibold text-foreground">{name}</div><p className="mt-1 text-sm text-muted">{description}</p></div>)}
           </div>
-          <p>{d("Le profil d’entraînement utilise SiriusEscrow v5 et SiriusDatasetRegistry v4. Un changement de contrats nécessite une migration coordonnée de l’application, de la base et des services ; cette page n’atteste pas la configuration d’une instance.")}</p>
+          <p>{d("Le profil d’entraînement utilise SiriusEscrow v6 et SiriusDatasetRegistry v4. Un changement de contrats nécessite une migration coordonnée de l’application, de la base et des services ; cette page n’atteste pas la configuration d’une instance.")}</p>
         </DocSection>
 
         <DocSection id="securite" title={d("Garanties & limites de sécurité")}>
@@ -395,7 +395,7 @@ export default function DocsPage() {
                 <li>{d("La qualité, la licéité du dataset et la qualité du modèle restent hors de portée des contrats.")}</li>
                 <li>{d("Le hash du CID, le Merkle root, la taille et les identifiants de prêt sont publics et permanents : ils ne doivent contenir aucune donnée sensible.")}</li>
                 <li>{d("L’émetteur KYB, sa clé de signature et l’administration du registre sont des points de gouvernance à protéger hors de Next et du runner.")}</li>
-                <li>{d("Une démonstration testnet ne vaut ni audit indépendant, ni validation d’attestation Phala, ni autorisation d’utiliser des données sensibles ou des fonds réels.")}</li>
+                <li>{d("Une démonstration testnet ne vaut ni audit indépendant, ni autorisation d’utiliser des données sensibles ou des fonds réels.")}</li>
               </ul>
             </div>
           </div>

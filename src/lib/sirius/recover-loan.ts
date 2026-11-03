@@ -3,6 +3,7 @@ import { toHex, type Hex } from "viem";
 import { prisma } from "@/lib/db";
 import { AppError } from "@/lib/app-error";
 import { addressesEqual } from "@/lib/evm/address";
+import { checkoutAddress, escrowAddress } from "@/lib/evm/addresses";
 import { getPublicClient } from "@/lib/evm/client";
 import { readLoan, reconcileLoanEscrow } from "@/lib/evm/escrow";
 import { assertLoanLockTransaction, loanEscrowBinding, trustedEscrowBinding, trustedEscrowBindings } from "@/lib/evm/history";
@@ -85,7 +86,9 @@ export async function recoverUnsubmittedLoan(loan: Loan, options: { requireConfi
     transaction ?? client.getTransaction({ hash }),
   ]);
   if (receipt.status !== "success") throw new AppError("Transaction du lock hors scope", 409);
-  assertLoanLockTransaction(lock, { loanId: loan.id, borrower: loan.borrower, escrow: binding.escrow });
+  // Le checkout BTC ne verrouille que dans l'escrow courant.
+  const checkout = currentCheckoutFor(binding.escrow);
+  assertLoanLockTransaction(lock, { loanId: loan.id, borrower: loan.borrower, escrow: binding.escrow, checkout });
   const state = await reconcileLoanEscrow(loan.evmLoanKey as Hex, receipt.blockNumber, binding);
   const updated = await prisma.loan.updateMany({
     where: { id: loan.id, status: loan.status, updatedAt: loan.updatedAt },
@@ -102,4 +105,13 @@ export async function recoverUnsubmittedLoan(loan: Loan, options: { requireConfi
     },
   });
   if (updated.count !== 1) throw new AppError("Réconciliation concurrente du prêt : actualise son état", 409);
+}
+
+/** Le checkout BTC configuré, s'il verrouille dans `escrow` ; sinon (ou configuration illisible) aucun. */
+function currentCheckoutFor(escrow: string): string | null {
+  try {
+    return addressesEqual(escrow, escrowAddress()) ? checkoutAddress() : null;
+  } catch {
+    return null;
+  }
 }

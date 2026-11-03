@@ -12,6 +12,7 @@ import { messageOf } from "@/lib/errors-client";
 import { borrowDataset } from "@/lib/loans/client";
 import { borrowDatasetWithSignature } from "@/lib/loans/signature-client";
 import { BorrowAndBuyCard } from "@/components/loans/BorrowAndBuyCard";
+import { PayWithBtcCard } from "@/components/loans/PayWithBtcCard";
 import { modelSelection } from "@/lib/models/registry";
 import { createInFlightGuard } from "@/lib/onboarding/steps";
 import { activeLoanOnDataset, type LoanDisplayInput } from "@/lib/train/loan-display";
@@ -60,6 +61,10 @@ export function BorrowPanel({
   const [busy, setBusy] = useState(false);
   const [signing, setSigning] = useState(false);
   const [gaslessLock, setGaslessLock] = useState(false);
+  const [payWithBtc, setPayWithBtc] = useState(false);
+  // Un compte Passport (Safe piloté par un wallet Bitcoin) ne signe pas d'EIP-712 d'EOA : ni le
+  // permit MUSD ni la demande de lock. Ces parcours lui sont donc masqués.
+  const eoaWallet = useWalletStore((s) => s.source !== "passport");
   const [borrowGuard] = useState(createInFlightGuard);
   const [signingIn, setSigningIn] = useState(false);
   // Message d'erreur et emprunt réussi sont, eux aussi, rangés avec le compte : après un
@@ -130,8 +135,12 @@ export function BorrowPanel({
   useEffect(() => {
     let actif = true;
     void fetch("/api/mezo/features", { cache: "no-store" })
-      .then((r) => (r.ok ? (r.json() as Promise<{ gaslessLock?: unknown }>) : null))
-      .then((features) => { if (actif && features) setGaslessLock(features.gaslessLock === true); })
+      .then((r) => (r.ok ? (r.json() as Promise<{ gaslessLock?: unknown; payWithBtc?: unknown }>) : null))
+      .then((features) => {
+        if (!actif || !features) return;
+        setGaslessLock(features.gaslessLock === true);
+        setPayWithBtc(features.payWithBtc === true);
+      })
       .catch(() => {});
     return () => { actif = false; };
   }, []);
@@ -235,7 +244,7 @@ export function BorrowPanel({
         >
           {busy ? t("Escrow…") : signingIn ? t("Connexion…") : t("Emprunter")}
         </button>
-        {gaslessLock && (
+        {gaslessLock && eoaWallet && (
           <button
             type="button"
             onClick={() => void borrowWithSignature()}
@@ -256,8 +265,16 @@ export function BorrowPanel({
           </button>
         )}
       </div>
-      {authenticated && model && priceUsdcAtomic && providerVerified !== false && (
-        <BorrowAndBuyCard priceUsdcAtomic={priceUsdcAtomic} disabled={busy || signing || signingIn} onDrawn={borrow} />
+      {payWithBtc && eoaWallet && model && priceUsdcAtomic && providerVerified !== false && (
+        <PayWithBtcCard
+          datasetId={datasetId}
+          priceUsdcAtomic={priceUsdcAtomic}
+          disabled={busy || signing || signingIn}
+          onPaid={() => setBorrowed((current) => ({ session: currentSession(), count: current.count + 1 }))}
+        />
+      )}
+      {authenticated && eoaWallet && model && priceUsdcAtomic && providerVerified !== false && (
+        <BorrowAndBuyCard priceUsdcAtomic={priceUsdcAtomic} disabled={busy || signing || signingIn} onDrawn={gaslessLock ? borrowWithSignature : borrow} />
       )}
       {!authenticated && (
         <p className="text-xs text-muted">

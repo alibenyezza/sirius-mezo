@@ -47,7 +47,7 @@ export async function generateMetadata({ params }: Params): Promise<Metadata> {
   return {
     title: `${certificate.record.dataset.name} — execution certificate`,
     description:
-      "Execution certificate of a training run on Sirius: enclave attestation, measurements and on-chain settlement. No account required.",
+      "Verifiable certificate of a training run on Sirius: result signed with the escrow's settlement key, and on-chain settlement in MUSD. No account required.",
     robots,
   };
 }

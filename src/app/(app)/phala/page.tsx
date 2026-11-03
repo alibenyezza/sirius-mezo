@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { notFound } from "next/navigation";
 import { PhalaDemo } from "@/components/phala-demo/PhalaDemo";
 import { Page, PageHeader } from "@/components/layout/Page";
 import { Card } from "@/components/ui/Card";
@@ -6,6 +7,8 @@ import { Card } from "@/components/ui/Card";
 // Textes anglais écrits directement : un composant serveur n'a pas accès au contexte de locale.
 export default function PhalaPage() {
   if (process.env.SIRIUS_PHALA_DEMO === "true") return <PhalaDemo />;
+  // Instance Mezo : aucun espace Phala, la page n'existe pas.
+  if (process.env.EVM_NETWORK === "testnet") notFound();
   const configured = process.env.SIRIUS_PHALA_DEMO_ORIGIN;
   let target: string | null = null;
   try {

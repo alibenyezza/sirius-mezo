@@ -121,6 +121,28 @@ export function CertificateView(props: CertificateViewProps) {
         </section>
       )}
 
+      {presentation.verdict === "signed" && (
+        <section className="mt-6" aria-labelledby="certificate-plain">
+          <h2 id="certificate-plain" className="text-sm font-semibold uppercase tracking-wider text-muted">
+            In plain words
+          </h2>
+          <ul className="mt-3 flex flex-col gap-2 text-sm" data-plain-summary>
+            <li>
+              A {props.modelName} model was trained on the dataset “{props.datasetName}”. The buyer received the model,
+              never the data.
+            </li>
+            <li>
+              The training ran on the Sirius testnet runner, not inside a hardware enclave. Its result is signed with the
+              key the escrow contract trusts, so anyone can check who vouches for it.
+            </li>
+            <li>
+              The payment settled on {props.networkLabel}
+              {props.settledAt ? ` on ${props.settledAt}` : ""}. Anyone can check every step below, without an account.
+            </li>
+          </ul>
+        </section>
+      )}
+
       <h2 className="mt-10 text-sm font-semibold uppercase tracking-wider text-muted">Technical details</h2>
       <dl className="mt-3 rounded-xl border border-border bg-surface px-5 py-1">
         <Row label="Dataset" mono={false}>
@@ -152,7 +174,9 @@ export function CertificateView(props: CertificateViewProps) {
 
       {presentation.checks.length > 0 && (
         <>
-          <h2 className="mt-10 text-sm font-semibold uppercase tracking-wider text-muted">Quote verification</h2>
+          <h2 className="mt-10 text-sm font-semibold uppercase tracking-wider text-muted">
+            {presentation.measurements.length > 0 ? "Quote verification" : "Verification"}
+          </h2>
           <ul className="mt-3 rounded-xl border border-border bg-surface px-5 py-1">
             {presentation.checks.map((check) => (
               <Check key={check.label} check={check} />
@@ -179,8 +203,10 @@ export function CertificateView(props: CertificateViewProps) {
 
       <p className="mt-10 max-w-prose text-sm text-muted">
         This certificate covers how the model was produced, not its quality. It contains no row of the dataset
-        and no key. To check it without trusting Sirius, download the raw attestation and verify the quote with
-        Intel DCAP tooling.
+        and no key.{" "}
+        {presentation.verdict === "signed" || presentation.measurements.length === 0
+          ? "To check it without trusting Sirius, download it, recover the signer of the attested hash and compare it with lockAuthorizer() of the escrow on the explorer."
+          : "To check it without trusting Sirius, download the raw attestation and verify the quote with Intel DCAP tooling."}
       </p>
       <p className="mt-4">
         <a

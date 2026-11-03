@@ -5,6 +5,7 @@ import { evmEscrowBinding, type EvmEscrowBinding } from "@/lib/tee/evm-binding";
 import { addressesEqual, normalizeAddress } from "./address";
 import { getPublicClient } from "./client";
 import { loanIdHash } from "./loan-key";
+import { siriuscheckoutAbi } from "./abi/siriuscheckout";
 import { siriusescrowAbi } from "./abi/siriusescrow";
 import { siriusescrowv7Abi } from "./abi/siriusescrowv7";
 
@@ -70,12 +71,29 @@ export const legacyEscrowAbi = parseAbi([
 
 export function assertLoanLockTransaction(
   transaction: { from: string; to: string | null; input: Hex },
-  scope: { loanId: string; borrower: string; escrow: string },
+  scope: { loanId: string; borrower: string; escrow: string; checkout?: string | null },
 ): void {
+  const expected = loanIdHash(scope.loanId);
+  // Paiement en BTC : la transaction va au checkout, qui verrouille dans l'escrow pour
+  // l'expéditeur. Elle doit venir de l'emprunteur et porter sa requête signée.
+  if (scope.checkout && addressesEqual(transaction.to ?? "", scope.checkout)) {
+    let matches = false;
+    try {
+      const call = decodeFunctionData({ abi: siriuscheckoutAbi, data: transaction.input });
+      if (call.functionName === "buyWithBtc") {
+        const request = call.args[1];
+        matches = request.loanIdHash === expected && addressesEqual(request.borrower, scope.borrower);
+      }
+    } catch {
+      // Même règle que plus bas : ne jamais relayer le calldata dans l'erreur.
+    }
+    if (!addressesEqual(transaction.from, scope.borrower)) throw new AppError("Transaction de lock de paiement invalide", 409);
+    if (!matches) throw new AppError("Transaction étrangère au lock", 409);
+    return;
+  }
   if (!addressesEqual(transaction.to ?? "", scope.escrow)) {
     throw new AppError("Transaction de lock de paiement invalide", 409);
   }
-  const expected = loanIdHash(scope.loanId);
   let matches = false;
   let relayed = false;
   try {

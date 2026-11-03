@@ -13,7 +13,7 @@ test("les profils, actions et erreurs métier sont affichés en anglais", () => 
     "Profil absent": "Missing profile",
     "Profil d’entraînement": "Training profile",
     "Profil du dataset verrouillé": "Dataset profile locked",
-    "TEE en cours…": "TEE working…",
+    "Entraînement…": "Training…",
     "Récupérer le lock": "Recover lock",
     "Probabilité (classe 1)": "Probability (class 1)",
     "Classe prédite": "Predicted class",

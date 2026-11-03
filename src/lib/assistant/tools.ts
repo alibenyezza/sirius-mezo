@@ -71,7 +71,7 @@ export const ASSISTANT_TOOLS: readonly AssistantToolDefinition[] = Object.freeze
   {
     name: "get_protocol_status",
     description:
-      "Read the public protocol status of this Sirius instance (same data as the /status page): network and chain id, settlement token, confidential compute mode, per-loan and total exposure limits, current compute fee tariff per training profile and minimum provider price, contract addresses, audit status. No input.",
+      "Read the public protocol status of this Sirius instance (same data as the /status page): network and chain id, settlement token, how training runs on this instance, per-loan and total exposure limits, current compute fee tariff per training profile and minimum provider price, contract addresses, audit status. No input.",
     strict: true,
     eager_input_streaming: true,
     input_schema: { type: "object", properties: {}, required: [], additionalProperties: false },

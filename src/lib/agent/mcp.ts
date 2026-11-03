@@ -35,8 +35,9 @@ const LIST_CACHE_TTL_MS = 60 * 60_000;
 
 export const MCP_INSTRUCTIONS =
   "Sirius is a private data marketplace on Mezo. Providers publish encrypted CSV datasets; " +
-  "a buyer pays in a stablecoin for a training run inside an Intel TDX enclave and receives only the trained model, " +
-  "never the raw data. Payment is held in an on-chain escrow and released on delivery, or refunded after the deadline. " +
+  "a buyer pays in MUSD for one training run on the testnet runner and receives only the trained model, " +
+  "never the raw data. Payment is held in an on-chain escrow and released on delivery, or refunded after the deadline; " +
+  "each result is signed with the escrow's settlement key. " +
   "These tools are read-only: search the catalogue, read a dataset, list training profiles, read the protocol status " +
   "and verify a public execution certificate. Purchases happen on the website for now.";
 
@@ -129,7 +130,7 @@ export function createSiriusMcpServer(source: AgentToolSource, origin: string): 
     {
       title: "Get protocol status",
       description:
-        "Read the public status of this Sirius instance: network and chain id, settlement token, confidential compute mode, " +
+        "Read the public status of this Sirius instance: network and chain id, settlement token, training mode, " +
         "exposure limits, compute fee tariff, contract addresses and audit status.",
       outputSchema: protocolStatusOutput,
       annotations: READ_ONLY,
@@ -142,9 +143,9 @@ export function createSiriusMcpServer(source: AgentToolSource, origin: string): 
     {
       title: "Verify execution certificate",
       description:
-        "Verify the public execution certificate of a settled training run: enclave attestation bound to the loan, " +
-        "Intel hardware and TCB status, code identity against pinned measurements, and on-chain settlement. " +
-        "`verdict` is `verified` only when every check passed.",
+        "Verify the public execution certificate of a settled training run: the result signature bound to the loan, " +
+        "its signer checked against the escrow's on-chain lockAuthorizer (the escrow's settlement key), and the on-chain settlement. " +
+        "`verdict` is `signed` when the signature matches that key, `failed` when a check failed.",
       inputSchema: verifyCertificateInput,
       outputSchema: verifyCertificateOutput,
       annotations: { ...READ_ONLY, openWorldHint: true },

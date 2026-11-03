@@ -161,7 +161,7 @@ export function GetStartedCard({ address, gasWei, stableAtomic, token, onAddFund
   }
 
   const missing = [
-    progress.funding.gas ? t("de l’BTC pour le gas") : null,
+    progress.funding.gas ? t("du BTC pour le gas") : null,
     progress.funding.token ? t("des {token} pour emprunter", { token }) : null,
   ].filter((item): item is string => item !== null);
 

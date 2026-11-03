@@ -14,6 +14,7 @@ import {
   permitFromSignature,
   type LockRequest,
 } from "@/lib/evm/lock-request";
+import { mezoFeatures } from "@/lib/mezo/features";
 import { finalizeLoan, renewLoanLock } from "./borrower";
 import { musdPermitDomainAbi } from "./gasless-lock-abi";
 import { parseLockRelayBody, serializeLockRequest, type LockRelayBody } from "./gasless-lock-policy";
@@ -89,9 +90,15 @@ async function readPermitContext(owner: `0x${string}`) {
   return { token, nonce, name, version };
 }
 
-/** Charges à signer par l'acheteur. L'échéance est celle de l'autorisation de lock (cinq minutes au plus). */
+/**
+ * Charges à signer par l'acheteur. L'échéance est celle de l'autorisation de lock (cinq minutes
+ * au plus). Servent au relais sans gas comme au paiement en BTC, qui soumet la même requête
+ * signée depuis `SiriusCheckout`.
+ */
 export async function prepareLockWithSignature(loanId: string, borrower: string) {
-  requireEnabled();
+  if (!gaslessLockEnabled() && !mezoFeatures().payWithBtc) {
+    throw new AppError("Paiement par signature désactivé sur cette instance", 404);
+  }
   const borrowerAddress = normalizeAddress(borrower) as `0x${string}`;
   const { chain } = resolveServerNetwork();
   const escrow = escrowAddress();
@@ -134,6 +141,35 @@ function revertReason(error: unknown): string | null {
 export async function relayLockWithSignature(loanId: string, borrower: string, body: unknown) {
   requireEnabled();
   const borrowerAddress = normalizeAddress(borrower) as `0x${string}`;
+  const { request, borrowerSignature, permit, authorization } = await verifySignedLock(loanId, borrowerAddress, body);
+  const { chain, rpcUrl } = resolveServerNetwork();
+  const account = settlementAccount();
+  const publicClient = getPublicClient();
+  let simulation;
+  try {
+    simulation = await publicClient.simulateContract({
+      address: escrowAddress(),
+      abi: siriusescrowAbi,
+      functionName: "lockWithSignature",
+      args: [request, borrowerSignature, permit, authorization],
+      account,
+    });
+  } catch (error) {
+    const reason = revertReason(error);
+    throw new AppError(reason ? `Lock par signature refusé par le contrat : ${reason}` : "Lock par signature refusé par le contrat", 409);
+  }
+  const wallet = createWalletClient({ account, chain, transport: http(rpcUrl) });
+  const txHash = await wallet.writeContract(simulation.request);
+  const loan = await finalizeLoan(loanId, borrowerAddress, txHash);
+  return { txHash, loan };
+}
+
+/**
+ * Recoupe une demande de lock signée avec les termes reconstruits par le serveur et rend ce
+ * qu'il faut pour l'exécuter : la requête, la signature, le permit et une autorisation
+ * fraîche de Sirius. Partagé par le relais sans gas et par le paiement en BTC.
+ */
+export async function verifySignedLock(loanId: string, borrowerAddress: `0x${string}`, body: unknown) {
   const payload: LockRelayBody = parseLockRelayBody(body);
   if (!addressesEqual(payload.request.borrower, borrowerAddress)) throw new AppError("Demande de lock d’un autre compte", 403);
 
@@ -153,24 +189,10 @@ export async function relayLockWithSignature(loanId: string, borrower: string, b
 
   const request = { ...signed, borrower: borrowerAddress, provider: normalizeAddress(signed.provider) as `0x${string}` };
   const permit = payload.permitSignature ? permitFromSignature(payload.permitSignature, terms.amount, signed.deadline) : NO_PERMIT;
-  const { chain, rpcUrl } = resolveServerNetwork();
-  const account = settlementAccount();
-  const publicClient = getPublicClient();
-  let simulation;
-  try {
-    simulation = await publicClient.simulateContract({
-      address: escrowAddress(),
-      abi: siriusescrowAbi,
-      functionName: "lockWithSignature",
-      args: [request, payload.borrowerSignature, permit, { deadline: authorization.deadline, signature: authorization.signature }],
-      account,
-    });
-  } catch (error) {
-    const reason = revertReason(error);
-    throw new AppError(reason ? `Lock par signature refusé par le contrat : ${reason}` : "Lock par signature refusé par le contrat", 409);
-  }
-  const wallet = createWalletClient({ account, chain, transport: http(rpcUrl) });
-  const txHash = await wallet.writeContract(simulation.request);
-  const loan = await finalizeLoan(loanId, borrowerAddress, txHash);
-  return { txHash, loan };
+  return {
+    request,
+    borrowerSignature: payload.borrowerSignature,
+    permit,
+    authorization: { deadline: authorization.deadline, signature: authorization.signature },
+  };
 }

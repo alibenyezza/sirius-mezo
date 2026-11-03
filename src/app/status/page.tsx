@@ -3,6 +3,9 @@ import type { Metadata } from "next";
 import { MAINNET_STABLECOIN_NAME } from "@/lib/evm/stablecoin";
 import { addressExplorerUrl } from "@/lib/evm/explorer";
 import { readProtocolStatus } from "@/lib/sirius/protocol-status";
+import { mezoFeatures } from "@/lib/mezo/features";
+import { readPlatformFee } from "@/lib/mezo/platform-fee";
+import { readDeploymentManifest, type DeploymentManifest } from "@/lib/sirius/deployment-manifest";
 import { LegalLinks } from "@/components/layout/LegalLinks";
 
 /**
@@ -20,7 +23,7 @@ export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
   title: "Protocol status · Sirius",
-  description: "What is live on Sirius: network, contracts, confidential compute, limits and audit status.",
+  description: "What is live on Sirius: network, contracts, training runner, limits and audit status.",
 };
 
 function Row({ label, value, href, mono = false }: { label: string; value: string; href?: string; mono?: boolean }) {
@@ -34,9 +37,23 @@ function Row({ label, value, href, mono = false }: { label: string; value: strin
   );
 }
 
-export default function StatusPage() {
+function manifestOrNull(): DeploymentManifest | null {
+  try {
+    return readDeploymentManifest();
+  } catch {
+    return null;
+  }
+}
+
+const pct = (bps: number) => `${(bps / 100).toLocaleString("en-US", { maximumFractionDigits: 2 })} %`;
+
+export default async function StatusPage() {
   // « MUSD » sur mainnet, « test MUSD » sur testnet : la page est en anglais, sans t().
   const { network, chain, mainnet, symbol, confidentialCompute, settlement, externalAudit, limits, contracts, mezo } = readProtocolStatus();
+  const features = mezoFeatures();
+  const fee = await readPlatformFee().catch(() => null);
+  const manifest = manifestOrNull();
+  const onOff = (on: boolean) => (on ? "On" : "Off on this instance");
 
   return (
     <main className="relative z-10 mx-auto w-full max-w-2xl px-6 py-12">
@@ -50,7 +67,7 @@ export default function StatusPage() {
 
       <dl className="mt-8 rounded-xl border border-border bg-surface px-5 py-1">
         <Row label="Network" value={`${chain.name} (chain ${chain.id})`} />
-        <Row label="Confidential compute" value={confidentialCompute} />
+        <Row label="Training" value={confidentialCompute} />
         <Row label="Settlement" value={settlement} />
         <Row label="External audit" value={externalAudit} />
         {mainnet && <Row label="Per-loan limit" value={limits.perLoan ?? "Not configured"} />}
@@ -63,6 +80,28 @@ export default function StatusPage() {
         {contracts.map(({ label, address }) => address
           ? <Row key={label} label={label} value={address} href={addressExplorerUrl(network, address)} mono />
           : <Row key={label} label={label} value="Not configured" />)}
+      </dl>
+
+      <h2 className="mt-10 text-lg font-semibold">Mezo integrations</h2>
+      <dl className="mt-3 rounded-xl border border-border bg-surface px-5 py-1">
+        <Row label="One-signature payment" value={onOff(features.gaslessLock)} />
+        <Row label="Pay with BTC (Mezo Pools)" value={onOff(features.payWithBtc)} />
+        <Row label="Borrow & Buy from a trove" value={onOff(features.borrowAndBuy)} />
+        <Row label="Earnings to Stability Pool / sMUSD" value={onOff(features.earn)} />
+        <Row
+          label="Platform fee"
+          value={fee
+            ? fee.baseBps === 0
+              ? "None on this escrow"
+              : `${pct(fee.baseBps)} at release${fee.discountedBps !== null ? `, ${pct(fee.discountedBps)} for veMEZO holders` : ""}; half goes to veBTC voters as a MUSD gauge incentive`
+            : "Unavailable (escrow not readable)"}
+        />
+        {manifest?.contracts.feeRouter && (
+          <Row label="Fee router" value={manifest.contracts.feeRouter} href={addressExplorerUrl(network, manifest.contracts.feeRouter)} mono />
+        )}
+        {manifest?.contracts.checkout && (
+          <Row label="BTC checkout" value={manifest.contracts.checkout} href={addressExplorerUrl(network, manifest.contracts.checkout)} mono />
+        )}
       </dl>
 
       <h2 className="mt-10 text-lg font-semibold">MUSD yield venues</h2>

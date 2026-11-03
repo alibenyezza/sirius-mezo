@@ -222,7 +222,7 @@ export const verifyCertificateOutput = z.object({
       model: z.object({ name: z.string(), cid: z.string() }),
       settledAt: z.string().nullable(),
       settlement: z.object({ txHash: z.string(), chainId: z.number(), network: z.string() }),
-      verdict: z.enum(["verified", "failed", "incomplete", "unattested"]),
+      verdict: z.enum(["verified", "signed", "failed", "incomplete", "unattested"]),
       headline: z.string(),
       summary: z.string(),
       checks: z.array(z.object({ label: z.string(), state: z.enum(["pass", "fail", "unknown"]), detail: z.string() })),
@@ -237,7 +237,7 @@ export const verifyCertificateOutput = z.object({
 // Projections
 // ---------------------------------------------------------------------------------------------
 
-/** Origine publique du site (`https://sirius-data.tech`), sans barre finale. */
+/** Origine publique du site, sans barre finale. */
 function siteUrl(origin: string, path: string): string {
   return `${origin.replace(/\/+$/, "")}${path}`;
 }
@@ -318,7 +318,7 @@ function feeStatus(fee: ComputeFee): "none" | "indicative" | "unknown" {
 
 export const HOW_TO_BUY =
   "A purchase is made on the dataset page by the holder of a KYB-verified wallet: the payment is locked in an on-chain escrow, " +
-  "training runs inside an Intel TDX enclave, and only the trained model is delivered (never the raw rows). " +
+  "training runs on the testnet runner, and only the trained model is delivered (never the raw rows). " +
   "Purchase through this MCP server is not available yet.";
 
 export function getDatasetResult(
@@ -363,7 +363,7 @@ export function getDatasetResult(
 
 export const DELIVERY =
   "The buyer receives the trained model only: target column, feature columns, coefficients and evaluation metrics, " +
-  "encrypted to the buyer, plus a public execution certificate. The raw rows never leave the enclave.";
+  "encrypted to the buyer, plus a public execution certificate. The raw rows are never delivered to the buyer.";
 
 export function listTrainingProfilesResult(): z.infer<typeof listTrainingProfilesOutput> {
   return {

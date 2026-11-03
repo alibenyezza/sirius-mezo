@@ -8,6 +8,7 @@ import { assertLockStable } from "@/lib/evm/finality";
 import type { FinalityTier } from "@/lib/evm/fast-finality";
 import { assignLoanFinalityTier, effectiveLoanFinalityTier } from "./finality-tier";
 import { recordSettlementEvidence } from "./settlement-evidence";
+import { executionReceiptSignature } from "@/lib/tee/receipt";
 import { RunnerFinalityPending } from "@/lib/runner/failure-policy";
 import { recoverLoanJobInRunner, runLoanJobInRunner, settleLoanInRunner } from "@/lib/tee/runner-client";
 import type { RunnerReleaseEnvelope } from "@/lib/tee/contract";
@@ -127,11 +128,13 @@ export async function recoverLoanResult(loanId: string): Promise<boolean> {
     modelCid: result.modelCid, releaseEnvelope: result.releaseEnvelope,
     releaseEnvelopeHash: result.releaseEnvelopeHash, deliveryPublicKey: recovered.deliveryPublicKey,
   });
+  const attestationSignature = await executionReceiptSignature(result.attestation.payloadHash);
   const persisted = await prisma.loan.updateMany({
     where: { id: loanId, status: loan.status, modelCid: null, updatedAt: loan.updatedAt },
     data: {
       status: "TRAINING", modelCid: result.modelCid, runnerReceipt: result.runnerReceipt,
       attestationHash: result.attestation.payloadHash, attestationPayload: result.attestation.payload,
+      attestationSignature,
       attestationQuote: result.attestation.evidence?.quote ?? null,
       attestationEventLog: result.attestation.evidence?.eventLog ?? null,
       attestationComposeHash: result.attestation.evidence?.composeHash ?? null,
@@ -188,6 +191,7 @@ export async function prepareLoanResult(
       runnerReceipt: null,
       attestationHash: null,
       attestationPayload: null,
+      attestationSignature: null,
       attestationQuote: null,
       attestationEventLog: null,
       attestationComposeHash: null,
@@ -263,6 +267,7 @@ export async function prepareLoanResult(
       releaseEnvelopeHash: result.releaseEnvelopeHash,
       deliveryPublicKey,
     });
+    const attestationSignature = await executionReceiptSignature(result.attestation.payloadHash);
     const persisted = await prisma.loan.updateMany({
       where: { id: loanId, status: "TRAINING", modelCid: null, updatedAt: now },
       data: {
@@ -270,6 +275,7 @@ export async function prepareLoanResult(
         runnerReceipt: result.runnerReceipt,
         attestationHash: result.attestation.payloadHash,
         attestationPayload: result.attestation.payload,
+        attestationSignature,
         attestationQuote: result.attestation.evidence?.quote ?? null,
         attestationEventLog: result.attestation.evidence?.eventLog ?? null,
         attestationComposeHash: result.attestation.evidence?.composeHash ?? null,

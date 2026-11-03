@@ -34,8 +34,8 @@ export const PROFILE_MESSAGES_EN: Record<string, string> = {
     "For a first transfer, send a small amount first and check that it arrives.",
   "Compare le début et la fin de l’adresse dans ton wallet avant de confirmer.":
     "Compare the beginning and the end of the address in your wallet before confirming.",
-  "Les frais réseau se paient en ETH : garde un peu d’ETH sur la même adresse.":
-    "Network fees are paid in ETH: keep a little ETH on the same address.",
+  "Les frais réseau se paient en BTC : garde un peu de BTC sur la même adresse.":
+    "Network fees are paid in BTC: keep a little BTC on the same address.",
   "Le bouton de pont ci-dessus ouvre un service tiers : vérifie qu’il supporte {token} avant de l’utiliser.":
     "The bridge button above opens a third-party service: check that it supports {token} before using it.",
 };

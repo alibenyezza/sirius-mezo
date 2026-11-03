@@ -1,5 +1,5 @@
 /**
- * Point d'accroche de la visite guidée (docs/passage-mainnet/04-dashboard.md : « Relançable
+ * Point d'accroche de la visite guidée (« Relançable
  * à tout moment : bouton Visite guidée dans le menu profil »).
  *
  * Le composant de visite (le guide Sirio, `src/components/guide/GuideHost.tsx`) est porté par

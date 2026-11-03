@@ -36,12 +36,12 @@ const SHORTCUTS = [
   {
     href: "/marketplace",
     label: "Marketplace",
-    desc: "Parcourir les datasets et lancer un entraînement en TEE.",
+    desc: "Parcourir les datasets et lancer un entraînement.",
   },
   {
     href: "/train",
     label: "Entraîner",
-    desc: "Entraîner sur ses données ou un dataset du catalogue, en TEE.",
+    desc: "Entraîner sur ses données ou un dataset du catalogue.",
   },
   {
     href: "/datasets",
@@ -173,7 +173,7 @@ function DashboardPageContent() {
           </div>
           {gas && (
             <p className={`mt-1.5 text-xs ${gas.low ? "text-negative" : "text-muted"}`}>
-              {gas.low ? t("{eth} ETH — plus assez pour payer le gas", { eth: gas.eth }) : t("{eth} BTC pour le gas", { eth: gas.eth })}
+              {gas.low ? t("{eth} BTC — plus assez pour payer le gas", { eth: gas.eth }) : t("{eth} BTC pour le gas", { eth: gas.eth })}
             </p>
           )}
           {error && <p className="mt-2 text-xs text-negative">{t("Solde indisponible — réessaie.")}</p>}

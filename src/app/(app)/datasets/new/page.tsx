@@ -8,7 +8,7 @@ import { NewDatasetWizard } from "./NewDatasetWizard";
 export const dynamic = "force-dynamic";
 
 /**
- * Publication d'un dataset en deux étapes (docs/passage-mainnet/07-upload.md).
+ * Publication d'un dataset en deux étapes.
  *
  * Composant serveur volontairement minimal : il transmet au formulaire ce que seul le
  * serveur connaît (frais de calcul du tarif, minimum, jeton du réseau). Tout le parcours

@@ -1,5 +1,13 @@
 /** Intégrations Mezo (lock par signature, Borrow & Buy, gains fournisseurs). */
 export const MEZO_MESSAGES_EN: Record<string, string> = {
+  "Essayer en 5 minutes": "Try it in 5 minutes",
+  "Hash attesté invalide : SHA-256 hexadécimal attendu": "Invalid attested hash: hexadecimal SHA-256 expected",
+  // Frais de plateforme
+  "Entre {minimum} et {maximum} {symbol}, au plus {decimals} décimales.": "Between {minimum} and {maximum} {symbol}, at most {decimals} decimals.",
+  "Sirius garde {fee} de chaque emprunt réglé, {discounted} si tu verrouilles du MEZO en veMEZO. Une partie revient aux votants veBTC du pool BTC/MUSD de Mezo.": "Sirius keeps {fee} of each settled loan, {discounted} if you lock MEZO as veMEZO. Part of it goes to veBTC voters of Mezo’s BTC/MUSD pool.",
+  "Sirius garde {fee} de chaque emprunt réglé. Une partie revient aux votants veBTC du pool BTC/MUSD de Mezo.": "Sirius keeps {fee} of each settled loan. Part of it goes to veBTC voters of Mezo’s BTC/MUSD pool.",
+  "Tu recevras au moins {amount} par emprunt réglé.": "You will receive at least {amount} per settled loan.",
+  "Aucun frais de calcul avec l’escrow actuel : l’emprunteur bloque exactement ce prix, et tu le reçois moins les frais de plateforme à chaque emprunt réglé.": "No compute fee with the current escrow: the borrower locks exactly this price, and you receive it minus the platform fee on each settled loan.",
   // Borrow & Buy
   "Introuvable": "Not found",
   "Montant invalide : entier atomique attendu": "Invalid amount: atomic integer expected",
@@ -68,4 +76,37 @@ export const MEZO_MESSAGES_EN: Record<string, string> = {
   "Signature…": "Signing…",
   "Deux signatures dans ton wallet, aucune transaction : Sirius soumet le lock et paie le gas en BTC. Le MUSD part de ton compte au moment du lock.":
     "Two signatures in your wallet, no transaction: Sirius submits the lock and pays the gas in BTC. MUSD leaves your account at lock time.",
+  // Paiement en BTC (SiriusCheckout)
+  "Payer en BTC": "Pay with BTC",
+  "Environ {btc} BTC, échangés en MUSD sur le pool BTC/MUSD de Mezo Pools et verrouillés dans l’escrow, en une seule transaction.":
+    "About {btc} BTC, swapped to MUSD on the Mezo Pools BTC/MUSD pool and locked in the escrow, in a single transaction.",
+  "Cours de l’oracle": "Oracle price",
+  "Reste dans ton wallet": "Left in your wallet",
+  "Paiement en cours…": "Paying…",
+  "Payer {btc} BTC": "Pay {btc} BTC",
+  "Connecte ton wallet pour payer en BTC.": "Connect your wallet to pay with BTC.",
+  "Solde BTC insuffisant pour ce paiement et son gas.": "Not enough BTC for this payment and its gas.",
+  "Solde BTC insuffisant pour ce paiement et son gas": "Not enough BTC for this payment and its gas",
+  "Deux signatures puis une transaction. Le swap est refusé s’il rend moins que le prix, ou plus de 3 % sous l’oracle BTC/USD de Mezo.":
+    "Two signatures, then one transaction. The swap is refused if it returns less than the price, or more than 3 % below Mezo's BTC/USD oracle.",
+  "Payé en BTC :": "Paid with BTC:",
+  "SIRIUS_CHECKOUT_ADDRESS n'est pas une adresse EVM valide": "SIRIUS_CHECKOUT_ADDRESS is not a valid EVM address",
+  "Devis BTC indisponible": "BTC quote unavailable",
+  "Paiement en BTC indisponible avec un devis compute": "Paying with BTC is unavailable with a compute quote",
+  "Paiement en BTC refusé": "BTC payment refused",
+  "Le checkout BTC ne pointe pas sur l’escrow courant": "The BTC checkout does not point at the current escrow",
+  "Le minimum du swap doit couvrir le prix": "The swap minimum must cover the price",
+  "Minimum de MUSD invalide": "Invalid MUSD minimum",
+  "Montant de BTC invalide": "Invalid BTC amount",
+  "Paiement en BTC désactivé sur cette instance": "Paying with BTC is disabled on this instance",
+  "Paiement en BTC refusé par le contrat": "The contract refused the BTC payment",
+  "Prix invalide": "Invalid price",
+  "Prix de l’oracle indisponible": "Oracle price unavailable",
+  "Le pool BTC/MUSD ne rend rien pour ce montant": "The BTC/MUSD pool returns nothing for this amount",
+  "Le pool BTC/MUSD n’a pas assez de liquidité pour ce prix": "The BTC/MUSD pool does not have enough liquidity for this price",
+  "Le pool BTC/MUSD s’écarte trop de l’oracle : paiement en BTC suspendu": "The BTC/MUSD pool is too far from the oracle: paying with BTC is paused",
+  // Accueil
+  "Louez des données privées pour un entraînement. Payez en MUSD, depuis votre Bitcoin, sur Mezo.":
+    "Rent private data for one training run. Pay in MUSD, straight from your Bitcoin, on Mezo.",
+  "Essayez de le casser": "Try to break it",
 };

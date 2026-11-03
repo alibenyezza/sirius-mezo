@@ -67,7 +67,7 @@ test("le consentement est strictement booléen, absent = refus, jamais interpré
 test("le texte du consentement est celui du cahier, traduit mot pour mot, et versionné", () => {
   assert.equal(
     t(TRAINING_CONSENT_TEXT_KEY),
-    "Allow Sirius to use this dataset, inside the enclave only, to evaluate and develop new models. You can withdraw this consent at any time for future use.",
+    "Allow Sirius to use this dataset, on its training runner only, to evaluate and develop new models. You can withdraw this consent at any time for future use.",
   );
   assert.match(TRAINING_CONSENT_VERSION, /^\d{4}-\d{2}-\d{2}$/);
 });

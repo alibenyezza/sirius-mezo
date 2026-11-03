@@ -16,10 +16,10 @@ const STEP_COPY_BASE: Omit<StepCopy, "verify"> = {
     title: "Connecte-toi",
     body: "Signe un message dans ton wallet : c’est gratuit, ce n’est pas une transaction, et ça prouve que ce wallet est bien à toi.",
   },
-  fund: { title: "Ajoute du BTC et des {token}", body: "L’ETH paie le gas de chaque transaction ; les {token} paient l’emprunt." },
+  fund: { title: "Ajoute du BTC et des {token}", body: "Le BTC paie le gas de chaque transaction ; les {token} paient l’emprunt." },
   pick: { title: "Choisis un dataset", body: "Parcours la marketplace et ouvre la fiche d’un dataset." },
   borrow: { title: "Emprunte-le", body: "Sur la fiche, clique sur Emprunter : le prix du dataset et le compute sont bloqués en escrow." },
-  model: { title: "Récupère ton modèle", body: "L’entraînement tourne dans une enclave TEE ; ton modèle t’attend sur la page Entraîner." },
+  model: { title: "Récupère ton modèle", body: "L’entraînement tourne sur le runner de testnet ; ton modèle t’attend sur la page Entraîner." },
 };
 
 const VERIFY_BODY: Record<EvmNetwork, string> = {

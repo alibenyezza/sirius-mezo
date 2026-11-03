@@ -41,7 +41,7 @@ export async function addFunds(): Promise<FondsAjoutes> {
       // `noopener` : la page ouverte ne peut pas manipuler l'onglet Sirius en retour.
       if (urlBody.kind === "bridge") {
         window.open(urlBody.url, "_blank", "noopener,noreferrer");
-        throw new Error("Pont ouvert : envoie de l’USDC ou de le MUSD vers Mezo depuis un autre réseau, il arrive en MUSD");
+        throw new Error("Pont ouvert : envoie de l’USDC ou du MUSD vers Mezo depuis un autre réseau, il arrive en MUSD");
       }
       window.open(urlBody.url, "moonpay", "popup,width=460,height=720,noopener");
       throw new Error("Fenêtre d'achat ouverte");

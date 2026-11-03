@@ -1,5 +1,5 @@
 import "server-only";
-import { erc20Abi, getAddress, type Address } from "viem";
+import { erc20Abi, getAddress, parseAbi, type Address } from "viem";
 import { getPublicClient } from "@/lib/evm/client";
 import { ZERO_ADDRESS } from "@/lib/evm/address";
 import { resolveServerNetwork, type EvmNetwork } from "@/lib/evm/networks";
@@ -12,7 +12,7 @@ import {
   sortedTrovesAbi,
   troveManagerAbi,
 } from "./abi";
-import { MUSD_BORROWING_RATE_BPS, MUSD_MCR, musdProtocol } from "./protocol";
+import { MUSD_BORROWING_RATE_BPS, MUSD_CCR, MUSD_MCR, musdProtocol } from "./protocol";
 import { drawQuote, nominalIcr, type DrawQuote } from "./trove-math";
 
 /**
@@ -92,6 +92,31 @@ export async function readTrovePosition(account: Address, network?: EvmNetwork):
   };
 }
 
+const systemAbi = parseAbi([
+  "function checkRecoveryMode(uint256 price) view returns (bool)",
+  "function getTroveMaxBorrowingCapacity(address borrower) view returns (uint256)",
+  "function fetchPrice() view returns (uint256)",
+]);
+
+/**
+ * État du système MUSD qui conditionne un tirage : Recovery Mode (au prix courant) et plafond
+ * de dette du trove. Illisible : rien n'est supposé, le contrat tranchera.
+ */
+async function readSystemState(account: Address, net: EvmNetwork): Promise<{ recoveryMode?: boolean; ccr?: bigint; maxBorrowingCapacity?: bigint }> {
+  const protocol = musdProtocol(net);
+  const client = getPublicClient();
+  try {
+    const price = await client.readContract({ address: protocol.priceFeed, abi: systemAbi, functionName: "fetchPrice" });
+    const [recoveryMode, maxBorrowingCapacity] = await Promise.all([
+      client.readContract({ address: protocol.troveManager, abi: systemAbi, functionName: "checkRecoveryMode", args: [price] }),
+      client.readContract({ address: protocol.troveManager, abi: systemAbi, functionName: "getTroveMaxBorrowingCapacity", args: [getAddress(account)] }),
+    ]);
+    return { recoveryMode, ccr: MUSD_CCR, maxBorrowingCapacity };
+  } catch {
+    return {};
+  }
+}
+
 export interface InsertHints {
   upperHint: Address;
   lowerHint: Address;
@@ -167,9 +192,10 @@ export async function readDrawQuote(account: Address, amount: bigint, network?: 
   const client = getPublicClient();
   const protocol = musdProtocol(net);
 
-  const [position, liveFee] = await Promise.all([
+  const [position, liveFee, systemState] = await Promise.all([
     readTrovePosition(account, net),
     client.readContract({ address: protocol.borrowerOperations, abi: borrowerOperationsAbi, functionName: "getBorrowingFee", args: [amount] }),
+    readSystemState(account, net),
   ]);
 
   const coll = BigInt(position.coll);
@@ -184,6 +210,7 @@ export async function readDrawQuote(account: Address, amount: bigint, network?: 
     fee: liveFee,
     mcr: MUSD_MCR,
     safetyMarginBps: DRAW_SAFETY_MARGIN_BPS,
+    ...systemState,
   });
 
   const hints = quote.allowed ? await computeInsertHints(quote.newDebt, coll, net) : { upperHint: ZERO_ADDRESS, lowerHint: ZERO_ADDRESS };

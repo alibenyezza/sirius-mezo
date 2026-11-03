@@ -1,6 +1,6 @@
 // B2.1 — Compatibilité historique épinglée. Chaque test fixe le comportement d'un lecteur face à un
 // format ancien : si quelqu'un le casse, ce test échoue. La matrice complète est dans
-// docs/HISTORICAL-COMPATIBILITY.md ; les lecteurs déjà couverts ailleurs n'y sont pas dupliqués.
+// les lecteurs déjà couverts ailleurs n'y sont pas dupliqués.
 import assert from "node:assert/strict";
 import * as crypto from "node:crypto";
 import { test } from "node:test";

@@ -38,10 +38,10 @@ export const DATASETS_MESSAGES_EN: Record<string, string> = {
   "Créé le": "Created on",
   "Dernière mise en ligne": "Last listed on",
   "Prix": "Price",
-  "Ce que tu reçois par emprunt réglé. Les frais de calcul de l’enclave s’ajoutent pour l’emprunteur.":
-    "What you receive per settled borrow. The enclave compute fee is added on top for the borrower.",
-  "Le prix n’est pas modifiable : il est inscrit dans le reçu signé par l’enclave au scellement du dataset. Pour changer de prix, détruis le dataset et publie-le à nouveau.":
-    "The price cannot be changed: it is written in the receipt signed by the enclave when the dataset was sealed. To change the price, destroy the dataset and publish it again.",
+  "Ce que tu reçois par emprunt réglé. Les frais de calcul du runner s’ajoutent pour l’emprunteur.":
+    "What you receive per settled borrow. The runner compute fee is added on top for the borrower.",
+  "Le prix n’est pas modifiable : il est inscrit dans le reçu signé par le runner au scellement du dataset. Pour changer de prix, détruis le dataset et publie-le à nouveau.":
+    "The price cannot be changed: it is written in the receipt signed by the runner when the dataset was sealed. To change the price, destroy the dataset and publish it again.",
 
   // Fiche : statistiques
   "Statistiques": "Statistics",
@@ -103,8 +103,8 @@ export const DATASETS_MESSAGES_EN: Record<string, string> = {
 
   // Fiche : consentement
   "Amélioration des modèles": "Model improvement",
-  "Tu as autorisé Sirius à utiliser ce dataset, uniquement dans l’enclave, pour évaluer et développer de nouveaux modèles (le {date}, texte {version}).":
-    "You allowed Sirius to use this dataset, inside the enclave only, to evaluate and develop new models (on {date}, text {version}).",
+  "Tu as autorisé Sirius à utiliser ce dataset, uniquement sur son runner d’entraînement, pour évaluer et développer de nouveaux modèles (le {date}, texte {version}).":
+    "You allowed Sirius to use this dataset, on its training runner only, to evaluate and develop new models (on {date}, text {version}).",
   "Retirer mon consentement": "Withdraw my consent",
   "Le retrait vaut pour les usages futurs. Il ne peut pas être annulé depuis cette page.":
     "Withdrawal applies to future use. It cannot be undone from this page.",
@@ -140,7 +140,7 @@ export const DATASETS_MESSAGES_EN: Record<string, string> = {
   "Champ de réglage inconnu": "Unknown setting field",
   "Action de publication inconnue": "Unknown listing action",
   "Action de consentement inconnue": "Unknown consent action",
-  "Le prix n'est pas modifiable : il est inscrit dans le reçu signé par l'enclave": "The price cannot be changed: it is written in the receipt signed by the enclave",
+  "Le prix n'est pas modifiable : il est inscrit dans le reçu signé par le runner": "The price cannot be changed: it is written in the receipt signed by the runner",
   "Champ de dataset non modifiable": "This dataset field cannot be changed",
   "Nom trop long (120 caractères maximum)": "Name too long (120 characters maximum)",
   "Nom invalide : caractères invisibles ou de contrôle interdits": "Invalid name: invisible or control characters are not allowed",

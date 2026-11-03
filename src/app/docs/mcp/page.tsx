@@ -29,10 +29,10 @@ const MCP_EN: Record<string, string> = {
   "Lit un dataset : description, détail du prix, profil d’entraînement et provider.": "Reads one dataset: description, price breakdown, training profile and provider.",
   "Liste les profils d’entraînement, ce qu’ils prédisent et leurs métriques.": "Lists the training profiles, what they predict and their metrics.",
   "Donne le réseau, le stablecoin, les plafonds de la bêta et l’état de l’audit.": "Gives the network, the stablecoin, the beta limits and the audit status.",
-  "Vérifie le certificat public d’un prêt réglé : enclave Intel TDX, mesures épinglées et transaction de règlement.": "Verifies the public certificate of a settled loan: Intel TDX enclave, pinned measurements and settlement transaction.",
+  "Vérifie le certificat public d’un prêt réglé : signature du résultat par la clé de règlement de l’escrow et transaction de règlement.": "Verifies the public certificate of a settled loan: result signed with the escrow’s settlement key, and the settlement transaction.",
 };
 
-const MCP_URL = "https://sirius-data.tech/api/mcp";
+const MCP_URL = `${process.env.NEXT_PUBLIC_SIRIUS_APP_ORIGIN?.trim() || "https://sirius-mezo.vercel.app"}/api/mcp`;
 
 const TOC = [
   { id: "adresse", label: "Adresse du serveur" },
@@ -125,7 +125,7 @@ export default function McpDocsPage() {
             ["get_dataset", d("Lit un dataset : description, détail du prix, profil d’entraînement et provider.")],
             ["list_training_profiles", d("Liste les profils d’entraînement, ce qu’ils prédisent et leurs métriques.")],
             ["get_protocol_status", d("Donne le réseau, le stablecoin, les plafonds de la bêta et l’état de l’audit.")],
-            ["verify_certificate", d("Vérifie le certificat public d’un prêt réglé : enclave Intel TDX, mesures épinglées et transaction de règlement.")],
+            ["verify_certificate", d("Vérifie le certificat public d’un prêt réglé : signature du résultat par la clé de règlement de l’escrow et transaction de règlement.")],
           ].map(([tool, effect]) => (
             <div key={tool} className="border-b border-border/60 px-4 py-3 last:border-b-0 sm:grid sm:grid-cols-[13rem_1fr] sm:gap-4">
               <code className="font-mono text-xs text-foreground">{tool}</code>

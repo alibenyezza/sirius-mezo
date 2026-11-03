@@ -1,5 +1,6 @@
 import "server-only";
 import { hashLoanAttestationPayload, parseLoanAttestationPayload } from "@/lib/tee/attestation";
+import { RECEIPT_SIGNATURE } from "@/lib/tee/receipt-message";
 import { loanEscrowBinding } from "@/lib/evm/history";
 import type { EvmEscrowBinding } from "@/lib/tee/evm-binding";
 import { modelDisplayName, modelSelection } from "@/lib/models/registry";
@@ -72,6 +73,8 @@ export interface CertificateLoanRow {
   attestationQuote: string | null;
   attestationEventLog: string | null;
   attestationComposeHash: string | null;
+  /** Reçu hors enclave : signature EIP-191 du hash attesté par le lockAuthorizer de l'escrow. */
+  attestationSignature?: string | null;
   settleTxHash: string | null;
   settledAt: Date | null;
   /** Revue ouverte par le reaper : release rapide contredit à finalité complète (fast-settlement-review.ts). */
@@ -94,6 +97,10 @@ export interface CertificateEvidence {
   quote: string | null;
   eventLog: string | null;
   composeHash: string | null;
+  /** Reçu signé par le compte de règlement, quand l'entraînement a tourné hors enclave. */
+  signature: string | null;
+  /** Escrow du prêt (déjà dans le payload) : son `lockAuthorizer` est le signataire attendu du reçu. */
+  escrow: string;
 }
 
 export interface CertificateRecord {
@@ -142,11 +149,13 @@ export function resolveCertificate(
   if (!model) return UNAVAILABLE;
 
   let chainId: number;
+  let escrowAddress: string;
   let network: EvmNetwork | null;
   try {
     const payload = parseLoanAttestationPayload(loan.attestationPayload);
     const escrow = binding(loan);
     chainId = escrow.chainId;
+    escrowAddress = escrow.escrow;
     network = networkForChain(chainId);
     if (!network) return UNAVAILABLE;
     if (
@@ -197,6 +206,8 @@ export function resolveCertificate(
         quote: loan.attestationQuote || null,
         eventLog: evidenceComplete ? loan.attestationEventLog : null,
         composeHash: evidenceComplete ? loan.attestationComposeHash!.toLowerCase() : null,
+        signature: loan.attestationSignature && RECEIPT_SIGNATURE.test(loan.attestationSignature) ? loan.attestationSignature : null,
+        escrow: escrowAddress,
       },
     },
   };
@@ -222,6 +233,8 @@ export function certificateExport(record: CertificateRecord) {
       tdxQuote: record.evidence.quote,
       eventLog: record.evidence.eventLog,
       composeHash: record.evidence.composeHash,
+      settlementSignature: record.evidence.signature,
+      escrow: record.evidence.escrow,
     },
     howToVerify: [
       "SHA-256 of attestation.payload (exact UTF-8 string) must equal attestation.payloadSha256.",
@@ -230,6 +243,7 @@ export function certificateExport(record: CertificateRecord) {
       "Replay attestation.eventLog: it must reproduce the quote's RTMR3 and contain the compose-hash event equal to attestation.composeHash.",
       "Compare MRTD and composeHash with the values published for the Sirius enclave. RTMR3 changes at every CVM restart and is only authenticated through the replayed event log.",
       "Check that settlementTxHash released the escrow for this loan on the chain identified by chainId.",
+      "Without a TDX quote (testnet runner, no enclave): recover the EIP-191 signer of the 32 raw bytes payloadSha256 from attestation.settlementSignature; it must equal lockAuthorizer() of attestation.escrow, read on-chain.",
     ],
   };
 }

@@ -9,7 +9,7 @@ import { CONTACT_EMAIL } from "@/lib/copy/disclaimers";
  * l'adresse de contact. Aucune donnée personnelle des fondateurs (nom, adresse, téléphone,
  * numéro d'immatriculation) n'apparaît ici ; un champ sans valeur réelle est omis, jamais
  * rempli d'un texte d'attente. Les prestataires cités sont ceux réellement utilisés
- * (docs/passage-mainnet/19-mise-en-production.md, deploy/operations/supplier-limits.json).
+ * (deploy/operations/supplier-limits.json).
  * `legal.test.ts` vérifie ces points.
  */
 
@@ -23,7 +23,7 @@ const LAST_UPDATED = "6 October 2026";
 const SECTIONS: [string, string[]][] = [
   ["Hosting", [
     "Web application: Vercel Inc., 440 N Barranca Ave #4133, Covina, CA 91723, USA.",
-    "Confidential compute: Phala Cloud, operated by Phala Network. Training runs inside Intel TDX hardware enclaves, as described on the status page.",
+    "Training: on this Mezo testnet instance, training runs on Sirius' testnet runner, as described on the status page. Each result is signed with the escrow's settlement key.",
   ]],
   ["Service providers", [
     "Neon: managed PostgreSQL database.",
@@ -46,7 +46,7 @@ export default function LegalPage() {
       <section className="mt-8">
         <h2 className="text-lg font-semibold">Publisher</h2>
         <p className="mt-3 text-sm text-muted">
-          This site, sirius-data.tech, is published by Sirius. Contact:{" "}
+          This site, sirius-mezo.vercel.app, is published by Sirius. Contact:{" "}
           <a href={`mailto:${CONTACT_EMAIL}`} className="text-accent hover:text-accent/80">{CONTACT_EMAIL}</a>.
         </p>
       </section>

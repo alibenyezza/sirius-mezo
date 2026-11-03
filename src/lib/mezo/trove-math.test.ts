@@ -8,7 +8,9 @@ import {
   nominalIcr,
   ONE,
   REASON_BELOW_THRESHOLD,
+  REASON_CAPACITY,
   REASON_NO_TROVE,
+  REASON_RECOVERY_MODE,
 } from "./trove-math";
 
 const E18 = BigInt(10) ** BigInt(18);
@@ -130,4 +132,23 @@ describe("drawQuote", () => {
   it("refuse un montant négatif", () => {
     assert.throws(() => drawQuote({ ...base, amount: -usd(1) }), RangeError);
   });
+});
+
+it("refuse un tirage en Recovery Mode sous le CCR, et au-delà du plafond du trove", () => {
+  const base = {
+    coll: BigInt("100000000000000000"), debt: BigInt("2000000000000000000000"), price: BigInt("77000000000000000000000"),
+    amount: BigInt("100000000000000000000"), feeRateBps: 10, mcr: BigInt("1100000000000000000"), safetyMarginBps: 1_000,
+  };
+  // Ratio après tirage ≈ 366 % : permis hors Recovery Mode comme dedans.
+  assert.equal(drawQuote(base).allowed, true);
+  assert.equal(drawQuote({ ...base, recoveryMode: true, ccr: BigInt("1500000000000000000") }).allowed, true);
+  const tight = { ...base, coll: BigInt("40000000000000000") }; // ≈ 146 %
+  assert.equal(drawQuote(tight).allowed, true);
+  const recovery = drawQuote({ ...tight, recoveryMode: true, ccr: BigInt("1500000000000000000") });
+  assert.equal(recovery.allowed, false);
+  assert.equal(recovery.reason, REASON_RECOVERY_MODE);
+  const capped = drawQuote({ ...base, maxBorrowingCapacity: BigInt("2050000000000000000000") });
+  assert.equal(capped.allowed, false);
+  assert.equal(capped.reason, REASON_CAPACITY);
+  assert.equal(drawQuote({ ...base, maxBorrowingCapacity: BigInt(0) }).allowed, true);
 });

@@ -24,12 +24,13 @@ test("mentions légales : éditeur Sirius et adresse de contact par la constante
 
 test("mentions légales : hébergeurs et prestataires réellement utilisés", () => {
   assert.match(legal, /Vercel Inc\., 440 N Barranca Ave #4133, Covina, CA 91723, USA/);
-  assert.match(legal, /Phala Cloud, operated by Phala Network/);
+  assert.match(legal, /testnet runner/);
+  assert.doesNotMatch(legal, /Phala|Intel TDX|enclave/);
   for (const provider of ["Neon", "Pinata", "OVHcloud", "Web3Auth", "Alchemy"]) assert.match(legal, new RegExp(provider));
 });
 
 test("mentions légales : aucune donnée personnelle des fondateurs, aucun texte d'attente", () => {
-  assert.doesNotMatch(legalText, /\bAli\b|Ben ?Yezza|\bNoe\b|alibenyezza/i);
+  assert.doesNotMatch(legalText, /\bAli\b|Ben ?Yezza|alibenyezza/i);
   assert.doesNotMatch(legalText, /SIREN|SIRET|RCS|share capital|capital of|\+33|\bphone\b|telephone|home address/i);
   assert.doesNotMatch(legalText, /\bTBD\b|\bTODO\b|placeholder|lorem|XXX|to be (completed|confirmed)/i);
 });

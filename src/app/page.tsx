@@ -25,49 +25,6 @@ const team = [
   },
 ];
 
-/** Compte X du projet : sa seule présence publique hors du site. */
-const X_HANDLE = "Sirius_data";
-
-const X_GLYPH = (
-  <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden>
-    <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
-  </svg>
-);
-
-/**
- * Lien vers X. En icône seule en haut de page, où il doit se voir dès l'arrivée sans
- * concurrencer le bouton de connexion ; avec le handle en pied de page, où il y a la place.
- */
-function XLink({ variant }: { variant: "icon" | "footer" }) {
-  const { t } = useLocale();
-  const label = t("Suivre Sirius sur X");
-  if (variant === "icon") {
-    return (
-      <a
-        href={`https://x.com/${X_HANDLE}`}
-        target="_blank"
-        rel="noopener noreferrer"
-        aria-label={label}
-        title={label}
-        className="flex h-10 w-10 items-center justify-center rounded-full text-muted transition-colors hover:bg-surface hover:text-foreground"
-      >
-        {X_GLYPH}
-      </a>
-    );
-  }
-  return (
-    <a
-      href={`https://x.com/${X_HANDLE}`}
-      target="_blank"
-      rel="noopener noreferrer"
-      className="flex items-center gap-2 py-2 text-sm text-muted underline-offset-4 transition-colors hover:text-foreground hover:underline"
-    >
-      {X_GLYPH}
-      <span>@{X_HANDLE}</span>
-    </a>
-  );
-}
-
 /** Avatar circulaire. */
 function AvatarCard({
   name,
@@ -149,6 +106,9 @@ function PageBottom() {
           <Link href="/proof" className="py-2 text-sm text-muted underline-offset-4 transition-colors hover:text-foreground hover:underline">
             {t("Preuve on-chain")}
           </Link>
+          <Link href="/try" className="py-2 text-sm text-muted underline-offset-4 transition-colors hover:text-foreground hover:underline">
+            {t("Essayer en 5 minutes")}
+          </Link>
           <Link href="/terms" className="py-2 text-sm text-muted underline-offset-4 transition-colors hover:text-foreground hover:underline">
             {t("Conditions d’utilisation")}
           </Link>
@@ -158,9 +118,8 @@ function PageBottom() {
           <Link href="/legal" className="py-2 text-sm text-muted underline-offset-4 transition-colors hover:text-foreground hover:underline">
             {t("Mentions légales")}
           </Link>
-          <XLink variant="footer" />
         </div>
-        <p className="text-xs tracking-widest text-muted">{t("Sirius — data lending confidentiel sur EVM")}</p>
+        <p className="text-xs tracking-widest text-muted">{t("Sirius — louer des données privées pour un entraînement, payé en MUSD sur Mezo")}</p>
         <p className="text-xs text-muted">{networkLine}</p>
       </footer>
     </div>
@@ -254,7 +213,6 @@ export default function Home() {
   return (
     <main className="relative z-10 text-foreground">
       <div className="fixed right-0 top-0 z-30 flex items-center gap-2 p-6 sm:p-8">
-        <XLink variant="icon" />
         <ConnectButton />
       </div>
 
@@ -265,8 +223,22 @@ export default function Home() {
             className="pointer-events-none absolute inset-0 z-10 flex flex-col justify-between"
             style={{ transformOrigin: "center center" }}
           >
-            <div className="flex items-start justify-between p-8 md:p-12">
+            <div className="flex max-w-xl flex-col items-start gap-4 p-8 md:p-12">
               <h1 className="text-4xl font-semibold tracking-tight text-foreground md:text-5xl">Sirius</h1>
+              <p className="text-base leading-snug text-muted md:text-lg">
+                {t("Louez des données privées pour un entraînement. Payez en MUSD, depuis votre Bitcoin, sur Mezo.")}
+              </p>
+              <div className="pointer-events-auto flex flex-wrap items-center gap-3">
+                <Link href="/try" className="rounded-xl bg-accent px-5 py-2.5 text-sm font-medium text-background transition-colors hover:bg-accent/90">
+                  {t("Essayer en 5 minutes")}
+                </Link>
+                <Link href="/proof" className="rounded-xl border border-border px-4 py-2.5 text-sm text-muted transition-colors hover:text-foreground">
+                  {t("Preuve on-chain")}
+                </Link>
+                <Link href="/break" className="rounded-xl border border-border px-4 py-2.5 text-sm text-muted transition-colors hover:text-foreground">
+                  {t("Essayez de le casser")}
+                </Link>
+              </div>
             </div>
           </div>
 
@@ -278,18 +250,24 @@ export default function Home() {
             <div className="flex max-w-xl flex-col items-center text-center">
               <h2 className="text-6xl font-semibold tracking-tight text-foreground md:text-7xl">Sirius</h2>
               <p className="mt-6 text-lg leading-snug text-muted md:text-xl">
-                {t("Vos données, exploitables sans jamais les exposer.")}
+                {t("Louez des données privées pour un entraînement. Payez en MUSD, depuis votre Bitcoin, sur Mezo.")}
               </p>
               <div className="mt-12 flex flex-col items-center gap-5">
+                <Link
+                  href="/try"
+                  className="rounded-xl bg-accent px-8 py-4 text-base font-medium text-background transition-colors hover:bg-accent/90"
+                >
+                  {t("Essayer en 5 minutes")}
+                </Link>
                 {connected ? (
                   <Link
                     href="/dashboard"
-                    className="rounded-xl bg-accent px-8 py-4 text-base font-medium text-background transition-colors hover:bg-accent/90"
+                    className="py-2 text-sm font-medium text-muted underline-offset-4 transition-colors hover:text-foreground hover:underline"
                   >
                     {t("Accéder à l’app")}
                   </Link>
                 ) : (
-                  <ConnectCta size="lg">{t("Connecter un wallet")}</ConnectCta>
+                  <ConnectCta size="md">{t("Connecter un wallet")}</ConnectCta>
                 )}
                 <Link
                   href="/docs"

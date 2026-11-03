@@ -92,7 +92,7 @@ test("StatusPill : état inconnu → « Unknown status », la valeur brute n'app
 test("PriceBreakdown : exemple 20 + 3 = 23 MUSD, minimum affiché", () => {
   const out = page("price-example");
   assert.match(out, /<dt[^>]*>Provider receives<\/dt><dd[^>]*>20\.00 MUSD<\/dd>/);
-  assert.match(out, /<dt[^>]*>Compute fee \(Phala enclave\)<\/dt><dd[^>]*>3\.00 MUSD<\/dd>/);
+  assert.match(out, /<dt[^>]*>Compute fee \(testnet runner\)<\/dt><dd[^>]*>3\.00 MUSD<\/dd>/);
   assert.match(out, /<dt[^>]*>Borrower pays<\/dt><dd[^>]*>23\.00 MUSD<\/dd>/);
   assert.match(out, /Minimum set by the tariff: 0\.001 MUSD\./);
   assert.doesNotMatch(out, /role="alert"/);

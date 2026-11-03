@@ -59,3 +59,17 @@ export function datasetRegistryAddress(): Address {
     "NEXT_PUBLIC_SIRIUS_DATASET_ADDRESS",
   );
 }
+
+/**
+ * `SiriusCheckout` (paiement en BTC), facultatif : `null` quand l'instance ne l'a pas déployé.
+ * Une valeur présente mais invalide lève, comme pour les autres adresses.
+ */
+export function checkoutAddress(): Address | null {
+  const value = process.env.SIRIUS_CHECKOUT_ADDRESS?.trim() || process.env.NEXT_PUBLIC_SIRIUS_CHECKOUT_ADDRESS?.trim();
+  if (!value) return null;
+  try {
+    return getAddress(value);
+  } catch {
+    throw new Error("SIRIUS_CHECKOUT_ADDRESS n'est pas une adresse EVM valide");
+  }
+}

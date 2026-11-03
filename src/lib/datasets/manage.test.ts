@@ -240,7 +240,7 @@ test("validateDetailsPatch : nom, description, bornes exactes et refus du prix",
   }
   rejectsWith(() => validateDetailsPatch({ description: 3 }), 400, "Description invalide");
   for (const key of ["priceUsdcAtomic", "priceUsdc", "price"]) {
-    rejectsWith(() => validateDetailsPatch({ name: "x", [key]: "1" }), 400, "Le prix n'est pas modifiable : il est inscrit dans le reçu signé par l'enclave");
+    rejectsWith(() => validateDetailsPatch({ name: "x", [key]: "1" }), 400, "Le prix n'est pas modifiable : il est inscrit dans le reçu signé par le runner");
   }
   for (const key of ["status", "provider", "listingExpiresAt", "trainingConsentRevokedAt", "wrappedKey", "id", "__proto__", "constructor"]) {
     rejectsWith(() => validateDetailsPatch(JSON.parse(`{"name":"x",${JSON.stringify(key)}:1}`)), 400, "Champ de dataset non modifiable");
@@ -548,7 +548,7 @@ test("statistiques : propriété vérifiée avant toute lecture de prêts, plafo
   assert.equal(stats.earnedAtomic, String(MAX_STATS_LOANS));
   const query = store.calls.find((call) => call.op === "loan.findMany")!.args as { where: unknown; select: Record<string, boolean> };
   assert.deepEqual(query.where, { datasetId: "ds1" });
-  assert.deepEqual(Object.keys(query.select).sort(), ["amountUsdcAtomic", "cancelTxHash", "createdAt", "datasetAmountUsdcAtomic", "status"],
+  assert.deepEqual(Object.keys(query.select).sort(), ["amountUsdcAtomic", "cancelTxHash", "createdAt", "datasetAmountUsdcAtomic", "evmEscrowAddress", "status"],
     "ni l'emprunteur ni les preuves ne sont lus");
 });
 
@@ -674,6 +674,8 @@ function routeDeps(store: ReturnType<typeof fakeDb>, session: { current: { addre
     "@/lib/http/rate-limit": rate,
     "@/lib/datasets/manage": manage,
     "@/lib/evm/usdc": { USDC_DECIMALS: 6 },
+    "@/lib/evm/addresses": { escrowAddress: () => `0x${"e1".repeat(20)}` },
+    "@/lib/mezo/platform-fee": { readPlatformFee: async () => null },
     "@/lib/auth/require-auth": { requireAuth: () => { if (!session.current) throw new AppError("Authentification requise", 401); return session.current; } },
     "@/lib/auth/mutation-grant": {
       requireMutationGrant: async (...args: unknown[]) => {
@@ -721,7 +723,7 @@ test("routes /settings : session obligatoire, 404 pour un autre wallet, prix ref
   session.current = { address: OWNER };
   response = await route.PATCH(jsonRequest(url, "PATCH", { priceUsdcAtomic: "1" }), ctx("ds1"));
   assert.equal(response.status, 400);
-  assert.equal((await response.json()).error, "Le prix n'est pas modifiable : il est inscrit dans le reçu signé par l'enclave");
+  assert.equal((await response.json()).error, "Le prix n'est pas modifiable : il est inscrit dans le reçu signé par le runner");
   assert.equal(store.datasets.get("ds1")!.priceUsdcAtomic, "20000000");
   response = await route.PATCH(jsonRequest(url, "PATCH", { name: " Renommé ", description: "Ma description" }), ctx("ds1"));
   assert.equal(response.status, 200);
@@ -934,4 +936,17 @@ test("route PATCH /api/datasets/[id] existante : mêmes règles de passage à Pu
   const demo = legacyRoute(store, { SIRIUS_PHALA_DEMO: "true" });
   assert.equal((await demo.patch("ds4", "LISTED")).status, 409, "en démo, rien ne repasse Public");
   assert.equal((await demo.patch("ds4", "UNLISTED")).status, 409, "ni Semi-privé depuis Privé");
+});
+
+test("aggregateLoanStats : frais de plateforme retirés seulement sur l'escrow qui les prélève", () => {
+  const ESCROW = `0x${"e1".repeat(20)}`;
+  const OLD = `0x${"e0".repeat(20)}`;
+  const stats = aggregateLoanStats([
+    loan("SETTLED", NOW - 1, { datasetAmountUsdcAtomic: "10000", evmEscrowAddress: ESCROW.toUpperCase().replace("0X", "0x") }),
+    loan("SETTLED", NOW - 1, { datasetAmountUsdcAtomic: "10000", evmEscrowAddress: OLD }),
+    loan("ESCROWED", NOW - 1, { datasetAmountUsdcAtomic: "5000", evmEscrowAddress: ESCROW }),
+  ], NOW, { escrow: ESCROW, bps: 200 });
+  assert.equal(stats.earnedAtomic, (BigInt(9800) + BigInt(10000)).toString());
+  assert.equal(stats.inEscrowAtomic, "4900");
+  assert.equal(aggregateLoanStats([loan("SETTLED", NOW - 1, { datasetAmountUsdcAtomic: "10000", evmEscrowAddress: ESCROW })], NOW).earnedAtomic, "10000");
 });

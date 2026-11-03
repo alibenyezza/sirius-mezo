@@ -40,7 +40,8 @@ test("état du protocole : plafonds seulement sur mainnet, enclave seulement si 
   const testnet = withNetwork("testnet", () => readProtocolStatus({ ...env, SIRIUS_EXPECTED_MRTD: "" }));
   assert.equal(testnet.mainnet, false);
   assert.equal(testnet.enclave, false);
-  assert.match(testnet.confidentialCompute, /Demonstration mode/);
+  assert.match(testnet.confidentialCompute, /not in a hardware enclave/);
+  assert.match(testnet.confidentialCompute, /signed with the escrow's settlement key/);
   assert.deepEqual(testnet.limits, { perLoan: null, totalExposure: null });
   assert.deepEqual(testnet.mezo, {
     stabilityPool: "0x1CCA7E410eE41739792eA0A24e00349Dd247680e",

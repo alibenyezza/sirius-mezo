@@ -16,6 +16,8 @@ const record: CertificateRecord = {
     quote: "ab".repeat(10),
     eventLog: "[]",
     composeHash: "c".repeat(64),
+    signature: null,
+    escrow: `0x${"34".repeat(20)}`,
   },
 };
 

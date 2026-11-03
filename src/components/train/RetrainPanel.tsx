@@ -19,7 +19,7 @@ type Listing =
 
 /**
  * Ré-entraînement d'un emprunt terminé : un NOUVEL emprunt complet du même dataset (donnée payée à
- * nouveau, plus le calcul : docs/passage-mainnet/01-decisions-avant-samedi.md, section 2).
+ * nouveau, plus le calcul).
  *
  * Aucune nouvelle transaction : on réutilise `borrowDataset`, le parcours d'emprunt existant
  * (préparation du prêt, devis signé confirmé par l'emprunteur avec le total, approbation, lock). Le

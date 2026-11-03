@@ -26,6 +26,7 @@ const CERTIFICATE_SELECT = {
   attestationQuote: true,
   attestationEventLog: true,
   attestationComposeHash: true,
+  attestationSignature: true,
   settleTxHash: true,
   settledAt: true,
   finalityReview: true,

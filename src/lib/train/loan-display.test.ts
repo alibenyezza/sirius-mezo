@@ -322,7 +322,7 @@ test("l'attente de finalité et la confirmation de double emprunt sont traduites
     "Finalité imminente…",
     "L’entraînement pourra démarrer dans ~{minutes} min — tu peux fermer cette page, ton paiement est en sécurité dans l’escrow.",
     "Le réseau finalise ton paiement : l’entraînement pourra démarrer d’une minute à l’autre. Ton paiement est en sécurité dans l’escrow.",
-    "Si cette page reste ouverte, l’entraînement démarre automatiquement dès la finalité. Sinon, reviens lancer le job : inutile d’emprunter à nouveau.",
+    "Si cette page reste ouverte, l’entraînement démarre automatiquement dès la finalité. Sinon, reviens lancer l’entraînement : inutile d’emprunter à nouveau.",
     "Emprunt déjà en cours",
     "Tu as déjà un emprunt payé sur ce dataset, en attente d’entraînement. Emprunter à nouveau te fait payer une seconde fois.",
     "Voir mes entraînements",

@@ -1,7 +1,7 @@
 import { addressesEqual } from "@/lib/evm/address";
 
 /**
- * Logique d'affichage de la page Train pour les emprunts (docs/passage-mainnet/09-train-et-certificat.md,
+ * Logique d'affichage de la page Train pour les emprunts (
  * « Avant le 6 »). Fonctions pures : aucune décision d'argent ne se prend ici. Le serveur reste
  * l'autorité (`POST /api/loans/[id]/cancel` vérifie l'emprunteur, l'échéance et l'état on-chain) ;
  * ces règles ne décident que de ce que l'interface propose, et penchent toujours vers « ne rien

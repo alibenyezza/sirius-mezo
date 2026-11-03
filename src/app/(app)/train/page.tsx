@@ -296,7 +296,7 @@ function TrainPageContent() {
     setError(null);
     setBusyKey(key, true);
     try {
-      if (!dataset.runnerReceipt) throw new Error(t("Reçu confidentiel du dataset manquant"));
+      if (!dataset.runnerReceipt) throw new Error(t("Reçu du runner pour ce dataset manquant"));
       const model = modelSelection(dataset.modelId, dataset.modelVersion);
       if (!model) throw new Error(t("Profil d’entraînement du dataset absent ou invalide"));
       const res = await runSelfTrain(dataset.id, dataset.runnerReceipt, model);
@@ -429,7 +429,7 @@ function TrainPageContent() {
       const message = messageOf(err);
       if (message === "Loan non verrouillé ou déjà en cours") {
         await refresh().catch(() => {});
-        setError(t("Le job TEE est déjà en cours. Actualise dans quelques secondes."));
+        setError(t("L’entraînement est déjà en cours. Actualise dans quelques secondes."));
       } else if (message === LOCK_FINALITY_PENDING) {
         // Pas une erreur : le lock n'est pas encore sous le bloc stable. L'attente reprend (un
         // lancement automatique refusé n'est pas consommé) et la relecture remplace le bouton.
@@ -453,7 +453,7 @@ function TrainPageContent() {
     setError(null);
     setBusyKey(key, true);
     try {
-      if (!loan.runnerReceipt) throw new Error(t("Capsule TEE manquante"));
+      if (!loan.runnerReceipt) throw new Error(t("Capsule du modèle manquante"));
       deliver(loan.id, await resumeLoanSettlement(loan.id, loan.runnerReceipt));
       await refresh();
     } catch (err) {
@@ -555,7 +555,7 @@ function TrainPageContent() {
     <Page>
       <PageHeader
         title={t("Entraîner un modèle")}
-        description={t("Le calcul tourne dans un TEE — tu ne récupères que le modèle, jamais la donnée brute.")}
+        description={t("L’entraînement tourne sur le runner de testnet et chaque résultat est signé avec la clé de règlement de l’escrow. Tu ne récupères que le modèle, jamais la donnée brute.")}
       />
 
       <DisclaimerNote messages={["modelQuality", "retrainDeterministic", "betaLimits", "contactUs"]} />
@@ -729,11 +729,11 @@ function TrainPageContent() {
                     className="inline-flex max-w-full shrink-0 items-center justify-center gap-2 rounded-xl bg-accent px-4 py-2 text-sm font-medium text-background transition-colors hover:bg-accent/90 disabled:opacity-50"
                   >
                     {busy.has(`job:${l.id}`) ? (
-                      <><TeeSpinner />{t("TEE en cours…")}</>
+                      <><TeeSpinner />{t("Entraînement…")}</>
                     )
                       : l.status === "TRAINING"
                         ? t("Réessayer le job")
-                        : t("Lancer le job (TEE)")}
+                        : t("Lancer l’entraînement")}
                   </button>
                 )}
                 {l.status === "SUBMITTING" && (
@@ -791,7 +791,7 @@ function TrainPageContent() {
                   <p className="mt-1 text-muted">
                     {fastLock
                       ? t("Si cette page reste ouverte, l’entraînement démarre automatiquement dès la confirmation. Sinon, reviens lancer le job : inutile d’emprunter à nouveau.")
-                      : t("Si cette page reste ouverte, l’entraînement démarre automatiquement dès la finalité. Sinon, reviens lancer le job : inutile d’emprunter à nouveau.")}
+                      : t("Si cette page reste ouverte, l’entraînement démarre automatiquement dès la finalité. Sinon, reviens lancer l’entraînement : inutile d’emprunter à nouveau.")}
                   </p>
                 </div>
               )}
@@ -808,7 +808,7 @@ function TrainPageContent() {
                       : t("Entraînement échoué : aucun modèle n’a été livré.")}
                   </p>
                   <p className="mt-1 text-muted">
-                    {t("Le remboursement te rend tout ce que tu as payé, sauf, le cas échéant, le calcul réellement consommé et mesuré par l’enclave. Il est confirmé dans ton wallet ; les frais réseau ETH sont payés séparément.")}
+                    {t("Le remboursement te rend tout ce que tu as payé, sauf, le cas échéant, le calcul réellement consommé et mesuré par le runner. Il est confirmé dans ton wallet ; les frais réseau, en BTC, sont payés séparément.")}
                   </p>
                 </div>
               )}
@@ -902,7 +902,7 @@ function SelfTrainCard({
         aria-busy={busy}
         className="inline-flex max-w-full shrink-0 items-center justify-center gap-2 rounded-xl bg-accent px-4 py-2 text-sm font-medium text-background transition-colors hover:bg-accent/90 disabled:opacity-50"
       >
-        {busy ? <><TeeSpinner />{t("TEE en cours…")}</> : t("Entraîner")}
+        {busy ? <><TeeSpinner />{t("Entraînement…")}</> : t("Entraîner")}
       </button>
     </Card>
   );

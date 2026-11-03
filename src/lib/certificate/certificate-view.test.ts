@@ -59,7 +59,7 @@ test("échec, attente, erreur, sans quote : jamais le titre d'exécution vérifi
   assert.match(page("failed"), /may have been upgraded/);
   assert.match(page("failed"), /data-pin="mismatch"/);
   assert.match(page("pending"), /Reload this page in a few minutes/);
-  assert.match(page("unattested"), /No hardware attestation recorded/);
+  assert.match(page("unattested"), /No signed receipt recorded/);
   assert.equal(page("unattested").includes("Settlement recorded"), false, "date absente : ligne omise");
   assert.match(page("no-explorer"), new RegExp(`0x(12){32}`));
   assert.equal(page("no-explorer").includes("target=\"_blank\""), false, "sans explorateur : pas de lien");

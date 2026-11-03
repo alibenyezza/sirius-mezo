@@ -2,7 +2,8 @@ import "server-only";
 import { prisma } from "@/lib/db";
 import { billingEnabled } from "@/lib/billing/config";
 import { getPublicClient } from "@/lib/evm/client";
-import { kybRegistryAddress } from "@/lib/evm/addresses";
+import { datasetRegistryAddress, kybRegistryAddress } from "@/lib/evm/addresses";
+import { siriusdatasetregistryAbi } from "@/lib/evm/abi/siriusdatasetregistry";
 import { siriuskybregistryAbi } from "@/lib/evm/abi/siriuskybregistry";
 import { resolveServerNetwork, USDC_DECIMALS_BY_NETWORK } from "@/lib/evm/networks";
 import { USDC_DECIMALS } from "@/lib/evm/usdc";
@@ -44,6 +45,28 @@ const db: MarketplaceDb = {
   },
 };
 
+/**
+ * Titres vivants sur le registre configuré, lus on-chain (`isLive`). Les identifiants EVM sont
+ * publics ; seuls ceux des datasets demandés sont lus. Une panne RPC rend `null` : rien n'est caché.
+ */
+async function liveOnRegistry(datasetIds: readonly string[]): Promise<Set<string> | null> {
+  const rows = await prisma.dataset.findMany({ where: { id: { in: [...datasetIds] } }, select: { id: true, evmDatasetId: true } });
+  const registry = datasetRegistryAddress();
+  const client = getPublicClient();
+  try {
+    const checks = await Promise.all(rows.map(async (row) => {
+      if (!row.evmDatasetId) return null;
+      const live = await client.readContract({
+        address: registry, abi: siriusdatasetregistryAbi, functionName: "isLive", args: [row.evmDatasetId as `0x${string}`],
+      });
+      return live ? row.id : null;
+    }));
+    return new Set(checks.filter((id): id is string => id !== null));
+  } catch {
+    return null;
+  }
+}
+
 function billingMode(): BillingMode {
   try {
     return billingEnabled() ? "v7" : "v6";
@@ -71,5 +94,6 @@ export function marketplaceDeps(): MarketplaceDeps {
     },
     token,
     now: () => new Date(),
+    liveOnRegistry,
   };
 }

@@ -17,8 +17,8 @@ export const GUIDE_MESSAGES_EN: Record<string, string> = {
 
   // Accueil
   "Salut, je suis {name}.": "Hi, I’m {name}.",
-  "Sirius permet d’entraîner un modèle sur des données confidentielles sans jamais les voir, et d’être payé quand on prête les siennes.":
-    "Sirius lets you train a model on confidential data without ever seeing it, and get paid when you lend yours.",
+  "Sirius permet de louer des données privées pour un entraînement, payé en MUSD, sans jamais recevoir la donnée brute, et d’être payé quand on prête les siennes.":
+    "Sirius lets you rent private data for one training run, paid in MUSD, without ever receiving the raw data, and get paid when you lend yours.",
   "Je te montre comment ça marche en quelques étapes — tu peux passer à tout moment.":
     "I’ll show you how it works in a few steps — you can skip at any time.",
 
@@ -39,26 +39,24 @@ export const GUIDE_MESSAGES_EN: Record<string, string> = {
     "Every lender and borrower is verified on-chain: it protects everyone’s data and money.",
   "Je regarde si ton wallet est déjà vérifié…": "Checking whether your wallet is already verified…",
   "Une seule transaction à confirmer dans ton wallet, et c’est fait.": "One transaction to confirm in your wallet, and you’re done.",
-  "Il te faut un peu d’ETH pour payer le gas de cette transaction : ajoute des fonds d’abord, je t’attends ici.":
-    "You need a little ETH to pay the gas for this transaction: add funds first, I’ll wait here.",
+  "Il te faut un peu de BTC pour payer le gas de cette transaction : ajoute des fonds d’abord, je t’attends ici.":
+    "You need a little BTC to pay the gas for this transaction: add funds first, I’ll wait here.",
   "L’accès instantané n’est pas ouvert : colle le code d’invitation reçu de l’équipe, ou écris-nous.":
     "Instant access is not open: paste the invitation code you received from the team, or write to us.",
   "Je n’arrive pas à lire ton statut pour l’instant. Tu peux le vérifier sur la page Vérification, ou continuer.":
     "I can’t read your status right now. You can check it on the Verification page, or continue.",
   "Ton wallet est vérifié. Je te fais visiter ?": "Your wallet is verified. Shall I show you around?",
 
-  // Tour du menu (« Phala » est un nom propre, identique dans les deux langues)
-  "Phala": "Phala",
+  // Tour du menu
+  "Démo d’entraînement": "Training demo",
   "Parcours les datasets publiés, et emprunte celui qu’il te faut : le prix est bloqué en escrow, jamais versé d’avance.":
     "Browse the published datasets and borrow the one you need: the price is locked in escrow, never paid upfront.",
-  "Lance tes entraînements et récupère tes modèles ici. Après le paiement, compte ~15 minutes de finalité avant de lancer le job.":
-    "Run your training jobs and collect your models here. After payment, allow ~15 minutes of finality before running the job.",
+  "Lance tes entraînements et récupère tes modèles ici. Après le paiement, quelques secondes suffisent pour que le lock soit confirmé.":
+    "Run your training jobs and collect your models here. After payment, the lock is confirmed in a few seconds.",
   "Dépose un CSV : il est chiffré dans ton navigateur, et tu es payé·e en {token} à chaque entraînement réglé.":
     "Upload a CSV: it is encrypted in your browser, and you get paid in {token} on every settled training run.",
   "Tes emprunts, règlements et remboursements, chacun vérifiable sur l’explorateur de la chaîne.":
     "Your borrowings, settlements and refunds, each verifiable on the chain explorer.",
-  "L’enclave qui entraîne sans voir les données : son identité est attestée à chaque requête.":
-    "The enclave that trains without seeing the data: its identity is attested on every request.",
   "Ton solde, ta liste « Bien démarrer » et tes raccourcis. On y revient quand tu veux.":
     "Your balance, your “Get started” list and your shortcuts. Come back whenever you like.",
   "Tu sais tout !": "You know it all!",
@@ -83,8 +81,8 @@ export const GUIDE_MESSAGES_EN: Record<string, string> = {
   "Cette liste suit l’état réel de ton compte — connexion, vérification, fonds — et disparaît quand tout est fait.":
     "This list follows the real state of your account — sign-in, verification, funds — and disappears once everything is done.",
   "Ton solde": "Your balance",
-  "Ton solde en {token}, et l’ETH qu’il te reste pour le gas. « Ajouter des fonds » ouvre les options de dépôt.":
-    "Your {token} balance, and the ETH you have left for gas. “Add funds” opens the deposit options.",
+  "Ton solde en {token}, et le BTC qu’il te reste pour le gas. « Ajouter des fonds » ouvre les options de dépôt.":
+    "Your {token} balance, and the BTC you have left for gas. “Add funds” opens the deposit options.",
   "À retirer": "To withdraw",
   "Les règlements et remboursements arrivent d’abord ici, dans l’escrow : retire-les pour les ramener dans ton wallet.":
     "Settlements and refunds land here first, in the escrow: withdraw them to move them to your wallet.",
@@ -102,16 +100,16 @@ export const GUIDE_MESSAGES_EN: Record<string, string> = {
   "Entraîner sur tes données sans escrow est réservé à l’équipe pendant la bêta : écris-nous pour l’essayer.":
     "Training on your own data without escrow is reserved to the team during the beta: write to us to try it.",
   "Mes entraînements": "My training runs",
-  "Après un emprunt, attends la finalité du paiement (~15 min), puis « Lancer le job (TEE) ». Un modèle réglé se vérifie et se télécharge ici ; un prêt jamais réglé se rembourse après son délai.":
-    "After borrowing, wait for payment finality (~15 min), then “Run job (TEE)”. A settled model is verified and downloaded here; a loan never settled is refunded after its deadline.",
+  "Après un emprunt, attends quelques secondes que le paiement soit confirmé, puis « Lancer l’entraînement ». Un modèle réglé se vérifie et se télécharge ici ; un prêt jamais réglé se rembourse après son délai.":
+    "After borrowing, wait a few seconds for the payment to be confirmed, then “Run training”. A settled model is verified and downloaded here; a loan never settled is refunded after its deadline.",
 
-  // Phala
-  "Phala, l’enclave": "Phala, the enclave",
-  "Le calcul tourne dans une enclave Phala (Intel TDX) : l’identité du code est attestée à chaque requête, et personne ne voit tes données.":
-    "Computation runs inside a Phala enclave (Intel TDX): the code’s identity is attested on every request, and nobody sees your data.",
+  // Démo d’entraînement (page /phala, absente sur le testnet Mezo)
+  "La démo d’entraînement": "The training demo",
+  "Un espace pour essayer un entraînement sur un dataset d’exemple ou ton propre CSV. Tu reçois le modèle entraîné.":
+    "A space to try a training run on a sample dataset or your own CSV. You receive the trained model.",
   "L’attestation": "The attestation",
-  "Ce lien ouvre l’attestation du runner : la preuve que le code attendu tourne bien dans l’enclave.":
-    "This link opens the runner’s attestation: the proof that the expected code is running inside the enclave.",
+  "Ce lien ouvre les informations publiques du runner qui entraîne.":
+    "This link opens the public details of the runner that trains.",
   "Jeux d’exemple": "Sample datasets",
   "Un dataset synthétique prêt à l’emploi pour essayer sans rien préparer.":
     "A ready-to-use synthetic dataset to try things out without preparing anything.",
@@ -121,14 +119,14 @@ export const GUIDE_MESSAGES_EN: Record<string, string> = {
   "Mes résultats": "My results",
   "Tes modèles entraînés restent dans ce navigateur : télécharge-les pour les garder ailleurs.":
     "Your trained models stay in this browser: download them to keep them elsewhere.",
-  "L’espace Phala": "The Phala workspace",
+  "L’espace de démo": "The demo workspace",
   "La démo s’ouvre dans un espace dédié ; l’entraînement standard reste sur la page Entraîner.":
     "The demo opens in a dedicated workspace; standard training stays on the Train page.",
 
   // Marketplace
   "La marketplace": "The marketplace",
-  "Les datasets publiés par les fournisseurs. Un emprunt, c’est un entraînement dans l’enclave : tu reçois le modèle, jamais la donnée.":
-    "The datasets published by providers. A loan is one training run in the enclave: you receive the model, never the data.",
+  "Les datasets publiés par les fournisseurs. Un emprunt, c’est un entraînement sur le runner de testnet : tu reçois le modèle, jamais la donnée.":
+    "The datasets published by providers. A loan is one training run on the testnet runner: you receive the model, never the data.",
   "Rechercher": "Search",
   "Par nom ou description ; la recherche part après une pause de frappe, ou sur Entrée.":
     "By name or description; the search runs after a typing pause, or on Enter.",
@@ -154,8 +152,8 @@ export const GUIDE_MESSAGES_EN: Record<string, string> = {
   "Emprunts passés et part réglée au fournisseur : un signal sur la fiabilité du dataset.":
     "Past loans and the share settled to the provider: a signal of the dataset’s reliability.",
   "Ce que tu paies": "What you pay",
-  "La part du fournisseur plus les frais de calcul. Le montant exact est dans le devis, avant tout paiement ; le gas se paie à part, en ETH.":
-    "The provider’s share plus compute fees. The exact amount is in the quote, before any payment; gas is paid separately, in ETH.",
+  "La part du fournisseur plus les frais de calcul. Le montant exact est dans le devis, avant tout paiement ; le gas se paie à part, en BTC.":
+    "The provider’s share plus compute fees. The exact amount is in the quote, before any payment; gas is paid separately, in BTC.",
   "Emprunter": "Borrow",
   "Une transaction bloque le prix en escrow. La connexion et la vérification du wallet ne sont demandées qu’à ce moment-là.":
     "One transaction locks the price in escrow. Sign-in and wallet verification are only requested at that point.",
@@ -189,26 +187,26 @@ export const GUIDE_MESSAGES_EN: Record<string, string> = {
   "Le temps pendant lequel le dataset reste empruntable ; tu pourras le mettre en pause avant.":
     "How long the dataset stays borrowable; you can pause it earlier.",
   "Publier": "Publish",
-  "Chiffrement, scellement dans l’enclave, IPFS, puis le titre on-chain : une transaction à signer dans ton wallet.":
-    "Encryption, sealing in the enclave, IPFS, then the on-chain title: one transaction to sign in your wallet.",
+  "Chiffrement, scellement par le runner de testnet, IPFS, puis le titre on-chain : une transaction à signer dans ton wallet.":
+    "Encryption, sealing by the testnet runner, IPFS, then the on-chain title: one transaction to sign in your wallet.",
 
   // Explorer
   "En chiffres": "In numbers",
   "Emprunts, datasets empruntés, réglés, remboursés : le résumé de ton activité on-chain.":
     "Borrowings, datasets borrowed, settled, refunded: the summary of your on-chain activity.",
   "Un emprunt": "A borrowing",
-  "Titre du dataset, lock, attestation TEE, reçu d’audit, règlement ou remboursement : chaque preuve a son lien « Vérifier ».":
-    "Dataset title, lock, TEE attestation, audit receipt, settlement or refund: every proof has its “Verify” link.",
+  "Titre du dataset, lock, résultat signé, reçu d’audit, règlement ou remboursement : chaque preuve a son lien « Vérifier ».":
+    "Dataset title, lock, signed result, audit receipt, settlement or refund: every proof has its “Verify” link.",
 
   // Wallet
   "Ton wallet": "Your wallet",
   "Solde, gas, dépôt, retrait : tout ce qui touche à l’argent passe ici — et reste dans ton wallet ou dans l’escrow, jamais chez Sirius.":
     "Balance, gas, deposits, withdrawals: everything about money goes through here — and stays in your wallet or in the escrow, never with Sirius.",
   "Solde et gas": "Balance and gas",
-  "Ton solde en {token} et l’BTC pour le gas. « Ajouter des fonds » : par carte, depuis un autre wallet ou depuis une autre chaîne.":
+  "Ton solde en {token} et le BTC pour le gas. « Ajouter des fonds » : par carte, depuis un autre wallet ou depuis une autre chaîne.":
     "Your {token} balance and the BTC for gas. “Add funds”: by card, from another wallet or from another chain.",
-  "Ton solde en {token} et l’BTC pour le gas. « Ajouter des fonds » envoie des jetons de test et un peu d’ETH de test.":
-    "Your {token} balance and the BTC for gas. “Add funds” sends test tokens and a little test ETH.",
+  "Ton solde en {token} et le BTC pour le gas. « Ajouter des fonds » envoie des jetons de test et un peu de BTC de test.":
+    "Your {token} balance and the BTC for gas. “Add funds” sends test tokens and a little test BTC.",
   "Ton compte": "Your account",
   "Le réseau du site, ton adresse à copier, et l’état de ta session signée.":
     "The site’s network, your address to copy, and the state of your signed session.",

@@ -112,7 +112,6 @@ function ExplorerPageContent() {
   // Vue centrée sur le wallet connecté : seuls ses emprunts. L'API renvoie aussi les prêts où il
   // est fournisseur ; ils exposeraient l'adresse d'un autre emprunteur, donc on les écarte ici
   // plutôt que de se fier à la seule route. La vue fournisseur n'a pas d'équivalent pour l'instant
-  // (docs/passage-mainnet/06-mes-datasets.md).
   const borrowings = useMemo(
     () => (address ? loans.filter((loan) => addressesEqual(loan.borrower, address)) : []),
     [loans, address],
@@ -191,7 +190,7 @@ function ExplorerPageContent() {
             <div className="mt-5 grid gap-2 sm:grid-cols-2">
               <Evidence label={t("Titre du dataset")} value={loan.dataset.evmDatasetId} txHash={loan.dataset.evmMintTxHash} network={network} />
               <Evidence label={`Lock ${stablecoinTicker(network)}`} value={loan.evmLockTxHash} txHash={loan.evmLockTxHash} network={network} />
-              <Evidence label={t("Attestation TEE")} value={loan.attestationHash} />
+              <Evidence label={t("Attestation du runner")} value={loan.attestationHash} />
               <Evidence label={t("Reçu d’audit")} value={loan.auditReceipt} />
               <Evidence
                 label={loan.cancelTxHash ? t("Remboursement {token}", { token: stablecoinTicker(network) }) : `Release ${stablecoinTicker(network)}`}

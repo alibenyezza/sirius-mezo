@@ -63,7 +63,7 @@ export const GUIDE_PAGE_TOURS: Readonly<Record<GuidePageKey, GuidePageTour>> = {
     steps: [
       { anchor: null, title: "Ton tableau de bord", body: "Tout ce qui compte pour ton compte en un coup d’œil : ta liste de départ, ton solde et tes raccourcis." },
       { anchor: "get-started", title: "Bien démarrer", body: "Cette liste suit l’état réel de ton compte — connexion, vérification, fonds — et disparaît quand tout est fait." },
-      { anchor: "balance", title: "Ton solde", body: "Ton solde en {token}, et l’ETH qu’il te reste pour le gas. « Ajouter des fonds » ouvre les options de dépôt." },
+      { anchor: "balance", title: "Ton solde", body: "Ton solde en {token}, et le BTC qu’il te reste pour le gas. « Ajouter des fonds » ouvre les options de dépôt." },
       { anchor: "credits", title: "À retirer", body: "Les règlements et remboursements arrivent d’abord ici, dans l’escrow : retire-les pour les ramener dans ton wallet." },
       { anchor: "trust", title: "Confiance EVM", body: "Tes emprunts réglés, remboursés et tes preuves on-chain, côté fournisseur et côté emprunteur." },
       { anchor: "shortcuts", title: "Raccourcis", body: "Marketplace pour emprunter, Entraîner pour suivre tes jobs, Mes datasets pour publier les tiens." },
@@ -74,24 +74,24 @@ export const GUIDE_PAGE_TOURS: Readonly<Record<GuidePageKey, GuidePageTour>> = {
     steps: [
       { anchor: null, title: "Entraîner un modèle", body: "Ici tu suis tes emprunts et tes entraînements : chaque carte est un prêt, du paiement jusqu’au modèle livré." },
       { anchor: "own-data", title: "Tes propres données", body: "Entraîner sur tes données sans escrow est réservé à l’équipe pendant la bêta : écris-nous pour l’essayer." },
-      { anchor: "history", title: "Mes entraînements", body: "Après un emprunt, attends la finalité du paiement (~15 min), puis « Lancer le job (TEE) ». Un modèle réglé se vérifie et se télécharge ici ; un prêt jamais réglé se rembourse après son délai." },
+      { anchor: "history", title: "Mes entraînements", body: "Après un emprunt, attends quelques secondes que le paiement soit confirmé, puis « Lancer l’entraînement ». Un modèle réglé se vérifie et se télécharge ici ; un prêt jamais réglé se rembourse après son délai." },
     ],
   },
   phala: {
-    title: "Phala",
+    title: "Démo d’entraînement",
     steps: [
-      { anchor: null, title: "Phala, l’enclave", body: "Le calcul tourne dans une enclave Phala (Intel TDX) : l’identité du code est attestée à chaque requête, et personne ne voit tes données." },
-      { anchor: "attestation", title: "L’attestation", body: "Ce lien ouvre l’attestation du runner : la preuve que le code attendu tourne bien dans l’enclave." },
+      { anchor: null, title: "La démo d’entraînement", body: "Un espace pour essayer un entraînement sur un dataset d’exemple ou ton propre CSV. Tu reçois le modèle entraîné." },
+      { anchor: "attestation", title: "L’attestation", body: "Ce lien ouvre les informations publiques du runner qui entraîne." },
       { anchor: "examples", title: "Jeux d’exemple", body: "Un dataset synthétique prêt à l’emploi pour essayer sans rien préparer." },
       { anchor: "prepare", title: "Préparer l’entraînement", body: "Ton CSV, le modèle et la colonne à prédire. Le fichier est chiffré dans ton navigateur ; le calcul est offert pendant la démo." },
       { anchor: "results", title: "Mes résultats", body: "Tes modèles entraînés restent dans ce navigateur : télécharge-les pour les garder ailleurs." },
-      { anchor: "workspace", title: "L’espace Phala", body: "La démo s’ouvre dans un espace dédié ; l’entraînement standard reste sur la page Entraîner." },
+      { anchor: "workspace", title: "L’espace de démo", body: "La démo s’ouvre dans un espace dédié ; l’entraînement standard reste sur la page Entraîner." },
     ],
   },
   marketplace: {
     title: "Marketplace",
     steps: [
-      { anchor: null, title: "La marketplace", body: "Les datasets publiés par les fournisseurs. Un emprunt, c’est un entraînement dans l’enclave : tu reçois le modèle, jamais la donnée." },
+      { anchor: null, title: "La marketplace", body: "Les datasets publiés par les fournisseurs. Un emprunt, c’est un entraînement sur le runner de testnet : tu reçois le modèle, jamais la donnée." },
       { anchor: "search", title: "Rechercher", body: "Par nom ou description ; la recherche part après une pause de frappe, ou sur Entrée." },
       { anchor: "filters", title: "Filtrer", body: "Catégorie, modèle, prix total, taille — et « Vérifiés uniquement » pour ne garder que les fournisseurs attestés." },
       { anchor: "sort", title: "Trier", body: "Plus récents, plus empruntés ou prix croissant." },
@@ -105,7 +105,7 @@ export const GUIDE_PAGE_TOURS: Readonly<Record<GuidePageKey, GuidePageTour>> = {
       { anchor: "data", title: "Les données", body: "Lignes, colonnes, taille et catégorie. Les noms et types des colonnes ne sont pas publiés." },
       { anchor: "model", title: "Le modèle", body: "Fixé par le fournisseur à la publication : c’est ce modèle entraîné que tu recevras, avec ses coefficients et ses métriques." },
       { anchor: "stats", title: "Statistiques", body: "Emprunts passés et part réglée au fournisseur : un signal sur la fiabilité du dataset." },
-      { anchor: "price", title: "Ce que tu paies", body: "La part du fournisseur plus les frais de calcul. Le montant exact est dans le devis, avant tout paiement ; le gas se paie à part, en ETH." },
+      { anchor: "price", title: "Ce que tu paies", body: "La part du fournisseur plus les frais de calcul. Le montant exact est dans le devis, avant tout paiement ; le gas se paie à part, en BTC." },
       { anchor: "borrow", title: "Emprunter", body: "Une transaction bloque le prix en escrow. La connexion et la vérification du wallet ne sont demandées qu’à ce moment-là." },
     ],
   },
@@ -127,7 +127,7 @@ export const GUIDE_PAGE_TOURS: Readonly<Record<GuidePageKey, GuidePageTour>> = {
       { anchor: "profile", title: "Catégorie et profil", body: "La catégorie sert de filtre sur la marketplace ; le profil d’entraînement est vérifié sur le CSV puis verrouillé on-chain." },
       { anchor: "price", title: "Ton gain", body: "Ce que tu veux gagner par emprunt, en {token}. Les frais de calcul s’ajoutent pour l’emprunteur." },
       { anchor: "duration", title: "Durée de publication", body: "Le temps pendant lequel le dataset reste empruntable ; tu pourras le mettre en pause avant." },
-      { anchor: "publish", title: "Publier", body: "Chiffrement, scellement dans l’enclave, IPFS, puis le titre on-chain : une transaction à signer dans ton wallet." },
+      { anchor: "publish", title: "Publier", body: "Chiffrement, scellement par le runner de testnet, IPFS, puis le titre on-chain : une transaction à signer dans ton wallet." },
     ],
   },
   explorer: {
@@ -135,7 +135,7 @@ export const GUIDE_PAGE_TOURS: Readonly<Record<GuidePageKey, GuidePageTour>> = {
     steps: [
       { anchor: null, title: "Explorer", body: "Tes emprunts, règlements et remboursements, chacun vérifiable sur l’explorateur de la chaîne. Jamais le contenu des datasets." },
       { anchor: "summary", title: "En chiffres", body: "Emprunts, datasets empruntés, réglés, remboursés : le résumé de ton activité on-chain." },
-      { anchor: "loan", title: "Un emprunt", body: "Titre du dataset, lock, attestation TEE, reçu d’audit, règlement ou remboursement : chaque preuve a son lien « Vérifier »." },
+      { anchor: "loan", title: "Un emprunt", body: "Titre du dataset, lock, résultat signé, reçu d’audit, règlement ou remboursement : chaque preuve a son lien « Vérifier »." },
     ],
   },
   wallet: {
@@ -146,8 +146,8 @@ export const GUIDE_PAGE_TOURS: Readonly<Record<GuidePageKey, GuidePageTour>> = {
         anchor: "balance",
         title: "Solde et gas",
         body: {
-          mainnet: "Ton solde en {token} et l’BTC pour le gas. « Ajouter des fonds » : par carte, depuis un autre wallet ou depuis une autre chaîne.",
-          testnet: "Ton solde en {token} et l’BTC pour le gas. « Ajouter des fonds » envoie des jetons de test et un peu d’ETH de test.",
+          mainnet: "Ton solde en {token} et le BTC pour le gas. « Ajouter des fonds » : par carte, depuis un autre wallet ou depuis une autre chaîne.",
+          testnet: "Ton solde en {token} et le BTC pour le gas. « Ajouter des fonds » envoie des jetons de test et un peu de BTC de test.",
         },
       },
       { anchor: "account", title: "Ton compte", body: "Le réseau du site, ton adresse à copier, et l’état de ta session signée." },

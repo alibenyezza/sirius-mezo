@@ -16,6 +16,7 @@ import { DATASET_CATEGORY_LABEL_KEYS, parseDatasetCategory } from "@/lib/dataset
 import { addressesEqual } from "@/lib/evm/address";
 import { modelSelection } from "@/lib/models/registry";
 import { useWalletStore } from "@/stores/wallet";
+import { usePlatformFee } from "@/components/datasets/usePlatformFee";
 import {
   DATASET_SORTS,
   aggregateLoanStats,
@@ -222,6 +223,11 @@ function DatasetsContent() {
     if (await requestVerification("checklist", "provider")) setKybManquant(false);
   }
 
+  // Revenus nets de frais sur l'escrow courant (les anciens escrows n'en prélevaient pas).
+  const platformFee = usePlatformFee();
+  const currentEscrow = process.env.NEXT_PUBLIC_SIRIUS_ESCROW_ADDRESS?.trim() ?? "";
+  const escrowFee = platformFee && platformFee.baseBps > 0 && currentEscrow ? { escrow: currentEscrow, bps: platformFee.baseBps } : null;
+
   const cards = useMemo(() => {
     if (!datasets) return [];
     const now = loadedAt;
@@ -232,7 +238,7 @@ function DatasetsContent() {
       else byDataset.set(loan.datasetId, [loan]);
     }
     const rows = datasets.map((dataset) => {
-      const stats = loans ? aggregateLoanStats(byDataset.get(dataset.id) ?? [], now) : null;
+      const stats = loans ? aggregateLoanStats(byDataset.get(dataset.id) ?? [], now, escrowFee) : null;
       return {
         dataset,
         id: dataset.id,
@@ -247,7 +253,8 @@ function DatasetsContent() {
       };
     });
     return sortDatasets(rows, sort);
-  }, [datasets, loans, sort, loadedAt]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- escrowFee est dérivé de deux valeurs stables
+  }, [datasets, loans, sort, loadedAt, escrowFee?.bps, escrowFee?.escrow]);
 
   if (!connected || !address) {
     return (

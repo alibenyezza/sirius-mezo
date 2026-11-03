@@ -11,6 +11,8 @@ export interface MezoFeatures {
   borrowAndBuy: boolean;
   /** Dépôt des gains dans le Stability Pool ou le coffre sMUSD depuis le wallet. */
   earn: boolean;
+  /** Paiement en BTC : `SiriusCheckout` échange sur Mezo Pools et verrouille en une transaction. */
+  payWithBtc: boolean;
 }
 
 export function mezoFeatures(env: Record<string, string | undefined> = process.env): MezoFeatures {
@@ -19,5 +21,6 @@ export function mezoFeatures(env: Record<string, string | undefined> = process.e
     gaslessLock: on("SIRIUS_GASLESS_LOCK"),
     borrowAndBuy: on("SIRIUS_BORROW_AND_BUY"),
     earn: on("SIRIUS_MEZO_EARN"),
+    payWithBtc: on("SIRIUS_PAY_WITH_BTC") && Boolean((env.SIRIUS_CHECKOUT_ADDRESS ?? env.NEXT_PUBLIC_SIRIUS_CHECKOUT_ADDRESS)?.trim()),
   };
 }

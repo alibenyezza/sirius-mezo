@@ -234,9 +234,9 @@ function DetailContent({ id }: { id: string }) {
       <Card>
         <CardTitle>{t("Prix")}</CardTitle>
         <p className="mt-2 text-lg font-medium tabular-nums">{price}</p>
-        <p className="mt-1 text-xs text-muted">{t("Ce que tu reçois par emprunt réglé. Les frais de calcul de l’enclave s’ajoutent pour l’emprunteur.")}</p>
+        <p className="mt-1 text-xs text-muted">{t("Ce que tu reçois par emprunt réglé. Les frais de calcul du runner s’ajoutent pour l’emprunteur.")}</p>
         <p className="mt-3 text-xs text-muted">
-          {t("Le prix n’est pas modifiable : il est inscrit dans le reçu signé par l’enclave au scellement du dataset. Pour changer de prix, détruis le dataset et publie-le à nouveau.")}
+          {t("Le prix n’est pas modifiable : il est inscrit dans le reçu signé par le runner au scellement du dataset. Pour changer de prix, détruis le dataset et publie-le à nouveau.")}
         </p>
       </Card>
 
@@ -549,7 +549,7 @@ function ConsentCard({ view, busy, onRevoke }: { view: OwnerDatasetView; busy: B
       {consent.active ? (
         <>
           <p className="mt-1 text-sm text-muted">
-            {t("Tu as autorisé Sirius à utiliser ce dataset, uniquement dans l’enclave, pour évaluer et développer de nouveaux modèles (le {date}, texte {version}).", {
+            {t("Tu as autorisé Sirius à utiliser ce dataset, uniquement sur son runner d’entraînement, pour évaluer et développer de nouveaux modèles (le {date}, texte {version}).", {
               date: formatUtcDate(consent.givenAt),
               version: consent.version ?? "—",
             })}

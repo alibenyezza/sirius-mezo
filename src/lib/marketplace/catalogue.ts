@@ -75,6 +75,18 @@ export interface MarketplaceDeps {
   publishedComputeFees?(): Partial<Record<ModelId, string>> | null;
   token: TokenInfo;
   now(): Date;
+  /**
+   * Parmi ces datasets, ceux dont le titre est vivant sur le registre configuré. Après un
+   * redéploiement, un titre minté sur l'ancien registre ne peut plus être emprunté : il sort du
+   * catalogue. `null` (lecture impossible) laisse la liste telle quelle.
+   */
+  liveOnRegistry?(datasetIds: readonly string[]): Promise<Set<string> | null>;
+}
+
+async function keepLiveOnRegistry<T extends { id: string }>(deps: MarketplaceDeps, rows: T[]): Promise<T[]> {
+  if (!deps.liveOnRegistry || rows.length === 0) return rows;
+  const live = await deps.liveOnRegistry(rows.map((row) => row.id)).catch(() => null);
+  return live ? rows.filter((row) => live.has(row.id)) : rows;
 }
 
 /** Un devis plus ancien ne reflète plus forcément le tarif en vigueur : il n'est pas affiché. */
@@ -218,7 +230,7 @@ export async function readCatalogueSnapshot(deps: MarketplaceDeps): Promise<Cata
     take: MARKETPLACE_MAX_CANDIDATES + 1,
   });
   const truncated = rows.length > MARKETPLACE_MAX_CANDIDATES;
-  const online = rows.slice(0, MARKETPLACE_MAX_CANDIDATES).filter((row) => isOnlineDataset(row, now));
+  const online = await keepLiveOnRegistry(deps, rows.slice(0, MARKETPLACE_MAX_CANDIDATES).filter((row) => isOnlineDataset(row, now)));
   // Le KYB est toujours lu : la carte montre le badge. Adresses de fournisseurs, publiques on-chain.
   const providers = [...new Set(online.map((row) => row.provider))];
   const [stats, fees, kyb] = await Promise.all([
@@ -298,6 +310,7 @@ export async function loadListingDetail(id: string, deps: MarketplaceDeps): Prom
     select: MARKETPLACE_DATASET_SELECT,
   });
   if (!row || row.id !== id || !isOnlineDataset(row, now)) return null;
+  if ((await keepLiveOnRegistry(deps, [row])).length === 0) return null;
   const billingMode = deps.billingMode();
   const [stats, fees, kyb] = await Promise.all([
     loanStatsFor(deps.db, [row.id]),

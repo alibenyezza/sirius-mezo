@@ -12,7 +12,7 @@ function policy(overrides: Partial<BillingPolicy> = {}): BillingPolicy {
   return {
     version: 1,
     tariffVersion: "tarif-test-2026-10",
-    costReference: "docs/OPERATIONS-ACCOUNTING.md",
+    costReference: "synthetic-test-only",
     validUntil: Date.now() + 3_600_000,
     chainId: 31611,
     usdc: USDC,

@@ -24,11 +24,11 @@ export function LocaleProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     document.documentElement.lang = locale;
-    document.title = t("Sirius — data lending confidentiel sur EVM");
+    // Le titre vient des métadonnées de chaque page : ne pas le réécrire ici.
     // Un choix mémorisé lors d'une visite précédente ne doit pas ressusciter une
     // langue que le site ne propose plus.
     window.localStorage.removeItem("sirius.locale");
-  }, [locale, t]);
+  }, [locale]);
 
   return <LocaleContext value={{ locale, t }}>{children}</LocaleContext>;
 }

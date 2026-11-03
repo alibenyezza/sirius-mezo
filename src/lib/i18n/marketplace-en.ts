@@ -16,8 +16,8 @@ export const MARKETPLACE_MESSAGES_EN: Record<string, string> = {
 
   // Grille et filtres
   "Datasets disponibles": "Available datasets",
-  "Un emprunt = l’accès à un dataset et un entraînement dans l’enclave. Vous recevez le modèle entraîné, jamais la donnée.":
-    "One loan = access to a dataset and one training run inside the enclave. You receive the trained model, never the data.",
+  "Un emprunt = l’accès à un dataset pour un entraînement sur le runner de testnet. Vous recevez le modèle entraîné, jamais la donnée.":
+    "One loan = access to a dataset for one training run on the testnet runner. You receive the trained model, never the data.",
   "Consultation libre, sans wallet. La connexion n’est demandée qu’au moment d’emprunter.":
     "Browse freely, no wallet needed. You are only asked to connect when you borrow.",
   "Rechercher un dataset": "Search datasets",
@@ -94,8 +94,8 @@ export const MARKETPLACE_MESSAGES_EN: Record<string, string> = {
   "Les frais de calcul et le total sont affichés dans le devis, avant tout paiement.":
     "The compute fee and the total are shown in the quote, before any payment.",
   "Ce que vous obtenez": "What you get",
-  "Un accès à cette donnée et un entraînement dans l’enclave. Vous recevez le modèle entraîné, jamais la donnée. Chaque nouvel entraînement est un nouvel emprunt.":
-    "Access to this data and one training run inside the enclave. You receive the trained model, never the data. Each new training is a new loan.",
+  "Un accès à cette donnée pour un entraînement sur le runner de testnet. Vous recevez le modèle entraîné, jamais la donnée. Chaque nouvel entraînement est un nouvel emprunt.":
+    "Access to this data for one training run on the testnet runner. You receive the trained model, never the data. Each new training run is a new loan.",
   "En cas d’échec": "If it fails",
   "Seul le calcul réellement consommé est retenu, le reste est remboursé.":
     "Only the compute actually consumed is retained; the rest is refunded.",

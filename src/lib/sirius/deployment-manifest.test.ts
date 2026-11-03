@@ -100,3 +100,16 @@ test("manifeste : l'hôte de l'API Blockscout est dérivé de l'explorateur", ()
   assert.equal(explorerApiBase("https://explorer.test.mezo.org"), "https://api.explorer.test.mezo.org");
   assert.equal(explorerApiBase("https://explorer.mezo.org/"), "https://api.explorer.mezo.org");
 });
+
+test("manifeste : une preuve peut venir d'un wallet externe, l'équipe par défaut", () => {
+  const manifest = parseDeploymentManifest({
+    ...minimal(),
+    evidence: [
+      { label: "External purchase", kind: "tx", value: HASH, party: "external" },
+      { label: "Team purchase", kind: "tx", value: HASH },
+    ],
+  });
+  assert.equal(manifest.evidence?.[0].party, "external");
+  assert.equal(manifest.evidence?.[1].party, undefined);
+  assert.throws(() => parseDeploymentManifest({ ...minimal(), evidence: [{ label: "x", kind: "tx", value: HASH, party: "partner" }] }));
+});

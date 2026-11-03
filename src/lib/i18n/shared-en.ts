@@ -5,7 +5,7 @@
  * `english.ts`, ne se marchent pas dessus. Il est fusionné dans `EN_MESSAGES`.
  *
  * Le texte anglais des cinq avertissements est celui de
- * docs/passage-mainnet/16-socle-technique.md, section 4, au mot près.
+ * au mot près.
  */
 export const SHARED_MESSAGES_EN: Record<string, string> = {
   // Avertissements communs
@@ -36,7 +36,7 @@ export const SHARED_MESSAGES_EN: Record<string, string> = {
   "Le fournisseur reçoit": "Provider receives",
   "Vous payez": "You pay",
   "Prix payé par l’emprunteur": "Borrower pays",
-  "Frais de calcul (enclave Phala)": "Compute fee (Phala enclave)",
+  "Frais de calcul (runner de testnet)": "Compute fee (testnet runner)",
   "Minimum imposé par le tarif : {minimum}.": "Minimum set by the tariff: {minimum}.",
   "Sous le minimum imposé par le tarif : {minimum}.": "Below the minimum set by the tariff: {minimum}.",
   "Montant indisponible : valeur invalide.": "Amount unavailable: invalid value.",

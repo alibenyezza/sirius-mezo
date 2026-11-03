@@ -24,7 +24,7 @@ const ITEM_CLASS =
   "flex w-full items-center px-4 py-2.5 text-left text-sm text-foreground transition-colors hover:bg-white/5 focus-visible:bg-white/5 focus-visible:outline-none";
 
 /**
- * Bouton profil, en haut à droite de l'application (docs/passage-mainnet/05-wallet.md).
+ * Bouton profil, en haut à droite de l'application.
  *
  * Il n'existe que connecté : la connexion reste portée par le bouton de la barre latérale.
  * Il occupe une ligne alignée à droite en tête du contenu, sur ordinateur comme sur mobile.

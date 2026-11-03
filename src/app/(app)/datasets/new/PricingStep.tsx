@@ -5,6 +5,8 @@ import Link from "next/link";
 import { useLocale } from "@/components/i18n/LocaleProvider";
 import { DisclaimerNote } from "@/components/ui/DisclaimerNote";
 import { PriceBreakdown } from "@/components/datasets/PriceBreakdown";
+import { usePlatformFee } from "@/components/datasets/usePlatformFee";
+import { formatBps, providerNetAtomic } from "@/lib/mezo/platform-fee-math";
 import { formatTokenWithSymbol, type TokenInfo } from "@/components/datasets/price";
 import { formatBytes } from "@/lib/format";
 import { formatCount } from "@/lib/copy/numbers";
@@ -56,7 +58,7 @@ interface PricingStepProps {
 const STEP_LABEL_KEYS: Record<UploadStep, string> = {
   draft: "Création du brouillon",
   encrypt: "Chiffrement sur ton appareil",
-  seal: "Envoi et scellement par l’enclave",
+  seal: "Envoi et scellement par le runner",
   register: "Inscription du titre on-chain",
 };
 
@@ -91,6 +93,7 @@ export function PricingStep({
   onPublish,
 }: PricingStepProps) {
   const { t } = useLocale();
+  const platformFee = usePlatformFee();
   const ids = { price: useId(), priceHint: useId(), duration: useId(), consent: useId(), consentHint: useId() };
   // Sans tarif chargé, le plancher reste celui que la route impose (0,001 jeton) : il est connu localement.
   const minimum = formatTokenWithSymbol(tariff ? tariff.minimumProviderAtomic : minimumProviderPriceAtomic(token.decimals) ?? "", token) ?? "—";
@@ -131,13 +134,40 @@ export function PricingStep({
           className={`${INPUT_CLASS} font-mono tabular-nums`}
         />
         <p id={ids.priceHint} className="text-xs text-muted">
-          {t("Entre {minimum} et {maximum} {symbol}, au plus {decimals} décimales. Aucune commission supplémentaire pendant la bêta.", {
-            minimum,
-            maximum: formatCount(MAX_PROVIDER_PRICE_WHOLE),
-            symbol: token.symbol,
-            decimals: formatCount(token.decimals),
-          })}
+          {platformFee
+            ? t("Entre {minimum} et {maximum} {symbol}, au plus {decimals} décimales.", {
+              minimum,
+              maximum: formatCount(MAX_PROVIDER_PRICE_WHOLE),
+              symbol: token.symbol,
+              decimals: formatCount(token.decimals),
+            })
+            : t("Entre {minimum} et {maximum} {symbol}, au plus {decimals} décimales. Aucune commission supplémentaire pendant la bêta.", {
+              minimum,
+              maximum: formatCount(MAX_PROVIDER_PRICE_WHOLE),
+              symbol: token.symbol,
+              decimals: formatCount(token.decimals),
+            })}
         </p>
+        {platformFee && (
+          <p className="text-xs text-muted">
+            {platformFee.discountedBps !== null
+              ? t("Sirius garde {fee} de chaque emprunt réglé, {discounted} si tu verrouilles du MEZO en veMEZO. Une partie revient aux votants veBTC du pool BTC/MUSD de Mezo.", {
+                fee: formatBps(platformFee.baseBps),
+                discounted: formatBps(platformFee.discountedBps),
+              })
+              : t("Sirius garde {fee} de chaque emprunt réglé. Une partie revient aux votants veBTC du pool BTC/MUSD de Mezo.", {
+                fee: formatBps(platformFee.baseBps),
+              })}
+            {providerAtomic !== null && (
+              <>
+                {" "}
+                {t("Tu recevras au moins {amount} par emprunt réglé.", {
+                  amount: formatTokenWithSymbol(providerNetAtomic(providerAtomic, platformFee.baseBps), token) ?? "—",
+                })}
+              </>
+            )}
+          </p>
+        )}
         {priceInvalid && (
           <p role="alert" className="text-xs text-negative">{t("Montant invalide : vérifie les bornes et le nombre de décimales.")}</p>
         )}
@@ -161,7 +191,9 @@ export function PricingStep({
           )}
           <p className="text-xs text-muted">
             {tariff.version === "legacy-v6"
-              ? t("Aucun frais de calcul avec l’escrow actuel : l’emprunteur bloque exactement ta part, que tu reçois à chaque emprunt réglé.")
+              ? platformFee
+                ? t("Aucun frais de calcul avec l’escrow actuel : l’emprunteur bloque exactement ce prix, et tu le reçois moins les frais de plateforme à chaque emprunt réglé.")
+                : t("Aucun frais de calcul avec l’escrow actuel : l’emprunteur bloque exactement ta part, que tu reçois à chaque emprunt réglé.")
               : t("Frais de calcul du tarif en vigueur ({version}) pour le profil {model}. L’emprunteur paie ta part plus ces frais ; tu reçois ta part à chaque emprunt réglé.", {
                 version: tariff.version,
                 model: MODEL_REGISTRY[modelId].label,
@@ -255,7 +287,7 @@ export function PricingStep({
           <span>{t(TRAINING_CONSENT_TEXT_KEY)}</span>
         </label>
         <p id={ids.consentHint} className="pl-7 text-xs text-muted">
-          {t("Facultatif. Ton choix est enregistré avec sa date et la version du texte ({version}). La donnée n’est jamais déchiffrée hors de l’enclave, y compris pour cet usage. Tu pourras le retirer depuis la fiche du dataset.", {
+          {t("Facultatif. Ton choix est enregistré avec sa date et la version du texte ({version}). La donnée n’est déchiffrée que par le runner d’entraînement, y compris pour cet usage. Tu pourras le retirer depuis la fiche du dataset.", {
             version: TRAINING_CONSENT_VERSION,
           })}
         </p>
@@ -266,7 +298,7 @@ export function PricingStep({
           <p>{t(error)}</p>
           {sealedDatasetId && (
             <p className="mt-1 text-foreground/80">
-              {t("Le dataset est scellé par l’enclave.")}{" "}
+              {t("Le dataset est scellé par le runner.")}{" "}
               <Link href="/datasets" className="underline underline-offset-4">{t("Terminer l’inscription on-chain depuis Mes actifs data")}</Link>
             </p>
           )}

@@ -45,7 +45,7 @@ export function useComputeQuoteConfirmation() {
           <p className="mt-2 font-medium text-foreground">{t("Retenue maximale")} : {money(quote.maxFailureFee)}</p>
           <p className="mt-1">{t("Barème d’exécution, transferts inclus")} : {money(String(BigInt(quote.executionRateAtomicPerMs) * BigInt(1000)))} / s · {t("Durée maximale")} : {quote.maxExecutionMs / 1000} s</p>
         </div>
-        <p className="text-xs text-muted">{t("Les frais réseau ETH sont payés séparément dans ton wallet. Aucun supplément automatique.")}</p>
+        <p className="text-xs text-muted">{t("Les frais réseau, en BTC, sont payés séparément dans ton wallet. Aucun supplément automatique.")}</p>
         <p className="text-xs text-muted">{t("Devis valable jusqu’à")} {new Date(quote.expiresAt * 1000).toLocaleTimeString()} · {quote.tariffVersion}</p>
         <div className="flex flex-wrap justify-end gap-3">
           <button type="button" onClick={() => finish(false)} className="rounded-lg border border-border px-4 py-2 text-sm">{t("Annuler")}</button>
