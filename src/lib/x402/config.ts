@@ -103,6 +103,12 @@ export function parseFeatureValues(body: unknown, model: DownloadedModel): Recor
   return values;
 }
 
+/** Une heure plausible (18 h, jour ouvré d'hiver, pic du soir) pour l'exemple public. */
+const EXAMPLE_HOUR: Record<string, number> = {
+  hour: 18, temperature_c: 4.5, humidity_pct: 70, wind_kmh: 12, cloud_cover_pct: 60,
+  is_weekend: 0, is_holiday: 0, solar_kw: 0, morning_peak: 0, evening_peak: 1,
+};
+
 /** Description publique et gratuite de l'API (GET), pour qu'un agent sache quoi envoyer et combien ça coûte. */
 export function x402Description(config: X402Config, model: DownloadedModel) {
   return {
@@ -123,6 +129,6 @@ export function x402Description(config: X402Config, model: DownloadedModel) {
       metrics: model.metrics,
       trainedOn: "public/examples/regression/energy-demand-train.csv",
     },
-    example: { features: Object.fromEntries(model.features.map((f) => [f, 0])) },
+    example: { features: Object.fromEntries(model.features.map((f) => [f, EXAMPLE_HOUR[f] ?? 0])) },
   };
 }

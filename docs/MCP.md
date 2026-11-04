@@ -10,14 +10,13 @@ Première étape de la feuille de route « Sirius pour les agents » : une inter
 
 ## Se connecter
 
-URL : `https://sirius-data.tech/api/mcp` (staging : `https://phala.sirius-data.tech/api/mcp`). Transport Streamable
-HTTP, sans authentification.
+URL : `https://sirius-mezo.vercel.app/api/mcp` (Mezo testnet). Transport Streamable HTTP, sans authentification.
 
-- **Claude Code** : `claude mcp add --transport http sirius https://sirius-data.tech/api/mcp`
+- **Claude Code** : `claude mcp add --transport http sirius https://sirius-mezo.vercel.app/api/mcp`
 - **Claude (web, bureau)** : Paramètres → Connecteurs → Ajouter un connecteur personnalisé → coller l'URL.
 - **Cursor** et clients à fichier `mcp.json` :
   ```json
-  { "mcpServers": { "sirius": { "url": "https://sirius-data.tech/api/mcp" } } }
+  { "mcpServers": { "sirius": { "url": "https://sirius-mezo.vercel.app/api/mcp" } } }
   ```
 - **Test manuel** : `npx @modelcontextprotocol/inspector`, transport « Streamable HTTP », même URL.
 
@@ -69,10 +68,8 @@ Tous annotés `readOnlyHint: true`, `destructiveHint: false`, avec un `outputSch
 
 ## Activation
 
-1. Staging : poser `SIRIUS_MCP_ENABLED=true` sur le projet Vercel staging, redéployer, tester avec deux clients.
-2. Production : même variable sur le projet Vercel production (variable posée par Ali, voir les scripts
-   `.ops/mainnet/`), puis relancer le job « Front Vercel ».
-3. Couper : `SIRIUS_MCP_ENABLED=false` (ou supprimer la variable), redéployer.
+1. Poser `SIRIUS_MCP_ENABLED=true` sur le projet Vercel `sirius-mezo`, puis `vercel --prod`.
+2. Couper : `SIRIUS_MCP_ENABLED=false` (ou supprimer la variable), redéployer.
 
 ## Prédictions payées par x402
 
@@ -89,8 +86,12 @@ le transfert sur le testnet et paie le gas en BTC : l'agent n'a besoin que de MU
 - Modèle servi : un modèle de démonstration entraîné par le code du runner sur le dataset public
   `public/examples/regression/energy-demand-train.csv` (`src/lib/x402/demo-model.json`). Les modèles
   des acheteurs restent chiffrés pour eux et ne sont jamais servis.
-- Agent de démonstration : `X402_BUYER_KEY=0x… node --import tsx scripts/x402-agent.ts`.
+- Agent de démonstration : `X402_BUYER_KEY=0x… node --import tsx scripts/x402-agent.ts`, ou
+  `node --env-file=.env.local --import tsx scripts/x402-agent.ts --demo-wallet` (wallet du fournisseur de démo).
 - Activation : `SIRIUS_X402=true` et `SIRIUS_X402_PAY_TO` sur le projet Vercel, puis redéployer.
+- Premier règlement réel (4 nov. 2026) : 0,001 MUSD du wallet de démo vers la trésorerie,
+  [`0x50e71f23…11c20ed0`](https://explorer.test.mezo.org/tx/0x50e71f23b2cabd4fa3070cf542aa9af102bf65da13d2315a44106b9211c20ed0),
+  gas payé par le facilitateur.
 
 ## Suite (non construite)
 

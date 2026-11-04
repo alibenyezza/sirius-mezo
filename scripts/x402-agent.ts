@@ -2,6 +2,7 @@
  * Agent de démonstration x402 : paie une prédiction Sirius en MUSD sur le testnet Mezo.
  *
  *   X402_BUYER_KEY=0x… node --import tsx scripts/x402-agent.ts [url] ['{"hour":18,…}']
+ *   node --env-file=.env.local --import tsx scripts/x402-agent.ts --demo-wallet
  *
  * La clé vient de TON environnement et n'est jamais affichée. L'agent lit le prix sur l'API,
  * vérifie son solde MUSD, signe une autorisation Permit2 + EIP-2612 (aucune transaction, aucun
@@ -24,10 +25,18 @@ const DEFAULT_FEATURES = {
 const erc20 = [{ type: "function", name: "balanceOf", stateMutability: "view", inputs: [{ name: "a", type: "address" }], outputs: [{ type: "uint256" }] }] as const;
 
 async function main() {
-  const key = process.env.X402_BUYER_KEY?.trim();
-  if (!key || !/^0x[0-9a-fA-F]{64}$/.test(key)) throw new Error("Définis X402_BUYER_KEY (clé de TON wallet de test, 0x + 64 caractères hex).");
-  const url = process.argv[2] ?? DEFAULT_URL;
-  const features = process.argv[3] ? JSON.parse(process.argv[3]) as Record<string, number> : DEFAULT_FEATURES;
+  // `--demo-wallet` : paie avec le wallet de test du fournisseur de démo (SIRIUS_DEMO_PROVIDER_KEY,
+  // chargé par `node --env-file=.env.local`), sans copier de clé à la main.
+  const demoWallet = process.argv.includes("--demo-wallet");
+  const args = process.argv.slice(2).filter((arg) => arg !== "--demo-wallet");
+  const key = (demoWallet ? process.env.SIRIUS_DEMO_PROVIDER_KEY : process.env.X402_BUYER_KEY)?.trim();
+  if (!key || !/^0x[0-9a-fA-F]{64}$/.test(key)) {
+    throw new Error(demoWallet
+      ? "SIRIUS_DEMO_PROVIDER_KEY absente : lance avec node --env-file=.env.local …"
+      : "Définis X402_BUYER_KEY (clé de TON wallet de test, 0x + 64 caractères hex), ou utilise --demo-wallet.");
+  }
+  const url = args[0] ?? DEFAULT_URL;
+  const features = args[1] ? JSON.parse(args[1]) as Record<string, number> : DEFAULT_FEATURES;
 
   const chain = EVM_CHAINS.testnet;
   const publicClient = createPublicClient({ chain, transport: http(chain.rpcUrls.default.http[0]) });

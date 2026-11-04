@@ -10,7 +10,7 @@ Built for the **Mezo Buildathon** (October 2026), Wave 1 then Wave 2, in **Track
 
 - Bitcoin holders get a **productive use for their dollars**: buy intelligence on private data without selling BTC.
 - Data providers are paid in a **BTC-native stablecoin** through an escrow that releases atomically on delivery.
-- The escrow is a plain ERC-20 flow (`approve` → `lock` → `release` / `refund`): composable with any MUSD wallet, vault or agent. AI agents can buy a training run through the built-in MCP server and pay in MUSD.
+- The escrow is a plain ERC-20 flow (`approve` → `lock` → `release` / `refund`): composable with any MUSD wallet, vault or agent. AI agents can browse the catalogue through the built-in MCP server and pay per prediction in MUSD over x402.
 
 ## How it works
 
@@ -98,7 +98,7 @@ Sources, tests and scripts live in [`contracts/`](contracts). TypeScript ABIs ar
 | Contracts | Solidity `0.8.24` · Hardhat · viem |
 | Training | Testnet runner on the application server (no hardware isolation: use synthetic or non-sensitive data), each result signed with the escrow's settlement key |
 | Storage | IPFS / Pinata · AES-256-GCM |
-| Agents | MCP server (`/api/mcp`): catalogue search, dataset detail, protocol status, certificate verification |
+| Agents | MCP server (`/api/mcp`): catalogue search, dataset detail, protocol status, certificate verification · x402 paid predictions (`/api/x402/predict`) |
 
 ## Quickstart
 
@@ -143,6 +143,7 @@ Sirius account spend gas are off by default and documented in `.env.example`.
 | **Pay with BTC** (`SiriusCheckout.buyWithBtc`) | One transaction: the BTC sent is swapped to MUSD on the Mezo Pools BTC/MUSD pool, checked against Mezo's Skip BTC/USD oracle (at most 3 % below, at most one hour old), and locked in the escrow through the buyer's signed request. The MUSD left over stays with the buyer; the contract holds nothing between calls and has no owner. Simulated against live testnet state before deployment. | `contracts/src/SiriusCheckout.sol`, `src/lib/sirius/btc-checkout.ts`, `GET /api/mezo/btc-quote`, `POST /api/loans/[id]/pay-with-btc`, flag `SIRIUS_PAY_WITH_BTC` |
 | **Borrow & Buy** (`BorrowerOperationsSignatures.withdrawMUSDWithSignature`) | A buyer who holds a Mezo trove pays a training run by drawing only the missing MUSD against their BTC collateral: one signature, relayed by Sirius, MUSD minted straight to the buyer, then the escrow lock (in one signature when enabled). The UI shows debt and collateral ratio before and after, and refuses draws that would push the ratio under 1.21, exceed the trove's maximum borrowing capacity, or go against Recovery Mode (ratio under 150 % while the system is below its CCR). Insert hints come from `HintHelpers` and `SortedTroves`. | `src/lib/mezo/trove.ts`, `draw-relay.ts`, `GET /api/trove`, `POST /api/trove/draw`, flag `SIRIUS_BORROW_AND_BUY` |
 | **Earnings put to work** | Providers route the MUSD they earned into the MUSD Stability Pool (earn seized BTC from liquidations) or the sMUSD savings vault (protocol yield), and back, from the wallet page. Live positions, honest copy, no invented APY. | `src/lib/mezo/earn*.ts`, `GET /api/wallet/earn`, `src/components/wallet/EarnCard.tsx`, flag `SIRIUS_MEZO_EARN` |
+| **Paid predictions for agents (x402)** | An AI agent pays 0.001 MUSD per prediction with no account and no BTC: `POST /api/x402/predict` answers `402 Payment Required`, the agent signs a Permit2 + EIP-2612 authorization, and Mezo's x402 facilitator settles the MUSD transfer and pays the gas. Charged only when the prediction succeeds. Serves a demo model trained by the runner on a public dataset; buyers' models stay encrypted. First settlement: [`0x50e7…0ed0`](https://explorer.test.mezo.org/tx/0x50e71f23b2cabd4fa3070cf542aa9af102bf65da13d2315a44106b9211c20ed0). | `src/app/api/x402/predict/route.ts`, `src/lib/x402/config.ts`, `scripts/x402-agent.ts`, flag `SIRIUS_X402` |
 | **Bitcoin wallets via Mezo Passport** | Connect Unisat, OKX or Xverse through `@mezo-org/passport`; the smart account is bridged into the existing wallet layer and server-side signature checks accept ERC-1271/6492 signatures. | `src/lib/wallet/passport*.ts`, flag `NEXT_PUBLIC_MEZO_PASSPORT` |
 | **Verified contracts and public proof** | All deployed contracts are source-verified on the Mezo explorer; `/proof` lists network, contracts, live escrow accounting, every demo transaction and previous deployments, with no account needed. | `/proof`, `deployments/mezo-testnet.json`, `docs/MEZO-TESTNET.md` |
 | **Platform fee that feeds Mezo** | The escrow keeps 2 % of each released payment, never of a refund. Providers holding veMEZO pay 1 %, read from Mezo's vote-escrow at release. `SiriusFeeRouter` sends half to the treasury and posts the other half as a MUSD incentive on Mezo's BTC/MUSD gauge, so veBTC voters earn from every training run sold. Permissionless, immutable, live on `/proof`. | `contracts/src/SiriusFeeRouter.sol`, `SiriusMezoFeePolicy.sol`, `src/lib/mezo/governance.ts`, `scripts/mezo-distribute-fees.ts` |

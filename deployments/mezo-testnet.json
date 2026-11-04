@@ -98,5 +98,15 @@
         "withdrawFor": "0x0db9b21a69390b9baf5669da160a682f6d83f03c34f382b2b45f843054739df6"
       }
     }
+  ],
+  "evidence": [
+    {
+      "label": "x402 paid prediction",
+      "kind": "tx",
+      "value": "0x50e71f23b2cabd4fa3070cf542aa9af102bf65da13d2315a44106b9211c20ed0",
+      "note": "An agent paid 0.001 MUSD for one prediction on POST /api/x402/predict: it signed a Permit2 authorization, the Mezo x402 facilitator submitted it and paid the gas in BTC. Demo provider wallet to treasury.",
+      "date": "2026-11-04",
+      "party": "team"
+    }
   ]
 }
