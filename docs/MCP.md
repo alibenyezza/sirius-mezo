@@ -74,6 +74,24 @@ Tous annotés `readOnlyHint: true`, `destructiveHint: false`, avec un `outputSch
    `.ops/mainnet/`), puis relancer le job « Front Vercel ».
 3. Couper : `SIRIUS_MCP_ENABLED=false` (ou supprimer la variable), redéployer.
 
+## Prédictions payées par x402
+
+Un agent peut payer une prédiction à l'appel, sans compte ni session : `GET /api/x402/predict`
+décrit l'API (prix, actif, réseau, colonnes attendues, exemple), `POST /api/x402/predict` sans
+paiement répond `402 Payment Required`, et un client x402 (`@x402/fetch`) signe une autorisation
+Permit2 + EIP-2612 en MUSD. Le facilitateur Mezo (`https://facilitator.vativ.io`) vérifie, règle
+le transfert sur le testnet et paie le gas en BTC : l'agent n'a besoin que de MUSD.
+
+- Prix par défaut : 0,001 MUSD (`SIRIUS_X402_PRICE`), versé à `SIRIUS_X402_PAY_TO`.
+- Réglé seulement si la prédiction réussit : une entrée invalide répond 400 et ne coûte rien.
+- Paiement direct, sans escrow ni remboursement : réservé aux micro-paiements. L'entraînement
+  reste payé par l'escrow.
+- Modèle servi : un modèle de démonstration entraîné par le code du runner sur le dataset public
+  `public/examples/regression/energy-demand-train.csv` (`src/lib/x402/demo-model.json`). Les modèles
+  des acheteurs restent chiffrés pour eux et ne sont jamais servis.
+- Agent de démonstration : `X402_BUYER_KEY=0x… node --import tsx scripts/x402-agent.ts`.
+- Activation : `SIRIUS_X402=true` et `SIRIUS_X402_PAY_TO` sur le projet Vercel, puis redéployer.
+
 ## Suite (non construite)
 
 Parcours payant pour un agent : authentification par signature du wallet de l'agent (jeton court, budget plafonné,

@@ -4,6 +4,7 @@ import { MAINNET_STABLECOIN_NAME } from "@/lib/evm/stablecoin";
 import { addressExplorerUrl } from "@/lib/evm/explorer";
 import { readProtocolStatus } from "@/lib/sirius/protocol-status";
 import { mezoFeatures } from "@/lib/mezo/features";
+import { readX402Config } from "@/lib/x402/config";
 import { readPlatformFee } from "@/lib/mezo/platform-fee";
 import { readDeploymentManifest, type DeploymentManifest } from "@/lib/sirius/deployment-manifest";
 import { LegalLinks } from "@/components/layout/LegalLinks";
@@ -54,6 +55,13 @@ export default async function StatusPage() {
   const fee = await readPlatformFee().catch(() => null);
   const manifest = manifestOrNull();
   const onOff = (on: boolean) => (on ? "On" : "Off on this instance");
+  let x402: string;
+  try {
+    const config = readX402Config();
+    x402 = config ? `On · ${config.price} per call in MUSD, settled by the Mezo facilitator` : "Off on this instance";
+  } catch {
+    x402 = "Misconfigured on this instance";
+  }
 
   return (
     <main className="relative z-10 mx-auto w-full max-w-2xl px-6 py-12">
@@ -86,6 +94,7 @@ export default async function StatusPage() {
       <dl className="mt-3 rounded-xl border border-border bg-surface px-5 py-1">
         <Row label="One-signature payment" value={onOff(features.gaslessLock)} />
         <Row label="Pay with BTC (Mezo Pools)" value={onOff(features.payWithBtc)} />
+        <Row label="Paid predictions for agents (x402)" value={x402} />
         <Row label="Borrow & Buy from a trove" value={onOff(features.borrowAndBuy)} />
         <Row label="Earnings to Stability Pool / sMUSD" value={onOff(features.earn)} />
         <Row
