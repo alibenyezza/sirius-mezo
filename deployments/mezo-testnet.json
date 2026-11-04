@@ -163,6 +163,14 @@
       "note": "The demo provider deposited 1 MUSD of earnings into Mezo's MUSD Stability Pool (provideToSP).",
       "date": "2026-11-04",
       "party": "team"
+    },
+    {
+      "label": "Fees posted to the Mezo gauge (second)",
+      "kind": "tx",
+      "value": "0x5e74e6d154cc58f283dd7f183805117ef25358caab20844d17c92eac721989c9",
+      "note": "0.08 MUSD of fees from the one-signature and BTC loans: 0.04 MUSD to the treasury, 0.04 MUSD posted on the BTC/MUSD gauge bribe. 0.06 MUSD posted to veBTC voters in total.",
+      "date": "2026-11-04",
+      "party": "team"
     }
   ]
 }
