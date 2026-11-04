@@ -16,7 +16,7 @@
  * acheteurs jetables sont des wallets de l'équipe : leurs transactions vont dans « team » sur /proof.
  * Ensuite : `scripts/mezo-distribute-fees.ts --send` pour verser les frais au gauge.
  */
-import { readFileSync } from "node:fs";
+import { existsSync, readFileSync, writeFileSync } from "node:fs";
 import { randomBytes } from "node:crypto";
 import { resolve } from "node:path";
 import {
@@ -104,8 +104,13 @@ async function main() {
     args: [provider.address, datasetIdHash(manifest.demo.datasetId)],
   });
 
-  const buyerA = privateKeyToAccount(generatePrivateKey());
-  const buyerB = privateKeyToAccount(generatePrivateKey());
+  // Acheteurs jetables gardés dans un fichier local ignoré par git (.env*.local) : une relance
+  // réutilise les mêmes wallets et ce qu'ils ont déjà reçu, rien n'est perdu sur un échec.
+  const walletsFile = resolve(ROOT, ".env.team-flows.local");
+  const saved = existsSync(walletsFile) ? JSON.parse(readFileSync(walletsFile, "utf8")) as { buyerA: Hex; buyerB: Hex } : null;
+  const buyerKeys = saved ?? { buyerA: generatePrivateKey(), buyerB: generatePrivateKey() };
+  const buyerA = privateKeyToAccount(buyerKeys.buyerA);
+  const buyerB = privateKeyToAccount(buyerKeys.buyerB);
   const tx = (label: string, hash: Hex) => ({ label, hash, url: `${manifest.explorer}/tx/${hash}` });
   const done: Array<ReturnType<typeof tx>> = [];
   const wait = async (label: string, hash: Hex) => {
@@ -117,11 +122,14 @@ async function main() {
   const walletOf = (account: PrivateKeyAccount) => createWalletClient({ account, chain, transport });
   // Le RPC de Mezo estime parfois le gas sous le plancher EIP-7623 (coût minimal des données) :
   // chaque envoi part avec l'estimation plus une marge, jamais avec l'estimation brute.
+  // Il l'estime aussi bien trop bas pour lockWithSignature (≈ 29 k au lieu de plusieurs centaines
+  // de milliers) : chaque appel part avec le plus grand de l'estimation majorée et d'un plancher.
+  const GAS_FLOOR = BigInt(1_000_000);
   const withMargin = (gas: bigint) => gas * BigInt(3) / BigInt(2) + BigInt(10_000);
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const write = async (account: PrivateKeyAccount, params: any): Promise<Hex> => {
-    const gas = await client.estimateContractGas({ ...params, account });
-    return walletOf(account).writeContract({ ...params, account, chain, gas: withMargin(gas) });
+    const estimate = withMargin(await client.estimateContractGas({ ...params, account }));
+    return walletOf(account).writeContract({ ...params, account, chain, gas: estimate > GAS_FLOOR ? estimate : GAS_FLOOR });
   };
 
   // Devis BTC : combien envoyer pour 2 MUSD au cours du pool, sous le plancher de l'oracle.
@@ -138,7 +146,8 @@ async function main() {
   });
   const btcIn = BigInt(quote.btcIn);
   const gasPrice = await client.getGasPrice();
-  const btcForBuyerB = btcIn + gasPrice * BigInt(1_500_000);
+  // Le BTC du swap, plus de quoi couvrir largement le gas plafond (1 M) même si le prix double.
+  const btcForBuyerB = btcIn + gasPrice * BigInt(5_000_000);
 
   const [deployerMusd, deployerBtc, settlementBtc, providerMusd, providerBtc] = await Promise.all([
     client.readContract({ address: musd, abi: erc20Abi, functionName: "balanceOf", args: [deployer.address] }),
@@ -162,10 +171,20 @@ async function main() {
     return;
   }
 
-  // Financement des deux acheteurs jetables.
-  await wait("Financement de l'acheteur A : 2 MUSD", await write(deployer, { address: musd, abi: erc20Abi, functionName: "transfer", args: [buyerA.address, PRICE] }));
-  const fundGas = await client.estimateGas({ account: deployer, to: buyerB.address, value: btcForBuyerB });
-  await wait("Financement de l'acheteur B : BTC", await walletOf(deployer).sendTransaction({ to: buyerB.address, value: btcForBuyerB, gas: withMargin(fundGas) }));
+  // Financement des deux acheteurs jetables, seulement de ce qui leur manque.
+  if (!saved) writeFileSync(walletsFile, `${JSON.stringify(buyerKeys)}\n`, { mode: 0o600 });
+  const [buyerAMusd, buyerBBtc] = await Promise.all([
+    client.readContract({ address: musd, abi: erc20Abi, functionName: "balanceOf", args: [buyerA.address] }),
+    client.getBalance({ address: buyerB.address }),
+  ]);
+  if (buyerAMusd < PRICE) {
+    await wait("Financement de l'acheteur A : MUSD", await write(deployer, { address: musd, abi: erc20Abi, functionName: "transfer", args: [buyerA.address, PRICE - buyerAMusd] }));
+  }
+  if (buyerBBtc < btcForBuyerB) {
+    const value = btcForBuyerB - buyerBBtc;
+    const fundGas = await client.estimateGas({ account: deployer, to: buyerB.address, value });
+    await wait("Financement de l'acheteur B : BTC", await walletOf(deployer).sendTransaction({ to: buyerB.address, value, gas: withMargin(fundGas) }));
+  }
 
   const [tokenName, domain] = await Promise.all([
     client.readContract({ address: musd, abi: permitDomainAbi, functionName: "name" }),
