@@ -152,6 +152,13 @@ async function main() {
     throw new Error("Le lock MUSD ne correspond pas aux termes attendus");
   }
 
+  // Frais de plateforme : le fournisseur reçoit le montant moins le taux lu sur l'escrow au
+  // moment de la libération (0 sur un escrow sans frais).
+  const feeBps = await publicClient.readContract({ address: escrow, abi: escrowAbi, functionName: "feeBpsFor", args: [provider] })
+    .then((bps) => bps as bigint)
+    .catch(() => BigInt(0));
+  const expectedNet = amount - (amount * feeBps) / BigInt(10_000);
+
   await step("Release", await wallet.writeContract({
     address: escrow,
     abi: escrowAbi,
@@ -165,7 +172,8 @@ async function main() {
 
   await step("Retrait provider", await wallet.writeContract({ address: escrow, abi: escrowAbi, functionName: "withdrawFor", args: [provider], chain, account }));
   const providerUsdc = await publicClient.readContract({ address: usdc, abi: usdcAbi, functionName: "balanceOf", args: [provider] });
-  if (providerUsdc !== providerUsdcBefore + amount) throw new Error("Le provider n'a pas reçu les MUSD exacts");
+  if (providerUsdc !== providerUsdcBefore + expectedNet) throw new Error("Le provider n'a pas reçu les MUSD exacts");
+  console.log(`frais      : ${feeBps} bps, fournisseur crédité de ${formatEther(expectedNet)} MUSD`);
   console.log(`fair-exchange MUSD validé · hashlock ${createHash("sha256").update(preimage).digest("hex")}`);
 }
 

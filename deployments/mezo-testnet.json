@@ -2,7 +2,7 @@
   "network": "mezo-testnet",
   "chainId": 31611,
   "explorer": "https://explorer.test.mezo.org",
-  "deployedAt": "2026-10-26T13:05:23.199Z",
+  "deployedAt": "2026-11-04T10:10:12.056Z",
   "deployer": "0xF1b3C80fF7ffa2D6f609D51dC5483e8e8da036c1",
   "lockAuthorizer": "0x2d017fb59077456E87C6f0E719dd75B03a910c8a",
   "settlementToken": {
@@ -12,32 +12,47 @@
     "codeHash": "0xc0d0630dacd16463b0390f3914920cb4cbbe3586e7a51ef0d71930249756f474"
   },
   "contracts": {
-    "escrow": "0xd14a0af1581bd7bd80d9da0f775c1c254967abda",
+    "escrow": "0xce6f236c0ada94e8813beb6a79866dc6138909c0",
     "kyb": "0xf0ab86b45202c1600cb54b49cbd35bd3e4bb5392",
-    "datasets": "0x2f7482e7cf68e9babda9e31b566ffcbaa3a9b969",
+    "datasets": "0x6a80a8731cef8ad50fd33da394a7c610204d60a3",
     "kybMode": "open",
-    "escrowVersion": "sirius-escrow-usdc-v6"
+    "escrowVersion": "sirius-escrow-usdc-v6",
+    "escrowFeatures": [
+      "lockWithSignature",
+      "feeBpsFor"
+    ],
+    "feeRouter": "0x1ff4f5330b79ab662ae12d2605bd83d6ec84f2e2",
+    "feePolicy": "0x6360c4c391b532bdb367084043afebb2c4fca584",
+    "feeBps": 200,
+    "checkout": "0x66215c08a815e24b01a53f7526b73ce74426e368"
   },
   "verification": {
     "explorer": "https://explorer.test.mezo.org",
-    "method": "hardhat verify (Blockscout etherscan-compatible API, network mezoTestnet)",
-    "compiler": "v0.8.24+commit.e11b9ed9",
-    "verifiedAt": "2026-10-31T17:06:18.864Z",
+    "verifiedAt": "2026-11-04",
     "contracts": {
       "escrow": {
         "verified": true,
-        "name": "SiriusEscrow",
-        "url": "https://explorer.test.mezo.org/address/0xd14a0af1581bd7bd80d9da0f775c1c254967abda?tab=contract"
+        "url": "https://explorer.test.mezo.org/address/0xce6f236c0ada94e8813beb6a79866dc6138909c0#code"
       },
       "datasets": {
         "verified": true,
-        "name": "SiriusDatasetRegistry",
-        "url": "https://explorer.test.mezo.org/address/0x2f7482e7cf68e9babda9e31b566ffcbaa3a9b969?tab=contract"
+        "url": "https://explorer.test.mezo.org/address/0x6a80a8731cef8ad50fd33da394a7c610204d60a3#code"
       },
       "kyb": {
         "verified": true,
-        "name": "SiriusOpenKybRegistry",
-        "url": "https://explorer.test.mezo.org/address/0xf0ab86b45202c1600cb54b49cbd35bd3e4bb5392?tab=contract"
+        "url": "https://explorer.test.mezo.org/address/0xf0ab86b45202c1600cb54b49cbd35bd3e4bb5392#code"
+      },
+      "feeRouter": {
+        "verified": true,
+        "url": "https://explorer.test.mezo.org/address/0x1ff4f5330b79ab662ae12d2605bd83d6ec84f2e2#code"
+      },
+      "feePolicy": {
+        "verified": true,
+        "url": "https://explorer.test.mezo.org/address/0x6360c4c391b532bdb367084043afebb2c4fca584#code"
+      },
+      "checkout": {
+        "verified": true,
+        "url": "https://explorer.test.mezo.org/address/0x66215c08a815e24b01a53f7526b73ce74426e368#code"
       }
     }
   },
@@ -47,22 +62,41 @@
     "datasetId": "mezo-demo-energy-consumption",
     "amountMusd": "2",
     "transactions": {
-      "mint": "0x495bc76b6080466ae634e407e4b7e805b2b411986c46f084d9c0930bb6aa06d6",
-      "approve": "0x9c6e98d1af6dfa37e28902e50150dee547b977cc9338b2915a4f18c07cd56689",
-      "lock": "0xa2db7f4339341f9bd7aea932408bc339389526e6dcdb5a4673cd5467fbf152a9",
-      "release": "0x765c78e91717068ce567f95807f1994c81cfacdadd101ccbca391b2c0d09085c",
-      "withdrawFor": "0xc72a906b375bea2360e3bee9a67c572fedd68c4abcbf4ad537a4029ffdd77d50"
+      "mint": "0x151675a8aac6e08e439b9c60c7af1061879b57c13d5f6c48322332455c65f95d",
+      "approve": "0x64a4355b6d1292682f4e18f95bf2539c5d0620e4775c2958771b1bf1705f71c5",
+      "lock": "0x2975b5aa3d123098509fe1c3ef23c659aeec0cfbf811a38b33214c0296185e47",
+      "release": "0x876ec38bc6118568d678de727b4beba4bb6633cc6b601c63dcdc31a2e397f897",
+      "withdrawFor": "0xe051cbbd5239c83dd0cd871a1e65c2b6cea103d203d731c31a79fad6942e7d94"
     }
   },
-  "previous": {
-    "escrow": "0xefb89e4c5d32581bf09122cb6f4cc60558a27f67",
-    "kyb": "0x53df0d2cffbe273e24d1327bc5e573bd380319bd",
-    "datasets": "0xc1d9dbff541600cdde741b0ce9664ebd7fa49d78",
-    "lockAuthorizer": "0xF1b3C80fF7ffa2D6f609D51dC5483e8e8da036c1",
-    "transactions": {
-      "lock": "0x24014c3cf3be895ce67b8c5dd9378d519815c5efcdd7e2cb27c15e41fc719871",
-      "release": "0x1aa9d179dc82613fe05180faa49dc03ed942e21777fd0cbb8ad92691b14d4714",
-      "withdrawFor": "0x0db9b21a69390b9baf5669da160a682f6d83f03c34f382b2b45f843054739df6"
+  "previous": [
+    {
+      "escrow": "0xd14a0af1581bd7bd80d9da0f775c1c254967abda",
+      "kyb": "0xf0ab86b45202c1600cb54b49cbd35bd3e4bb5392",
+      "datasets": "0x2f7482e7cf68e9babda9e31b566ffcbaa3a9b969",
+      "kybMode": "open",
+      "escrowVersion": "sirius-escrow-usdc-v6",
+      "lockAuthorizer": "0x2d017fb59077456E87C6f0E719dd75B03a910c8a",
+      "deployedAt": "2026-10-26T13:05:23.199Z",
+      "deployer": "0xF1b3C80fF7ffa2D6f609D51dC5483e8e8da036c1",
+      "transactions": {
+        "mint": "0x495bc76b6080466ae634e407e4b7e805b2b411986c46f084d9c0930bb6aa06d6",
+        "approve": "0x9c6e98d1af6dfa37e28902e50150dee547b977cc9338b2915a4f18c07cd56689",
+        "lock": "0xa2db7f4339341f9bd7aea932408bc339389526e6dcdb5a4673cd5467fbf152a9",
+        "release": "0x765c78e91717068ce567f95807f1994c81cfacdadd101ccbca391b2c0d09085c",
+        "withdrawFor": "0xc72a906b375bea2360e3bee9a67c572fedd68c4abcbf4ad537a4029ffdd77d50"
+      }
+    },
+    {
+      "escrow": "0xefb89e4c5d32581bf09122cb6f4cc60558a27f67",
+      "kyb": "0x53df0d2cffbe273e24d1327bc5e573bd380319bd",
+      "datasets": "0xc1d9dbff541600cdde741b0ce9664ebd7fa49d78",
+      "lockAuthorizer": "0xF1b3C80fF7ffa2D6f609D51dC5483e8e8da036c1",
+      "transactions": {
+        "lock": "0x24014c3cf3be895ce67b8c5dd9378d519815c5efcdd7e2cb27c15e41fc719871",
+        "release": "0x1aa9d179dc82613fe05180faa49dc03ed942e21777fd0cbb8ad92691b14d4714",
+        "withdrawFor": "0x0db9b21a69390b9baf5669da160a682f6d83f03c34f382b2b45f843054739df6"
+      }
     }
-  }
+  ]
 }
