@@ -64,11 +64,6 @@ export const metadata: Metadata = {
     title: TITRE,
     description: DESCRIPTION,
   },
-  twitter: {
-    card: "summary_large_image",
-    title: TITRE,
-    description: DESCRIPTION,
-  },
 };
 
 export default async function RootLayout({

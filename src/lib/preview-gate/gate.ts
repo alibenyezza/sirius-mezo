@@ -1,7 +1,7 @@
 /**
  * Porte d'aperçu du passage mainnet.
  *
- * Pendant la mise en production, le public voit une page d'attente sur sirius-data.tech
+ * Pendant la mise en production, le public voit une page d'attente sur le domaine de production
  * pendant que l'équipe teste le vrai mainnet derrière. La porte est un interrupteur
  * d'environnement (`SIRIUS_PREVIEW_GATE=true`) posé sur le seul projet Vercel de
  * production : absent ou autre valeur, rien ne change. Une clé (`SIRIUS_PREVIEW_KEY`,
@@ -92,7 +92,7 @@ function isApiPath(pathname: string): boolean {
  * Liste blanche minimale. Chaque entrée répond à un appel extérieur inventorié ; tout ce qui
  * n'y figure pas est fermé.
  *
- * - `/api/auth/challenge` : le job « Fumée » du pipeline (`scripts/smoke-auth.mjs`) le
+ * - `/api/auth/challenge` : un test de fumée le
  *   POSTe sur la production après chaque déploiement et exige un 200 depuis les origines
  *   de la cible et un 403 depuis l'autre. La route ne fait qu'émettre un défi à signer :
  *   sans `/api/auth/verify`, fermé, il ne sert à rien. Le test de fumée reste donc vert avec
@@ -165,7 +165,6 @@ export const ROOT_FILES: ReadonlySet<string> = new Set([
   "/icon.png",
   "/apple-icon.png",
   "/opengraph-image",
-  "/twitter-image",
   "/file.svg",
   "/globe.svg",
   "/next.svg",

@@ -2,8 +2,8 @@
  * Mise en forme du certificat d'exécution : du résultat de vérification aux lignes
  * affichées. Module pur, sans accès serveur : il est rendu et testé tel quel.
  *
- * Règle de rédaction : la page ne dit « Executed inside an Intel TDX enclave on Phala
- * Cloud » que si **toutes** les vérifications ont abouti (quote liée au prêt, matériel
+ * Règle de rédaction : la page ne dit « Executed inside an Intel TDX enclave »
+ * que si **toutes** les vérifications ont abouti (quote liée au prêt, matériel
  * Intel et TCB acceptés, identité du code égale aux valeurs épinglées, ou à celles d'une
  * enclave Sirius de production remplacée après le prêt). Dans tous les
  * autres cas, le titre dit ce qui manque, sans rien promettre.
@@ -82,7 +82,7 @@ export interface CertificatePresentation {
   measurements: CertificateMeasurement[];
 }
 
-export const VERIFIED_HEADLINE = "Executed inside an Intel TDX enclave on Phala Cloud";
+export const VERIFIED_HEADLINE = "Executed inside an Intel TDX enclave";
 
 const HEX = /^[0-9a-f]+$/i;
 

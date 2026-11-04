@@ -213,7 +213,7 @@ exists today:
 - datasets published through the UI by other providers keep their database row
   (`evmDatasetId`, `evmChainId`, `evmMintTxHash` in `prisma/schema.prisma`) but their title
   lives on the old registry: they must be re-published by their provider (new upload →
-  new mint), as [`docs/ESCROW-V6.md`](ESCROW-V6.md) step 8 already requires. There is no
+  new mint), since a registry binds one escrow only. There is no
   automated migration of titles;
 - `src/lib/sirius/migration-check.ts` (run by `scripts/check-evm-migration.ts` at deploy
   time) checks **loans**, not datasets: it refuses to start if an old loan is still active on an
@@ -279,7 +279,7 @@ contract fails the other is still returned and the failing one carries `availabl
 ## One-signature payment relay (`lockWithSignature`)
 
 Flag: `SIRIUS_GASLESS_LOCK=true`. Requires an escrow that exposes `lockNonces` (v6 with
-`lockWithSignature`, see `docs/ESCROW-V6.md`); on an older escrow the routes answer 409.
+`lockWithSignature`, as deployed on 4 Nov 2026); on an older escrow the routes answer 409.
 
 1. `POST /api/loans` prepares the loan as usual (runner hashlock, lock authorization).
 2. `GET /api/loans/{id}/lock-with-signature` renews the authorization, decodes the exact lock terms the

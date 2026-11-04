@@ -110,7 +110,7 @@ export function CertificateView(props: CertificateViewProps) {
               A {props.modelName} model was trained on the dataset “{props.datasetName}”.
             </li>
             <li>
-              The training ran inside a sealed Intel TDX machine on Phala Cloud. The data was only decrypted there:
+              The training ran inside a sealed Intel TDX machine. The data was only decrypted there:
               whoever rented it received the trained model, never the data.
             </li>
             <li>

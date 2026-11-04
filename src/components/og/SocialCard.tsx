@@ -2,7 +2,7 @@ import { ImageResponse } from "next/og";
 
 /**
  * Image d'aperçu de lien (Open Graph et X), générée par `next/og` au lieu d'un PNG figé.
- * Utilisée par src/app/opengraph-image.tsx et src/app/twitter-image.tsx.
+ * Utilisée par src/app/opengraph-image.tsx.
  */
 
 const SOCIAL_CARD_SIZE = { width: 1200, height: 630 };

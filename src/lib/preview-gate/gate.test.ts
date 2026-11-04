@@ -124,7 +124,7 @@ test("liste blanche avec cookie valide : « open », l'équipe voit /terms avec 
 
 test("fichiers statiques : chunks Next, favicon, images et exemples de public/ restent servis", async () => {
   const config = readPreviewGateConfig(ACTIVE);
-  for (const path of ["/_next/static/chunks/app.js", "/_next/static/css/app.css", "/_next/image", "/favicon.ico", "/icon.png", "/apple-icon.png", "/opengraph-image", "/twitter-image", "/file.svg", "/globe.svg", "/next.svg", "/vercel.svg", "/window.svg", "/images/image_ali.png", "/images/devinci-blockchain.png", "/examples/README.md", "/examples/regression/housing-prices-train.csv", "/examples/benchmarks/industrial-yield-test.csv"]) {
+  for (const path of ["/_next/static/chunks/app.js", "/_next/static/css/app.css", "/_next/image", "/favicon.ico", "/icon.png", "/apple-icon.png", "/opengraph-image", "/file.svg", "/globe.svg", "/next.svg", "/vercel.svg", "/window.svg", "/images/image_ali.png", "/images/devinci-blockchain.png", "/examples/README.md", "/examples/regression/housing-prices-train.csv", "/examples/benchmarks/industrial-yield-test.csv"]) {
     assert.equal(isPreviewGateExempt(path), true, path);
     assert.equal(await decidePreviewGate(config, path, null), "allow", path);
   }
@@ -157,12 +157,12 @@ test("liste des fichiers racine et dossiers de public/ : exactement ceux du dép
   const publicFiles = publicEntries.filter((entry) => entry.isFile()).map((entry) => `/${entry.name}`);
   const publicDirectories = publicEntries.filter((entry) => entry.isDirectory()).map((entry) => `/${entry.name}/`);
   const metadataIcons = readdirSync(resolve(root, "src/app"), { withFileTypes: true })
-    .filter((entry) => entry.isFile() && /^(favicon\.ico|(apple-)?icon\.[a-z]+|(opengraph|twitter)-image\.[a-z]+)$/.test(entry.name))
+    .filter((entry) => entry.isFile() && /^(favicon\.ico|(apple-)?icon\.[a-z]+|opengraph-image\.[a-z]+)$/.test(entry.name))
     // Une image générée par du code (opengraph-image.tsx) est servie sans extension.
     .map((entry) => `/${entry.name.replace(/\.(tsx|ts|jsx|js)$/, "")}`);
   assert.deepEqual([...ROOT_FILES].sort(), [...publicFiles, ...metadataIcons].sort());
   assert.deepEqual([...PUBLIC_DIRECTORIES].sort(), publicDirectories.sort());
-  assert.deepEqual([...ROOT_FILES].sort(), ["/apple-icon.png", "/favicon.ico", "/file.svg", "/globe.svg", "/icon.png", "/next.svg", "/opengraph-image", "/twitter-image", "/vercel.svg", "/window.svg"]);
+  assert.deepEqual([...ROOT_FILES].sort(), ["/apple-icon.png", "/favicon.ico", "/file.svg", "/globe.svg", "/icon.png", "/next.svg", "/opengraph-image", "/vercel.svg", "/window.svg"]);
   assert.deepEqual([...PUBLIC_DIRECTORIES], ["/images/", "/examples/"]);
   for (const directory of PUBLIC_DIRECTORIES) assert.match(directory, /^\/[a-z]+\/$/);
   for (const file of ROOT_FILES) assert.match(file, /^\/[a-z-]+(\.[a-z]+)?$/);

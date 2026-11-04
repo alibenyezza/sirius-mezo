@@ -24,7 +24,7 @@ function page(name: string): string {
   return html[name];
 }
 
-const HEADLINE = "Executed inside an Intel TDX enclave on Phala Cloud";
+const HEADLINE = "Executed inside an Intel TDX enclave";
 
 test("certificat vérifié : titre, mesures, règlement, lien de preuve et téléchargement", () => {
   const out = page("verified");

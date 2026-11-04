@@ -44,27 +44,33 @@ Provider                        Mezo                         Borrower
 | Explorer | https://explorer.test.mezo.org |
 | Gas | BTC (native, 18 decimals) |
 | Settlement token | MUSD `0x118917a40FAF1CD7a13dB0Ef56C86De7973Ac503` (18 decimals) |
+| `SiriusEscrow` (v6, MUSD, `lockWithSignature`, 2 % fee) | [`0xce6f236c0ada94e8813beb6a79866dc6138909c0`](https://explorer.test.mezo.org/address/0xce6f236c0ada94e8813beb6a79866dc6138909c0) |
+| `SiriusDatasetRegistry` | [`0x6a80a8731cef8ad50fd33da394a7c610204d60a3`](https://explorer.test.mezo.org/address/0x6a80a8731cef8ad50fd33da394a7c610204d60a3) |
+| `SiriusCheckout` (Pay with BTC) | [`0x66215c08a815e24b01a53f7526b73ce74426e368`](https://explorer.test.mezo.org/address/0x66215c08a815e24b01a53f7526b73ce74426e368) |
+| `SiriusFeeRouter` | [`0x1ff4f5330b79ab662ae12d2605bd83d6ec84f2e2`](https://explorer.test.mezo.org/address/0x1ff4f5330b79ab662ae12d2605bd83d6ec84f2e2) |
+| `SiriusMezoFeePolicy` (veMEZO discount) | [`0x6360c4c391b532bdb367084043afebb2c4fca584`](https://explorer.test.mezo.org/address/0x6360c4c391b532bdb367084043afebb2c4fca584) |
 | `SiriusOpenKybRegistry` | [`0xf0ab86b45202c1600cb54b49cbd35bd3e4bb5392`](https://explorer.test.mezo.org/address/0xf0ab86b45202c1600cb54b49cbd35bd3e4bb5392) |
-| `SiriusDatasetRegistry` | [`0x2f7482e7cf68e9babda9e31b566ffcbaa3a9b969`](https://explorer.test.mezo.org/address/0x2f7482e7cf68e9babda9e31b566ffcbaa3a9b969) |
-| `SiriusEscrow` (v6, MUSD) | [`0xd14a0af1581bd7bd80d9da0f775c1c254967abda`](https://explorer.test.mezo.org/address/0xd14a0af1581bd7bd80d9da0f775c1c254967abda) |
 | Lock authorizer (app settlement account) | `0x2d017fb59077456E87C6f0E719dd75B03a910c8a` |
-| Deployer | `0xF1b3C80fF7ffa2D6f609D51dC5483e8e8da036c1` |
-| Live demo | https://sirius-mezo.vercel.app |
+| Deployer and treasury | `0xF1b3C80fF7ffa2D6f609D51dC5483e8e8da036c1` |
+| Live demo | https://sirius-mezo.vercel.app · [/proof](https://sirius-mezo.vercel.app/proof) · [/try](https://sirius-mezo.vercel.app/try) · [/break](https://sirius-mezo.vercel.app/break) |
 | Manifest | [`deployments/mezo-testnet.json`](deployments/mezo-testnet.json) |
+
+All six contracts are source-verified on the Mezo explorer (deployed 4 Nov 2026).
 
 ### Proof: a full MUSD loan on Mezo testnet
 
-Demo dataset title minted by the provider `0xeeD8eC97B94613a765639Ea72a9410CCb82eAe4f`, then a complete fair-exchange cycle settled in MUSD (2 MUSD, hashlock `64bd9c9b…431cdb`), signed by the application's settlement account:
+Demo dataset title minted by the provider `0xeeD8eC97B94613a765639Ea72a9410CCb82eAe4f`, then a complete fair-exchange cycle of 2 MUSD on the current contracts, signed by the application's settlement account. The provider receives 1.96 MUSD: the escrow keeps the 2 % platform fee at release.
 
 | Step | Transaction |
 |---|---|
-| Dataset title minted (`SiriusDatasetRegistry.mint`) | [`0x495bc76b…aa06d6`](https://explorer.test.mezo.org/tx/0x495bc76b6080466ae634e407e4b7e805b2b411986c46f084d9c0930bb6aa06d6) |
-| Borrower approves MUSD for the escrow | [`0x9c6e98d1…d56689`](https://explorer.test.mezo.org/tx/0x9c6e98d1af6dfa37e28902e50150dee547b977cc9338b2915a4f18c07cd56689) |
-| `SiriusEscrow.lock` — 2 MUSD locked with hashlock + EIP-712 authorization | [`0xa2db7f43…f152a9`](https://explorer.test.mezo.org/tx/0xa2db7f4339341f9bd7aea932408bc339389526e6dcdb5a4673cd5467fbf152a9) |
-| `SiriusEscrow.release` — preimage published, provider credited | [`0x765c78e9…09085c`](https://explorer.test.mezo.org/tx/0x765c78e91717068ce567f95807f1994c81cfacdadd101ccbca391b2c0d09085c) |
-| `SiriusEscrow.withdrawFor` — provider receives 2 MUSD | [`0xc72a906b…dd77d50`](https://explorer.test.mezo.org/tx/0xc72a906b375bea2360e3bee9a67c572fedd68c4abcbf4ad537a4029ffdd77d50) |
+| Dataset title minted (`SiriusDatasetRegistry.mint`) | [`0x151675a8…65f95d`](https://explorer.test.mezo.org/tx/0x151675a8aac6e08e439b9c60c7af1061879b57c13d5f6c48322332455c65f95d) |
+| Borrower approves MUSD for the escrow | [`0x64a4355b…5f71c5`](https://explorer.test.mezo.org/tx/0x64a4355b6d1292682f4e18f95bf2539c5d0620e4775c2958771b1bf1705f71c5) |
+| `SiriusEscrow.lock`: 2 MUSD locked with hashlock + EIP-712 authorization | [`0x2975b5aa…185e47`](https://explorer.test.mezo.org/tx/0x2975b5aa3d123098509fe1c3ef23c659aeec0cfbf811a38b33214c0296185e47) |
+| `SiriusEscrow.release`: preimage published, provider credited net of the fee | [`0x876ec38b…97f897`](https://explorer.test.mezo.org/tx/0x876ec38bc6118568d678de727b4beba4bb6633cc6b601c63dcdc31a2e397f897) |
+| `SiriusEscrow.withdrawFor`: provider receives 1.96 MUSD | [`0xe051cbbd…2e7d94`](https://explorer.test.mezo.org/tx/0xe051cbbd5239c83dd0cd871a1e65c2b6cea103d203d731c31a79fad6942e7d94) |
+| x402: an agent pays 0.001 MUSD for one prediction, settled by Mezo's facilitator | [`0x50e71f23…c20ed0`](https://explorer.test.mezo.org/tx/0x50e71f23b2cabd4fa3070cf542aa9af102bf65da13d2315a44106b9211c20ed0) |
 
-An earlier trio (escrow [`0xefb89e4c…a27f67`](https://explorer.test.mezo.org/address/0xefb89e4c5d32581bf09122cb6f4cc60558a27f67)) ran the same cycle with the deployer as signer: lock [`0x24014c3c…719871`](https://explorer.test.mezo.org/tx/0x24014c3cf3be895ce67b8c5dd9378d519815c5efcdd7e2cb27c15e41fc719871), release [`0x1aa9d179…d4714`](https://explorer.test.mezo.org/tx/0x1aa9d179dc82613fe05180faa49dc03ed942e21777fd0cbb8ad92691b14d4714).
+Two earlier deployments ran the same cycle (escrows [`0xd14a0af1581bd7bd80d9da0f775c1c254967abda`](https://explorer.test.mezo.org/address/0xd14a0af1581bd7bd80d9da0f775c1c254967abda) and [`0xefb89e4c5d32581bf09122cb6f4cc60558a27f67`](https://explorer.test.mezo.org/address/0xefb89e4c5d32581bf09122cb6f4cc60558a27f67)); their transactions are listed on [/proof](https://sirius-mezo.vercel.app/proof). Each was replaced when the escrow gained a feature, since the escrow is immutable.
 
 Reproduce it yourself (needs test BTC for gas and a few test MUSD on the deployer key):
 
@@ -82,10 +88,13 @@ With `NEXT_PUBLIC_MEZO_PASSPORT=true`, the connect menu offers **Bitcoin wallet 
 
 ## Contracts
 
-- `SiriusEscrow` v6: MUSD escrow per loan, EIP-712 lock authorization from the settlement key (`lockAuthorizer`), SHA-256 hashlock, locked training profile, KYB check on both parties, atomic release before deadline, refund after deadline, pull-only payouts. Reads `decimals()` on-chain so the minimum amount follows the token.
-- `SiriusEscrowV7`: signed quote, dataset + compute prepayment, separate provider / treasury credits, refund with capped retention of attested fees. Integrated locally, explicit opt-in.
+- `SiriusEscrow` v6: MUSD escrow per loan, EIP-712 lock authorization from the settlement key (`lockAuthorizer`), SHA-256 hashlock, locked training profile, KYB check on both parties, atomic release before deadline, refund after deadline, pull-only payouts. `lockWithSignature` takes a MUSD permit and a signed lock request so the buyer pays no gas. Keeps a 2 % fee at release (1 % for veMEZO holders), never on a refund.
+- `SiriusCheckout`: Pay with BTC in one transaction, swapping on the Mezo Pools BTC/MUSD pool under a Skip oracle bound, then locking through the buyer's signed request. No owner, holds nothing between calls.
+- `SiriusFeeRouter`: receives the platform fee, pays half to the treasury and posts half as a MUSD incentive on Mezo's BTC/MUSD gauge. Permissionless, immutable.
+- `SiriusMezoFeePolicy`: reads Mezo's vote-escrow at release to apply the veMEZO discount.
 - `SiriusKybRegistry` v3: EIP-712 KYB attestations, consented by the subject, expirable, revocable. `SiriusOpenKybRegistry` validates everyone for the hackathon testnet instance.
 - `SiriusDatasetRegistry` v4: non-transferable title of an encrypted dataset, bound to the CID hash, Merkle root, size and training profile.
+- `SiriusEscrowV7` (not deployed): signed quote with separate dataset and compute prepayment.
 
 Sources, tests and scripts live in [`contracts/`](contracts). TypeScript ABIs are generated into [`src/lib/evm/abi/`](src/lib/evm/abi).
 
@@ -151,19 +160,18 @@ Sirius account spend gas are off by default and documented in `.env.example`.
 | **Faucet on canonical MUSD** | The in-app faucet transfers 10 test MUSD from a funded reserve instead of calling `mint` on the canonical token (which only the protocol may do). | `src/lib/sirius/faucet.ts` |
 
 Protocol addresses (testnet and mainnet proxies, verified on-chain) live in `src/lib/mezo/protocol.ts`.
-`lockWithSignature` requires redeploying the escrow and dataset registry; the procedure is in
-[`docs/MEZO-TESTNET.md`](docs/MEZO-TESTNET.md).
+The current escrow, registry, checkout and fee contracts were redeployed together on 4 Nov 2026; the
+procedure is in [`docs/MEZO-TESTNET.md`](docs/MEZO-TESTNET.md).
 
 ## Roadmap
 
 1. Mezo mainnet deployment with real MUSD, provider earnings routed to sMUSD, first data providers, KYB.
 2. A hardware-isolated training runner for real data, keeping the same signed, verifiable certificates.
-3. Platform fees payable in MEZO, with a discount for veBTC / veMEZO holders.
+3. Agents buying full training runs, not only per-call predictions, with a capped budget signed by the agent's wallet.
 
 ## Documentation
 
 - [Architecture](docs/ARCHITECTURE.md)
-- [Escrow v6](docs/ESCROW-V6.md)
 - [MCP server for agents](docs/MCP.md)
 - [Mezo testnet deployment](docs/MEZO-TESTNET.md)
 

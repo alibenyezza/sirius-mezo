@@ -9,7 +9,7 @@ import { CONTACT_EMAIL } from "@/lib/copy/disclaimers";
  * l'adresse de contact. Aucune donnée personnelle des fondateurs (nom, adresse, téléphone,
  * numéro d'immatriculation) n'apparaît ici ; un champ sans valeur réelle est omis, jamais
  * rempli d'un texte d'attente. Les prestataires cités sont ceux réellement utilisés
- * (deploy/operations/supplier-limits.json).
+ * (voir la page elle-même).
  * `legal.test.ts` vérifie ces points.
  */
 
