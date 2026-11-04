@@ -115,6 +115,54 @@
       "note": "SiriusFeeRouter.distribute pulled 0.04 MUSD of platform fees from the escrow: 0.02 MUSD to the treasury and 0.02 MUSD posted as an incentive on the BTC/MUSD gauge bribe for veBTC voters.",
       "date": "2026-11-04",
       "party": "team"
+    },
+    {
+      "label": "One-signature payment",
+      "kind": "tx",
+      "value": "0x5c90a68cf3e47c968e99936ae7eb09a0eaf7df19ec953f6d5934bcac0595d193",
+      "note": "A buyer holding only MUSD and no BTC signed a MUSD permit and a lock request; the settlement account submitted lockWithSignature and paid the gas. 2 MUSD locked.",
+      "date": "2026-11-04",
+      "party": "team"
+    },
+    {
+      "label": "Pay with BTC",
+      "kind": "tx",
+      "value": "0xd8ee0d284929078d7ffe7600282bb8ee733957a9dc9812c518cf0ed6f5c07054",
+      "note": "A buyer holding only BTC called SiriusCheckout.buyWithBtc: 0.0000256 BTC swapped to 2.01 MUSD on the Mezo Pools BTC/MUSD pool under the oracle floor, then 2 MUSD locked in the escrow, in one transaction.",
+      "date": "2026-11-04",
+      "party": "team"
+    },
+    {
+      "label": "Release, one-signature loan",
+      "kind": "tx",
+      "value": "0x059eb9241fbb33381188419c5dde7ed3efaa9d9bd005a7f9b1788ee952fb7dd4",
+      "note": "Preimage published, provider credited net of the 2 % fee.",
+      "date": "2026-11-04",
+      "party": "team"
+    },
+    {
+      "label": "Release, BTC loan",
+      "kind": "tx",
+      "value": "0x6356166775d93c60aef2833f8fceaf4ffbf6cfcff054db4a695a1da77ff6f5a5",
+      "note": "Preimage published, provider credited net of the 2 % fee.",
+      "date": "2026-11-04",
+      "party": "team"
+    },
+    {
+      "label": "Provider withdrawal",
+      "kind": "tx",
+      "value": "0xa0cc6f3d0194c1c1e9139268934f723d53501f9943a0300e4423ecd2980d053a",
+      "note": "The demo provider received 3.92 MUSD: two 2 MUSD runs minus the platform fee.",
+      "date": "2026-11-04",
+      "party": "team"
+    },
+    {
+      "label": "Earnings into the Stability Pool",
+      "kind": "tx",
+      "value": "0xa3c31f31067d650b0d0908ec75bc0a5eb5a03849b473f73fba8e46271ab9676e",
+      "note": "The demo provider deposited 1 MUSD of earnings into Mezo's MUSD Stability Pool (provideToSP).",
+      "date": "2026-11-04",
+      "party": "team"
     }
   ]
 }

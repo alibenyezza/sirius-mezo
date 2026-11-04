@@ -69,6 +69,12 @@ Demo dataset title minted by the provider `0xeeD8eC97B94613a765639Ea72a9410CCb82
 | `SiriusEscrow.release`: preimage published, provider credited net of the fee | [`0x876ec38b…97f897`](https://explorer.test.mezo.org/tx/0x876ec38bc6118568d678de727b4beba4bb6633cc6b601c63dcdc31a2e397f897) |
 | `SiriusEscrow.withdrawFor`: provider receives 1.96 MUSD | [`0xe051cbbd…2e7d94`](https://explorer.test.mezo.org/tx/0xe051cbbd5239c83dd0cd871a1e65c2b6cea103d203d731c31a79fad6942e7d94) |
 | x402: an agent pays 0.001 MUSD for one prediction, settled by Mezo's facilitator | [`0x50e71f23…c20ed0`](https://explorer.test.mezo.org/tx/0x50e71f23b2cabd4fa3070cf542aa9af102bf65da13d2315a44106b9211c20ed0) |
+| One-signature payment: a buyer with no BTC signs; Sirius submits `lockWithSignature` and pays the gas | [`0x5c90a68c…95d193`](https://explorer.test.mezo.org/tx/0x5c90a68cf3e47c968e99936ae7eb09a0eaf7df19ec953f6d5934bcac0595d193) |
+| Pay with BTC: BTC swapped on the Mezo Pools BTC/MUSD pool and locked, in one transaction | [`0xd8ee0d28…c07054`](https://explorer.test.mezo.org/tx/0xd8ee0d284929078d7ffe7600282bb8ee733957a9dc9812c518cf0ed6f5c07054) |
+| Fees distributed: 0.02 MUSD to the treasury, 0.02 MUSD posted on the BTC/MUSD gauge for veBTC voters | [`0x9b25782b…d9607c`](https://explorer.test.mezo.org/tx/0x9b25782bb823c9f43660478b3a90ac40745fd84cd03fe19d42579707c1d9607c) |
+| Provider earnings into Mezo's MUSD Stability Pool (`provideToSP`, 1 MUSD) | [`0xa3c31f31…b9676e`](https://explorer.test.mezo.org/tx/0xa3c31f31067d650b0d0908ec75bc0a5eb5a03849b473f73fba8e46271ab9676e) |
+
+These were replayed with throwaway team wallets by [`scripts/mezo-team-flows.ts`](scripts/mezo-team-flows.ts); `/proof` lists them under team wallets, apart from external buyers.
 
 Two earlier deployments ran the same cycle (escrows [`0xd14a0af1581bd7bd80d9da0f775c1c254967abda`](https://explorer.test.mezo.org/address/0xd14a0af1581bd7bd80d9da0f775c1c254967abda) and [`0xefb89e4c5d32581bf09122cb6f4cc60558a27f67`](https://explorer.test.mezo.org/address/0xefb89e4c5d32581bf09122cb6f4cc60558a27f67)); their transactions are listed on [/proof](https://sirius-mezo.vercel.app/proof). Each was replaced when the escrow gained a feature, since the escrow is immutable.
 
