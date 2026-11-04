@@ -115,6 +115,14 @@ async function main() {
     console.log(`✓ ${label}\n  ${manifest.explorer}/tx/${hash}`);
   };
   const walletOf = (account: PrivateKeyAccount) => createWalletClient({ account, chain, transport });
+  // Le RPC de Mezo estime parfois le gas sous le plancher EIP-7623 (coût minimal des données) :
+  // chaque envoi part avec l'estimation plus une marge, jamais avec l'estimation brute.
+  const withMargin = (gas: bigint) => gas * BigInt(3) / BigInt(2) + BigInt(10_000);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const write = async (account: PrivateKeyAccount, params: any): Promise<Hex> => {
+    const gas = await client.estimateContractGas({ ...params, account });
+    return walletOf(account).writeContract({ ...params, account, chain, gas: withMargin(gas) });
+  };
 
   // Devis BTC : combien envoyer pour 2 MUSD au cours du pool, sous le plancher de l'oracle.
   const oracle = await client.readContract({ address: checkout, abi: siriuscheckoutAbi, functionName: "oracleFloor", args: [parseEther("1")] });
@@ -155,8 +163,9 @@ async function main() {
   }
 
   // Financement des deux acheteurs jetables.
-  await wait("Financement de l'acheteur A : 2 MUSD", await walletOf(deployer).writeContract({ address: musd, abi: erc20Abi, functionName: "transfer", args: [buyerA.address, PRICE] }));
-  await wait("Financement de l'acheteur B : BTC", await walletOf(deployer).sendTransaction({ to: buyerB.address, value: btcForBuyerB }));
+  await wait("Financement de l'acheteur A : 2 MUSD", await write(deployer, { address: musd, abi: erc20Abi, functionName: "transfer", args: [buyerA.address, PRICE] }));
+  const fundGas = await client.estimateGas({ account: deployer, to: buyerB.address, value: btcForBuyerB });
+  await wait("Financement de l'acheteur B : BTC", await walletOf(deployer).sendTransaction({ to: buyerB.address, value: btcForBuyerB, gas: withMargin(fundGas) }));
 
   const [tokenName, domain] = await Promise.all([
     client.readContract({ address: musd, abi: permitDomainAbi, functionName: "name" }),
@@ -198,29 +207,25 @@ async function main() {
 
   // 1. Paiement en une signature, relayé par le compte de règlement.
   const a = await signedLock(buyerA);
-  const relay = await client.simulateContract({
-    address: escrow, abi: siriusescrowAbi, functionName: "lockWithSignature",
-    args: [a.request, a.borrowerSignature, a.permit, a.authorization], account: settlement,
-  });
-  await wait("Paiement en une signature (lockWithSignature, gas payé par Sirius)", await walletOf(settlement).writeContract(relay.request));
+  const relay = { address: escrow, abi: siriusescrowAbi, functionName: "lockWithSignature", args: [a.request, a.borrowerSignature, a.permit, a.authorization] } as const;
+  await client.simulateContract({ ...relay, account: settlement });
+  await wait("Paiement en une signature (lockWithSignature, gas payé par Sirius)", await write(settlement, relay));
 
   // 2. Pay with BTC : l'acheteur B envoie son BTC au checkout.
   const b = await signedLock(buyerB);
-  const buy = await client.simulateContract({
-    address: checkout, abi: siriuscheckoutAbi, functionName: "buyWithBtc",
-    args: [PRICE, b.request, b.borrowerSignature, b.permit, b.authorization], value: btcIn, account: buyerB,
-  });
-  await wait("Pay with BTC (swap Mezo Pools + lock en une transaction)", await walletOf(buyerB).writeContract(buy.request));
+  const buy = { address: checkout, abi: siriuscheckoutAbi, functionName: "buyWithBtc", args: [PRICE, b.request, b.borrowerSignature, b.permit, b.authorization], value: btcIn } as const;
+  await client.simulateContract({ ...buy, account: buyerB });
+  await wait("Pay with BTC (swap Mezo Pools + lock en une transaction)", await write(buyerB, buy));
 
   // 3. Livraison : libération des deux prêts, puis retrait du fournisseur.
-  await wait("Libération du prêt payé en une signature", await walletOf(settlement).writeContract({ address: escrow, abi: siriusescrowAbi, functionName: "release", args: [a.loanKey, a.preimage] }));
-  await wait("Libération du prêt payé en BTC", await walletOf(settlement).writeContract({ address: escrow, abi: siriusescrowAbi, functionName: "release", args: [b.loanKey, b.preimage] }));
-  await wait("Retrait du fournisseur (withdrawFor)", await walletOf(settlement).writeContract({ address: escrow, abi: siriusescrowAbi, functionName: "withdrawFor", args: [provider.address] }));
+  await wait("Libération du prêt payé en une signature", await write(settlement, { address: escrow, abi: siriusescrowAbi, functionName: "release", args: [a.loanKey, a.preimage] }));
+  await wait("Libération du prêt payé en BTC", await write(settlement, { address: escrow, abi: siriusescrowAbi, functionName: "release", args: [b.loanKey, b.preimage] }));
+  await wait("Retrait du fournisseur (withdrawFor)", await write(settlement, { address: escrow, abi: siriusescrowAbi, functionName: "withdrawFor", args: [provider.address] }));
 
   // 4. Gains au travail : 1 MUSD du fournisseur dans le Stability Pool de Mezo.
   const pool = musdProtocol("testnet").stabilityPool;
-  await wait("Approbation MUSD pour le Stability Pool", await walletOf(provider).writeContract({ address: musd, abi: erc20Abi, functionName: "approve", args: [pool, SP_DEPOSIT] }));
-  await wait("Dépôt de 1 MUSD dans le Stability Pool (provideToSP)", await walletOf(provider).writeContract({ address: pool, abi: stabilityPoolAbi, functionName: "provideToSP", args: [SP_DEPOSIT] }));
+  await wait("Approbation MUSD pour le Stability Pool", await write(provider, { address: musd, abi: erc20Abi, functionName: "approve", args: [pool, SP_DEPOSIT] }));
+  await wait("Dépôt de 1 MUSD dans le Stability Pool (provideToSP)", await write(provider, { address: pool, abi: stabilityPoolAbi, functionName: "provideToSP", args: [SP_DEPOSIT] }));
 
   console.log("\nTerminé. Colle cette liste à Claude :");
   for (const item of done) console.log(`${item.label} | ${item.hash}`);

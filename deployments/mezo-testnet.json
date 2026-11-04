@@ -107,6 +107,14 @@
       "note": "An agent paid 0.001 MUSD for one prediction on POST /api/x402/predict: it signed a Permit2 authorization, the Mezo x402 facilitator submitted it and paid the gas in BTC. Demo provider wallet to treasury.",
       "date": "2026-11-04",
       "party": "team"
+    },
+    {
+      "label": "Fees posted to the Mezo gauge",
+      "kind": "tx",
+      "value": "0x9b25782bb823c9f43660478b3a90ac40745fd84cd03fe19d42579707c1d9607c",
+      "note": "SiriusFeeRouter.distribute pulled 0.04 MUSD of platform fees from the escrow: 0.02 MUSD to the treasury and 0.02 MUSD posted as an incentive on the BTC/MUSD gauge bribe for veBTC voters.",
+      "date": "2026-11-04",
+      "party": "team"
     }
   ]
 }
