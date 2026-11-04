@@ -1,5 +1,4 @@
 import { ERROR_MESSAGES_EN } from "./errors-en";
-import { PHALA_MESSAGES_EN } from "./phala-en";
 import { LEGAL_MESSAGES_EN } from "./legal-en";
 import { SHARED_MESSAGES_EN } from "./shared-en";
 import { DATASETS_MESSAGES_EN } from "./datasets-en";
@@ -13,12 +12,12 @@ import { ONBOARDING_MESSAGES_EN } from "./onboarding-en";
 import { ASSISTANT_MESSAGES_EN } from "./assistant-en";
 import { GUIDE_MESSAGES_EN } from "./guide-en";
 import { MEZO_MESSAGES_EN } from "./mezo-en";
+import { RUNNER_SESSION_MESSAGES_EN } from "./runner-session-en";
 
 export const EN_MESSAGES: Record<string, string> = {
   ...ASSISTANT_MESSAGES_EN,
   ...GUIDE_MESSAGES_EN,
   ...ERROR_MESSAGES_EN,
-  ...PHALA_MESSAGES_EN,
   ...SHARED_MESSAGES_EN,
   ...LEGAL_MESSAGES_EN,
   ...DATASETS_MESSAGES_EN,
@@ -29,6 +28,7 @@ export const EN_MESSAGES: Record<string, string> = {
   ...SETTINGS_MESSAGES_EN,
   ...FUNDING_MESSAGES_EN,
   ...ONBOARDING_MESSAGES_EN,
+  ...RUNNER_SESSION_MESSAGES_EN,
   "Prix du dataset": "Dataset price",
   "Code d’invitation": "Invitation code",
   "Pendant la bêta, l’accès est sur invitation. Colle le code reçu de l’équipe Sirius, puis confirme dans ton wallet.": "During the beta, access is by invitation. Paste the code you received from the Sirius team, then confirm in your wallet.",

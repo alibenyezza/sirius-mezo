@@ -7,7 +7,7 @@ function types(nodes: readonly MarkdownInline[]): string[] {
 }
 
 test("gras, italique, code en ligne, liens et retours à la ligne sont reconnus", () => {
-  const nodes = parseMarkdownInline("Ouvre la **Marketplace**, puis *Emprunter* : `escrow` — voir [la page](/marketplace) ou https://sirius-data.tech/docs.\nSuite");
+  const nodes = parseMarkdownInline("Ouvre la **Marketplace**, puis *Emprunter* : `escrow` — voir [la page](/marketplace) ou https://sirius-mezo.vercel.app/docs.\nSuite");
   assert.deepEqual(nodes, [
     { type: "text", text: "Ouvre la " },
     { type: "strong", children: [{ type: "text", text: "Marketplace" }] },
@@ -18,7 +18,7 @@ test("gras, italique, code en ligne, liens et retours à la ligne sont reconnus"
     { type: "text", text: " — voir " },
     { type: "link", href: "/marketplace", external: false, children: [{ type: "text", text: "la page" }] },
     { type: "text", text: " ou " },
-    { type: "link", href: "https://sirius-data.tech/docs", external: true, children: [{ type: "text", text: "https://sirius-data.tech/docs" }] },
+    { type: "link", href: "https://sirius-mezo.vercel.app/docs", external: true, children: [{ type: "text", text: "https://sirius-mezo.vercel.app/docs" }] },
     { type: "text", text: "." },
     { type: "br" },
     { type: "text", text: "Suite" },
@@ -65,19 +65,19 @@ test("aucun HTML n'est interprété, aucune image n'est chargée, seuls http(s) 
   }
   // Cibles acceptées.
   assert.deepEqual(safeMarkdownHref("/train"), { href: "/train", external: false });
-  assert.deepEqual(safeMarkdownHref("https://sirius-data.tech/docs"), { href: "https://sirius-data.tech/docs", external: true });
+  assert.deepEqual(safeMarkdownHref("https://sirius-mezo.vercel.app/docs"), { href: "https://sirius-mezo.vercel.app/docs", external: true });
   assert.deepEqual(safeMarkdownHref("HTTP://example.com"), { href: "HTTP://example.com", external: true });
   assert.equal(safeMarkdownHref(`https://x.example/${"a".repeat(3_000)}`), null);
-  const titled = parseMarkdownInline("[doc](https://sirius-data.tech/d \"titre\")");
-  assert.deepEqual(titled, [{ type: "link", href: "https://sirius-data.tech/d", external: true, children: [{ type: "text", text: "doc" }] }]);
+  const titled = parseMarkdownInline("[doc](https://sirius-mezo.vercel.app/d \"titre\")");
+  assert.deepEqual(titled, [{ type: "link", href: "https://sirius-mezo.vercel.app/d", external: true, children: [{ type: "text", text: "doc" }] }]);
 });
 
 test("liens externes : cliquables seulement vers les hôtes autorisés, sinon texte avec l'URL visible", () => {
-  for (const href of ["https://sirius-data.tech/docs", "https://www.sirius-data.tech", "https://phala.sirius-data.tech/phala", "https://explorer.mezo.org/tx/0x1", "https://explorer.test.mezo.org/address/0x2"]) {
+  for (const href of ["https://sirius-mezo.vercel.app/docs", "https://sirius-mezo.vercel.app/proof", "https://explorer.mezo.org/tx/0x1", "https://explorer.test.mezo.org/address/0x2"]) {
     assert.equal(isAllowedExternalHref(href), true, href);
     assert.deepEqual(types(parseMarkdownInline(`[voir](${href})`)), ["link", "text"], href);
   }
-  for (const href of ["https://evil.example/x", "https://sirius-data.tech.evil.example/x", "https://sirius-data.tech@evil.example/x", "https://evilsirius-data.tech/", "https://user:pw@sirius-data.tech/"]) {
+  for (const href of ["https://evil.example/x", "https://sirius-mezo.vercel.app.evil.example/x", "https://sirius-mezo.vercel.app@evil.example/x", "https://evilsirius-mezo.vercel.app/", "https://user:pw@sirius-mezo.vercel.app/", "https://sirius-data.tech/"]) {
     assert.equal(isAllowedExternalHref(href), false, href);
   }
   assert.deepEqual(parseMarkdownInline("[ton portefeuille](https://evil.example/claim)"), [{ type: "text", text: "ton portefeuille (https://evil.example/claim)" }]);

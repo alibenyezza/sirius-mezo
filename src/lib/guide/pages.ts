@@ -13,7 +13,7 @@ import type { EvmNetwork } from "@/lib/evm/networks";
  * (durées, limites) ne sont jamais recopiés ici : la page qui fait foi les affiche.
  */
 
-export const GUIDE_PAGE_KEYS = ["dashboard", "train", "phala", "marketplace", "dataset", "datasets", "upload", "explorer", "wallet", "kyb"] as const;
+export const GUIDE_PAGE_KEYS = ["dashboard", "train", "marketplace", "dataset", "datasets", "upload", "explorer", "wallet", "kyb"] as const;
 export type GuidePageKey = (typeof GUIDE_PAGE_KEYS)[number];
 
 export function isGuidePageKey(value: unknown): value is GuidePageKey {
@@ -23,7 +23,6 @@ export function isGuidePageKey(value: unknown): value is GuidePageKey {
 const EXACT_PATHS: Readonly<Record<string, GuidePageKey>> = {
   "/dashboard": "dashboard",
   "/train": "train",
-  "/phala": "phala",
   "/marketplace": "marketplace",
   "/datasets": "datasets",
   "/datasets/new": "upload",
@@ -75,17 +74,6 @@ export const GUIDE_PAGE_TOURS: Readonly<Record<GuidePageKey, GuidePageTour>> = {
       { anchor: null, title: "Entraîner un modèle", body: "Ici tu suis tes emprunts et tes entraînements : chaque carte est un prêt, du paiement jusqu’au modèle livré." },
       { anchor: "own-data", title: "Tes propres données", body: "Entraîner sur tes données sans escrow est réservé à l’équipe pendant la bêta : écris-nous pour l’essayer." },
       { anchor: "history", title: "Mes entraînements", body: "Après un emprunt, attends quelques secondes que le paiement soit confirmé, puis « Lancer l’entraînement ». Un modèle réglé se vérifie et se télécharge ici ; un prêt jamais réglé se rembourse après son délai." },
-    ],
-  },
-  phala: {
-    title: "Démo d’entraînement",
-    steps: [
-      { anchor: null, title: "La démo d’entraînement", body: "Un espace pour essayer un entraînement sur un dataset d’exemple ou ton propre CSV. Tu reçois le modèle entraîné." },
-      { anchor: "attestation", title: "L’attestation", body: "Ce lien ouvre les informations publiques du runner qui entraîne." },
-      { anchor: "examples", title: "Jeux d’exemple", body: "Un dataset synthétique prêt à l’emploi pour essayer sans rien préparer." },
-      { anchor: "prepare", title: "Préparer l’entraînement", body: "Ton CSV, le modèle et la colonne à prédire. Le fichier est chiffré dans ton navigateur ; le calcul est offert pendant la démo." },
-      { anchor: "results", title: "Mes résultats", body: "Tes modèles entraînés restent dans ce navigateur : télécharge-les pour les garder ailleurs." },
-      { anchor: "workspace", title: "L’espace de démo", body: "La démo s’ouvre dans un espace dédié ; l’entraînement standard reste sur la page Entraîner." },
     ],
   },
   marketplace: {

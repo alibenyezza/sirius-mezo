@@ -103,26 +103,6 @@ export const GUIDE_MESSAGES_EN: Record<string, string> = {
   "Après un emprunt, attends quelques secondes que le paiement soit confirmé, puis « Lancer l’entraînement ». Un modèle réglé se vérifie et se télécharge ici ; un prêt jamais réglé se rembourse après son délai.":
     "After borrowing, wait a few seconds for the payment to be confirmed, then “Run training”. A settled model is verified and downloaded here; a loan never settled is refunded after its deadline.",
 
-  // Démo d’entraînement (page /phala, absente sur le testnet Mezo)
-  "La démo d’entraînement": "The training demo",
-  "Un espace pour essayer un entraînement sur un dataset d’exemple ou ton propre CSV. Tu reçois le modèle entraîné.":
-    "A space to try a training run on a sample dataset or your own CSV. You receive the trained model.",
-  "L’attestation": "The attestation",
-  "Ce lien ouvre les informations publiques du runner qui entraîne.":
-    "This link opens the public details of the runner that trains.",
-  "Jeux d’exemple": "Sample datasets",
-  "Un dataset synthétique prêt à l’emploi pour essayer sans rien préparer.":
-    "A ready-to-use synthetic dataset to try things out without preparing anything.",
-  "Préparer l’entraînement": "Prepare the training",
-  "Ton CSV, le modèle et la colonne à prédire. Le fichier est chiffré dans ton navigateur ; le calcul est offert pendant la démo.":
-    "Your CSV, the model and the column to predict. The file is encrypted in your browser; the compute is free during the demo.",
-  "Mes résultats": "My results",
-  "Tes modèles entraînés restent dans ce navigateur : télécharge-les pour les garder ailleurs.":
-    "Your trained models stay in this browser: download them to keep them elsewhere.",
-  "L’espace de démo": "The demo workspace",
-  "La démo s’ouvre dans un espace dédié ; l’entraînement standard reste sur la page Entraîner.":
-    "The demo opens in a dedicated workspace; standard training stays on the Train page.",
-
   // Marketplace
   "La marketplace": "The marketplace",
   "Les datasets publiés par les fournisseurs. Un emprunt, c’est un entraînement sur le runner de testnet : tu reçois le modèle, jamais la donnée.":

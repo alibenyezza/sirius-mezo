@@ -1,5 +1,4 @@
 import { NextResponse, type NextRequest } from "next/server";
-import { DEMO_PAGE, demoOnlyRoute, isDemoOnlyHost } from "@/lib/phala-demo/demo-host";
 import {
   CLOSED_API_BODY,
   CLOSED_API_STATUS,
@@ -91,17 +90,7 @@ function forwardedHeaders(request: NextRequest, gateClosed: boolean): Headers {
 export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
-  // 1. Adresse démo : seule la session de training Phala est servie (src/lib/phala-demo/demo-host.ts).
-  //    Avant la porte d'aperçu, et indépendamment d'elle : l'adresse démo est rattachée au
-  //    projet staging, où l'interrupteur n'est pas posé ; si les deux s'appliquaient au même
-  //    projet, la restriction de l'adresse l'emporterait, puis la porte filtrerait ce qui reste.
-  if (isDemoOnlyHost(request.headers.get("host"))) {
-    const decision = demoOnlyRoute(pathname);
-    if (decision === "block") return NextResponse.json({ error: "Not found" }, { status: 404 });
-    if (decision === "redirect") return NextResponse.redirect(new URL(DEMO_PAGE, request.url));
-  }
-
-  // 2. Porte d'aperçu du passage mainnet (src/lib/preview-gate/gate.ts). Inactive, elle ne
+  // 1. Porte d'aperçu du passage mainnet (src/lib/preview-gate/gate.ts). Inactive, elle ne
   //    change rien ; active, elle ferme tout sauf la liste blanche à qui n'a pas le cookie.
   const gate = readPreviewGateConfig();
   // `gateClosed` : la page est rendue nue (sans portefeuille) ; `rewriteToWaiting` : elle est
@@ -124,12 +113,12 @@ export async function proxy(request: NextRequest) {
     if (decision === "public") gateClosed = true;
   }
 
-  // 3. Préchargements hors porte : inchangés, sans nonce (voir isPrefetch).
+  // 2. Préchargements hors porte : inchangés, sans nonce (voir isPrefetch).
   if (!gateClosed && isPrefetch(request)) {
     return NextResponse.next({ request: { headers: forwardedHeaders(request, false) } });
   }
 
-  // 4. Les routes API ne passent ici que pour les restrictions ci-dessus : ailleurs, inchangées.
+  // 3. Les routes API ne passent ici que pour les restrictions ci-dessus : ailleurs, inchangées.
   if (pathname.startsWith("/api/")) return NextResponse.next();
 
   const nonce = Buffer.from(crypto.randomUUID()).toString("base64");

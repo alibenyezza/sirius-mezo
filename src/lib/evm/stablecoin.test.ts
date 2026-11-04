@@ -3,7 +3,6 @@ import { test } from "node:test";
 import { getAddress } from "viem";
 import { MAINNET_STABLECOIN as DEPLOY_POLICY_STABLECOIN, MAINNET_USDC as DEPLOY_POLICY_USDC } from "../../../scripts/deploy-policy";
 import { MAINNET_STABLECOIN as RUNNER_VOLUME_STABLECOIN, MAINNET_USDC as RUNNER_VOLUME_USDC } from "../../../scripts/initialize-runner-volume";
-import { MAINNET_STABLECOIN as PREFLIGHT_STABLECOIN, MAINNET_USDC as PREFLIGHT_USDC } from "../../../scripts/phala-v7-preflight";
 import { MAINNET_STABLECOIN as RELEASE_CHECK_STABLECOIN, MAINNET_USDC as RELEASE_CHECK_USDC } from "../../../scripts/operations/release-check.mjs";
 import { USDC_DECIMALS_BY_NETWORK, type EvmNetwork } from "./networks";
 import {
@@ -38,7 +37,6 @@ test("chaque script impose la même adresse MUSD, et l'alias historique MAINNET_
   for (const [name, stablecoin, usdc] of [
     ["deploy-policy", DEPLOY_POLICY_STABLECOIN, DEPLOY_POLICY_USDC],
     ["initialize-runner-volume", RUNNER_VOLUME_STABLECOIN, RUNNER_VOLUME_USDC],
-    ["phala-v7-preflight", PREFLIGHT_STABLECOIN, PREFLIGHT_USDC],
     ["release-check", RELEASE_CHECK_STABLECOIN, RELEASE_CHECK_USDC],
   ] as const) {
     assert.equal(stablecoin, MAINNET_STABLECOIN_ADDRESS, name);

@@ -4,7 +4,7 @@
  * le panneau rend en éléments React. Rien n'est jamais interprété comme HTML : une balise
  * écrite dans la réponse reste du texte, une image n'est jamais chargée (son texte alternatif
  * seul est gardé), et seuls les chemins internes (`/train`) et les liens `http(s)://` vers une
- * liste fermée d'hôtes (le site, la démo Phala, les explorateurs de la chaîne) sont cliquables ;
+ * liste fermée d'hôtes (le site et les explorateurs de la chaîne) sont cliquables ;
  * un autre hôte est rendu en texte avec son URL visible, et `javascript:`, `data:`, `mailto:`
  * ou les URL relatives au protocole (`//…`) redeviennent du texte. Module pur, testable sans
  * navigateur.
@@ -41,13 +41,11 @@ export const MAX_MARKDOWN_LINE_CHARS = 2_000;
 const CONTROL_OR_SPACE = /[\u0000- \u007F]/;
 
 /**
- * Hôtes externes dont les liens restent cliquables : le site, la démo Phala et les
+ * Hôtes externes dont les liens restent cliquables : le site et les
  * explorateurs de la chaîne utilisés par l'application. Tout autre hôte est affiché en texte.
  */
 export const ALLOWED_LINK_HOSTS: ReadonlySet<string> = new Set([
-  "sirius-data.tech",
-  "www.sirius-data.tech",
-  "phala.sirius-data.tech",
+  "sirius-mezo.vercel.app",
   "explorer.mezo.org",
   "explorer.test.mezo.org",
 ]);

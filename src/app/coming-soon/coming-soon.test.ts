@@ -32,11 +32,12 @@ test("page d'attente : aucun script de portefeuille, aucun composant client", ()
   assert.doesNotMatch(bare, /WalletConnector|SharedBlob|StoreHydrator|E2eWalletBridge/);
 });
 
-test("proxy : l'adresse démo est tranchée avant la porte, la porte avant le passage des API", () => {
-  const demo = proxy.indexOf("isDemoOnlyHost(request.headers.get(\"host\"))");
+test("proxy : la porte est tranchée avant le passage des API", () => {
   const gate = proxy.indexOf("readPreviewGateConfig()");
   const api = proxy.indexOf('pathname.startsWith("/api/")) return NextResponse.next()');
-  assert.ok(demo > 0 && gate > demo && api > gate, `ordre : démo ${demo} < porte ${gate} < API ${api}`);
+  assert.ok(gate > 0 && api > gate, `ordre : porte ${gate} < API ${api}`);
+  // Plus d'adresse réservée à une démo : toutes les adresses servent le même site.
+  assert.doesNotMatch(proxy, /isDemoOnlyHost/);
   // L'en-tête de la porte est toujours réécrit, jamais relayé tel quel depuis le client.
   assert.match(proxy, /headers\.delete\(PREVIEW_GATE_HEADER\)/);
   // Les préchargements ne contournent plus le proxy : le matcher ne les exclut plus.

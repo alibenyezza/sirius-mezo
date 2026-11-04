@@ -167,8 +167,8 @@ function sourceFiles(directory: string): string[] {
 
 test("chaque page de l'application a sa visite, et chaque arrêt vise une ancre posée dans l'interface", () => {
   assert.deepEqual(
-    ["/dashboard", "/train", "/phala", "/marketplace", "/marketplace/abc-123", "/datasets", "/datasets/new", "/explorer", "/wallet", "/kyb", "/kyb/"].map(guidePageForPath),
-    ["dashboard", "train", "phala", "marketplace", "dataset", "datasets", "upload", "explorer", "wallet", "kyb", "kyb"],
+    ["/dashboard", "/train", "/marketplace", "/marketplace/abc-123", "/datasets", "/datasets/new", "/explorer", "/wallet", "/kyb", "/kyb/"].map(guidePageForPath),
+    ["dashboard", "train", "marketplace", "dataset", "datasets", "upload", "explorer", "wallet", "kyb", "kyb"],
   );
   for (const path of ["/", "/docs", "/datasets/abc", "/marketplace/a/b", "/settings", "marketplace", null, undefined, "/".padEnd(300, "a")]) {
     assert.equal(guidePageForPath(path), null, String(path));
