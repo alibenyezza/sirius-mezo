@@ -171,6 +171,30 @@
       "note": "0.08 MUSD of fees from the one-signature and BTC loans: 0.04 MUSD to the treasury, 0.04 MUSD posted on the BTC/MUSD gauge bribe. 0.06 MUSD posted to veBTC voters in total.",
       "date": "2026-11-04",
       "party": "team"
+    },
+    {
+      "label": "Marketplace purchase through the web app",
+      "kind": "tx",
+      "value": "0xf0ca92165954bd7a280c91df9d685d829990a0fcf5553705b5083c3f4f438c04",
+      "note": "Full cycle on the live site with MetaMask: three datasets published by three provider wallets, a fourth wallet paid 2 MUSD with one signature (no gas), the logistic model was trained and this settlement released the escrow. Certificate: /certificate/cmw46yuc1000008jthcuy2vdx",
+      "date": "2026-11-05",
+      "party": "team"
+    },
+    {
+      "label": "External buyer: purchase through the web app",
+      "kind": "tx",
+      "value": "0xf9214bd643da8ad7ab167f10f8e8609a5a863a1eab7ea1581e5ab191221e928e",
+      "note": "Wallet 0xafce23fb6d1aaa83e59e683e50436270be36d739, outside the team, paid 10 MUSD for \"Hourly energy demand – regional grid\" on the live site with MetaMask.",
+      "date": "2026-11-06",
+      "party": "external"
+    },
+    {
+      "label": "External buyer: model delivered, escrow released",
+      "kind": "tx",
+      "value": "0xa9d53959515d286b38bcc75b69af1641892ecd8b8040da39d6a683f47919c907",
+      "note": "The linear model was trained for 0xafce…d739 and the escrow paid the provider, net of the 2 % fee.",
+      "date": "2026-11-06",
+      "party": "external"
     }
   ]
 }

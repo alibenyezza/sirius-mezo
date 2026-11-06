@@ -74,7 +74,15 @@ Demo dataset title minted by the provider `0xeeD8eC97B94613a765639Ea72a9410CCb82
 | Fees distributed: 0.02 MUSD to the treasury, 0.02 MUSD posted on the BTC/MUSD gauge for veBTC voters | [`0x9b25782b…d9607c`](https://explorer.test.mezo.org/tx/0x9b25782bb823c9f43660478b3a90ac40745fd84cd03fe19d42579707c1d9607c) |
 | Provider earnings into Mezo's MUSD Stability Pool (`provideToSP`, 1 MUSD) | [`0xa3c31f31…b9676e`](https://explorer.test.mezo.org/tx/0xa3c31f31067d650b0d0908ec75bc0a5eb5a03849b473f73fba8e46271ab9676e) |
 
-These were replayed with throwaway team wallets by [`scripts/mezo-team-flows.ts`](scripts/mezo-team-flows.ts); `/proof` lists them under team wallets, apart from external buyers.
+| Through the web app with MetaMask: three datasets published by three provider wallets, a fourth wallet pays 2 MUSD with one signature, the model is trained and the escrow released ([certificate](https://sirius-mezo.vercel.app/certificate/cmw46yuc1000008jthcuy2vdx)) | [`0xf0ca9216…438c04`](https://explorer.test.mezo.org/tx/0xf0ca92165954bd7a280c91df9d685d829990a0fcf5553705b5083c3f4f438c04) |
+
+These were run with throwaway team wallets, the first ones by [`scripts/mezo-team-flows.ts`](scripts/mezo-team-flows.ts), the last one by hand on the live site; `/proof` lists them under team wallets, apart from external buyers.
+
+**External buyers** (wallets outside the team, on the live site with MetaMask):
+
+| Buyer | Dataset | Payment | Model delivered, escrow released |
+|---|---|---|---|
+| [`0xafce…d739`](https://explorer.test.mezo.org/address/0xafce23fb6d1aaa83e59e683e50436270be36d739) | Hourly energy demand – regional grid (10 MUSD) | [`0xf9214bd6…1e928e`](https://explorer.test.mezo.org/tx/0xf9214bd643da8ad7ab167f10f8e8609a5a863a1eab7ea1581e5ab191221e928e) | [`0xa9d53959…19c907`](https://explorer.test.mezo.org/tx/0xa9d53959515d286b38bcc75b69af1641892ecd8b8040da39d6a683f47919c907) |
 
 Two earlier deployments ran the same cycle (escrows [`0xd14a0af1581bd7bd80d9da0f775c1c254967abda`](https://explorer.test.mezo.org/address/0xd14a0af1581bd7bd80d9da0f775c1c254967abda) and [`0xefb89e4c5d32581bf09122cb6f4cc60558a27f67`](https://explorer.test.mezo.org/address/0xefb89e4c5d32581bf09122cb6f4cc60558a27f67)); their transactions are listed on [/proof](https://sirius-mezo.vercel.app/proof). Each was replaced when the escrow gained a feature, since the escrow is immutable.
 
