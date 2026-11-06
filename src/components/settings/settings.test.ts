@@ -3,7 +3,7 @@ import { test } from "node:test";
 import { requestGuidedTour } from "../profile/guided-tour";
 import { subscribeGuidedTourRequests } from "../guide/guide-store";
 import { formatKybDate, offersRenewal, parseInstantAccess, parseKybStatus, parsePublicKybStatus, showsInvitationForm } from "./kyb-state";
-import { KYB_CONTACT_EMAIL, KYB_SOON, kybSoonItems, networkInfo, savedLanguage, TESTNET_SITE_URL } from "./settings-logic";
+import { KYB_CONTACT_LABEL, KYB_SOON, kybSoonItems, networkInfo, savedLanguage, TESTNET_SITE_URL } from "./settings-logic";
 
 test("mainnet : libellé et lien vers le testnet ; testnet : pas de lien", () => {
   assert.deepEqual(networkInfo("mainnet"), { label: "Mezo mainnet", testnetUrl: TESTNET_SITE_URL });
@@ -73,7 +73,7 @@ test("le formulaire d'invitation n'apparaît que si le wallet n'est pas valide, 
   assert.equal(showsInvitationForm({ state: "inactive" }), true);
   assert.equal(showsInvitationForm({ state: "verified", expiresAt: 1 }), false);
   assert.equal(showsInvitationForm({ state: "unknown" }), false);
-  assert.equal(KYB_CONTACT_EMAIL, "sirius.data.contact@gmail.com");
+  assert.equal(KYB_CONTACT_LABEL, "github.com/alibenyezza/sirius-mezo/issues");
 });
 
 test("la date d'expiration est en UTC et sans fuseau local", () => {

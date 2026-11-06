@@ -93,7 +93,7 @@ test("sans wallet : la grille et la fiche se lisent, aucun appel privé n'est fa
   await expect(page.getByText("Each new training is a new loan.", { exact: false })).toBeVisible();
   await expect(page.getByRole("link", { name: "View the on-chain proof" })).toHaveAttribute("href", `/proof/${item.id}`);
   await expect(page.getByText("0x930f…318b")).toBeVisible();
-  await expect(page.getByRole("link", { name: "sirius.data.contact@gmail.com" })).toHaveAttribute("href", "mailto:sirius.data.contact@gmail.com");
+  await expect(page.getByRole("link", { name: "github.com/alibenyezza/sirius-mezo/issues" })).toHaveAttribute("href", "https://github.com/alibenyezza/sirius-mezo/issues/new");
 
   // La connexion n'est demandée qu'au clic : sans wallet installé, le clic l'annonce, rien ne part.
   await page.getByRole("button", { name: "Borrow" }).click();

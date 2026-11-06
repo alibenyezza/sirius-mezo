@@ -2,7 +2,7 @@
 
 import { Fragment } from "react";
 import { useLocale } from "@/components/i18n/LocaleProvider";
-import { CONTACT_EMAIL, DISCLAIMER_IDS, contactMailtoHref, disclaimerText, type DisclaimerId } from "@/lib/copy/disclaimers";
+import { CONTACT_LABEL, DISCLAIMER_IDS, contactHref, disclaimerText, type DisclaimerId } from "@/lib/copy/disclaimers";
 
 export type DisclaimerVariant = "info" | "warning";
 
@@ -24,21 +24,21 @@ const VARIANT_STYLES: Record<DisclaimerVariant, { box: string; icon: string }> =
 };
 
 /**
- * Coupe un texte traduit autour de l'adresse de contact pour en faire un lien `mailto:`.
+ * Coupe un texte traduit autour de l'adresse de contact pour en faire un lien vers les issues.
  * Le texte est rendu par React (échappé), jamais comme HTML : seule l'adresse constante
- * `CONTACT_EMAIL` devient un lien.
+ * `CONTACT_LABEL` devient un lien.
  */
 function withContactLink(text: string): React.ReactNode {
-  const parts = text.split(CONTACT_EMAIL);
+  const parts = text.split(CONTACT_LABEL);
   if (parts.length === 1) return text;
   return parts.map((part, index) => (
     <Fragment key={index}>
       {index > 0 && (
         <a
-          href={contactMailtoHref()}
+          href={contactHref()}
           className="font-medium text-foreground underline underline-offset-2 hover:text-accent focus-visible:rounded-sm focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
         >
-          {CONTACT_EMAIL}
+          {CONTACT_LABEL}
         </a>
       )}
       {part}

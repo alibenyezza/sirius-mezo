@@ -3,7 +3,8 @@
 import { useCallback, useEffect, useId, useRef, useState } from "react";
 import { useLocale } from "@/components/i18n/LocaleProvider";
 import { KybInviteForm } from "@/components/kyb/KybInviteForm";
-import { KYB_CONTACT_EMAIL } from "@/components/settings/settings-logic";
+import { KYB_CONTACT_LABEL } from "@/components/settings/settings-logic";
+import { contactHref } from "@/lib/copy/disclaimers";
 import { AddFundsDialog } from "@/components/wallet/AddFundsDialog";
 import { fetchGasBalance } from "@/lib/evm/balance";
 import { resolveClientNetwork } from "@/lib/evm/networks";
@@ -274,7 +275,7 @@ export function VerificationDialog({ requestId, reason, role, address }: {
                 <KybInviteForm role={role} onAccepted={succeed} onBusyChange={setWorking} />
                 <p className="text-xs text-muted">
                   {t("Pas d’invitation ? Écris-nous :")}{" "}
-                  <a href={`mailto:${KYB_CONTACT_EMAIL}`} className="font-medium text-accent underline-offset-2 hover:underline">{KYB_CONTACT_EMAIL}</a>
+                  <a href={contactHref()} className="font-medium text-accent underline-offset-2 hover:underline">{KYB_CONTACT_LABEL}</a>
                 </p>
               </div>
             )}

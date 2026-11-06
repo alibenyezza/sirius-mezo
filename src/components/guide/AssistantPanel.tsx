@@ -9,7 +9,7 @@ import { ASSISTANT_MAX_MESSAGE_CHARS } from "@/lib/assistant/config";
 import { markdownToPlainText } from "@/lib/assistant/markdown";
 import { assistantCannedAnswer, assistantSuggestionsFor } from "@/lib/assistant/suggestions";
 import type { AssistantTurn } from "@/lib/assistant/validate";
-import { contactMailtoHref } from "@/lib/copy/disclaimers";
+import { contactHref } from "@/lib/copy/disclaimers";
 import { GUIDE_NAME } from "@/lib/guide/machine";
 import { AssistantMarkdown } from "./AssistantMarkdown";
 import { GuideBlob } from "./GuideBlob";
@@ -405,7 +405,7 @@ export function AssistantPanel({ onClose, onReplay, onReplayPage }: {
             <button type="button" onClick={() => setMessages([])} disabled={busy || messages.length === 0} aria-label={t("Effacer la conversation")} title={t("Effacer la conversation")} className={ICON}>
               <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden><path d="M3 6h18" /><path d="M8 6V4h8v2" /><path d="M19 6l-1 14H6L5 6" /><path d="M10 11v6M14 11v6" /></svg>
             </button>
-            <a href={contactMailtoHref()} aria-label={t("Contacter l’équipe")} title={t("Contacter l’équipe")} className={ICON}>
+            <a href={contactHref()} aria-label={t("Contacter l’équipe")} title={t("Contacter l’équipe")} className={ICON}>
               <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden><rect x="3" y="5" width="18" height="14" rx="2" /><path d="M3 7l9 6 9-6" /></svg>
             </a>
           </div>

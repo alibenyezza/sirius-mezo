@@ -16,7 +16,7 @@ import { formatUsdcAtomic } from "@/lib/evm/usdc";
 import { messageOf } from "@/lib/errors-client";
 import { useWalletStore } from "@/stores/wallet";
 import { useUiStore } from "@/stores/ui";
-import { CONTACT_EMAIL, contactMailtoHref } from "@/lib/copy/disclaimers";
+import { CONTACT_LABEL, contactHref } from "@/lib/copy/disclaimers";
 import {
   LOAN_STATE_LABEL_KEY,
   LOAN_STATE_VARIANT,
@@ -599,10 +599,10 @@ function TrainPageContent() {
             <span data-testid="own-data-contact">
               {t("Envie d’entraîner sur vos propres données ? Contactez-nous à")}{" "}
               <a
-                href={contactMailtoHref()}
+                href={contactHref()}
                 className="font-medium text-foreground underline underline-offset-2 hover:text-accent focus-visible:rounded-sm focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
               >
-                {CONTACT_EMAIL}
+                {CONTACT_LABEL}
               </a>
               .
             </span>

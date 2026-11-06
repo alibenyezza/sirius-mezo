@@ -1,6 +1,6 @@
 import Link from "next/link";
 import type { Metadata } from "next";
-import { CONTACT_EMAIL } from "@/lib/copy/disclaimers";
+import { CONTACT_LABEL, contactHref } from "@/lib/copy/disclaimers";
 
 /**
  * Conditions de la bêta mainnet. Texte en anglais, page serveur publique.
@@ -114,7 +114,7 @@ export default function TermsPage() {
         <h2 className="text-lg font-semibold">Changes and contact</h2>
         <p className="mt-3 text-sm text-muted">
           These terms may change during the beta. The date above shows the last update. Questions about them:{" "}
-          <a href={`mailto:${CONTACT_EMAIL}`} className="text-accent hover:text-accent/80">{CONTACT_EMAIL}</a>.
+          <a href={contactHref()} className="text-accent hover:text-accent/80">{CONTACT_LABEL}</a>.
         </p>
       </section>
     </main>

@@ -16,8 +16,8 @@ const legalText = legal.replace(/\/\*[\s\S]*?\*\//g, "");
 
 test("mentions légales : éditeur Sirius et adresse de contact par la constante", () => {
   assert.match(legal, /published by Sirius/);
-  assert.match(legal, /import \{ CONTACT_EMAIL \} from "@\/lib\/copy\/disclaimers"/);
-  assert.match(legal, /mailto:\$\{CONTACT_EMAIL\}/);
+  assert.match(legal, /import \{ CONTACT_LABEL, contactHref \} from "@\/lib\/copy\/disclaimers"/);
+  assert.match(legal, /href=\{contactHref\(\)\}/);
   // Aucune adresse électronique écrite en dur : seule la constante fait foi.
   assert.doesNotMatch(legal, /[\w.+-]+@[\w-]+\.[a-z]{2,}/i);
 });

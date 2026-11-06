@@ -1,6 +1,6 @@
 import Link from "next/link";
 import type { Metadata } from "next";
-import { CONTACT_EMAIL } from "@/lib/copy/disclaimers";
+import { CONTACT_LABEL, contactHref } from "@/lib/copy/disclaimers";
 
 /**
  * Politique de confidentialité (RGPD). Texte en anglais, page serveur publique, comme les
@@ -129,7 +129,7 @@ const SECTIONS: [string, string[]][] = [
   ]],
   ["Your rights", [
     "You have the right to access, rectify and erase your data, to restrict or object to its processing, and to data portability. Where processing relies on your consent, you can withdraw it at any time.",
-    `To exercise these rights, write to ${CONTACT_EMAIL} from an address you control. Sirius may ask you to sign a message with your wallet to confirm that the data is yours.`,
+    `To exercise these rights, write to ${CONTACT_LABEL} from an address you control. Sirius may ask you to sign a message with your wallet to confirm that the data is yours.`,
     "You can also lodge a complaint with the CNIL (cnil.fr), the French data protection authority, or with the authority of your country of residence.",
   ]],
 ];
@@ -144,7 +144,7 @@ export default function PrivacyPage() {
         <h2 className="text-lg font-semibold">Who is responsible</h2>
         <p className="mt-3 text-sm text-muted">
           Sirius is the controller of the personal data processed through sirius-mezo.vercel.app. Contact:{" "}
-          <a href={`mailto:${CONTACT_EMAIL}`} className="text-accent hover:text-accent/80">{CONTACT_EMAIL}</a>.
+          <a href={contactHref()} className="text-accent hover:text-accent/80">{CONTACT_LABEL}</a>.
         </p>
       </section>
       <section className="mt-8">
@@ -173,7 +173,7 @@ export default function PrivacyPage() {
         <h2 className="text-lg font-semibold">Changes and contact</h2>
         <p className="mt-3 text-sm text-muted">
           This policy may change. The date above shows the last update. Questions about it:{" "}
-          <a href={`mailto:${CONTACT_EMAIL}`} className="text-accent hover:text-accent/80">{CONTACT_EMAIL}</a>.
+          <a href={contactHref()} className="text-accent hover:text-accent/80">{CONTACT_LABEL}</a>.
         </p>
       </section>
     </main>

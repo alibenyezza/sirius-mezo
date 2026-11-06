@@ -56,8 +56,8 @@ test("un non-admin ne voit ni catalogue ni self training, et lit l'encart de con
   await page.goto("/train");
   await connect(page);
   const contact = page.getByTestId("own-data-contact");
-  await expect(contact).toHaveText("Want to train on your own data? Contact us at sirius.data.contact@gmail.com.", { timeout: 30_000 });
-  await expect(contact.getByRole("link", { name: "sirius.data.contact@gmail.com" })).toHaveAttribute("href", "mailto:sirius.data.contact@gmail.com");
+  await expect(contact).toHaveText("Want to train on your own data? Contact us at github.com/alibenyezza/sirius-mezo/issues.", { timeout: 30_000 });
+  await expect(contact.getByRole("link", { name: "github.com/alibenyezza/sirius-mezo/issues" })).toHaveAttribute("href", "https://github.com/alibenyezza/sirius-mezo/issues/new");
   await expect(page.getByTestId("self-training")).toHaveCount(0);
   await expect(page.getByRole("heading", { name: "Catalog", exact: true })).toHaveCount(0);
   await expect(page.getByRole("heading", { name: "My data", exact: true })).toHaveCount(0);

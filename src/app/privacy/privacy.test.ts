@@ -21,7 +21,7 @@ const rateLimit = read("../../lib/http/rate-limit.ts");
 
 test("confidentialité : responsable Sirius, contact par la constante", () => {
   assert.match(privacy, /Sirius is the controller/);
-  assert.match(privacy, /mailto:\$\{CONTACT_EMAIL\}/);
+  assert.match(privacy, /href=\{contactHref\(\)\}/);
   assert.doesNotMatch(privacy, /[\w.+-]+@[\w-]+\.[a-z]{2,}/i, "aucune adresse électronique écrite en dur");
 });
 

@@ -1,6 +1,6 @@
 import Link from "next/link";
 import type { Metadata } from "next";
-import { CONTACT_EMAIL } from "@/lib/copy/disclaimers";
+import { CONTACT_LABEL, contactHref } from "@/lib/copy/disclaimers";
 
 /**
  * Mentions légales. Texte en anglais, page serveur publique, comme les conditions.
@@ -47,7 +47,7 @@ export default function LegalPage() {
         <h2 className="text-lg font-semibold">Publisher</h2>
         <p className="mt-3 text-sm text-muted">
           This site, sirius-mezo.vercel.app, is published by Sirius. Contact:{" "}
-          <a href={`mailto:${CONTACT_EMAIL}`} className="text-accent hover:text-accent/80">{CONTACT_EMAIL}</a>.
+          <a href={contactHref()} className="text-accent hover:text-accent/80">{CONTACT_LABEL}</a>.
         </p>
       </section>
       {SECTIONS.map(([title, items]) => (

@@ -10,10 +10,11 @@ import { MAX_DATASET_BYTES } from "@/lib/tee/contract";
 import { MAX_CSV_ROWS } from "@/lib/sirius/metrics";
 import { MAX_TRAINING_FEATURES, MIN_TRAINING_ROWS } from "@/lib/tee/train";
 import {
-  CONTACT_EMAIL,
+  CONTACT_LABEL,
+  CONTACT_URL,
   DISCLAIMER_IDS,
   DISCLAIMERS,
-  contactMailtoHref,
+  contactHref,
   dataLimitsVariables,
   disclaimerText,
 } from "./disclaimers";
@@ -27,7 +28,7 @@ test("les cinq textes anglais sont ceux de 16-socle-technique.md, section 4", ()
   );
   assert.equal(
     disclaimerText("contactUs", t),
-    "Need a stronger model or specific data? Contact us at sirius.data.contact@gmail.com.",
+    "Need a stronger model or specific data? Contact us at github.com/alibenyezza/sirius-mezo/issues.",
   );
   assert.equal(disclaimerText("betaLimits", t), "Beta: instant on-chain wallet verification, capped amounts per loan and in total.");
   assert.equal(
@@ -41,8 +42,8 @@ test("les cinq textes anglais sont ceux de 16-socle-technique.md, section 4", ()
 });
 
 test("l'adresse de contact est celle du cahier des charges", () => {
-  assert.equal(CONTACT_EMAIL, "sirius.data.contact@gmail.com");
-  assert.equal(DISCLAIMERS.contactUs.variables.email, CONTACT_EMAIL);
+  assert.equal(CONTACT_LABEL, "github.com/alibenyezza/sirius-mezo/issues");
+  assert.equal(DISCLAIMERS.contactUs.variables.email, CONTACT_LABEL);
 });
 
 test("chaque texte est traduit et aucun paramètre n'est laissé vide", () => {
@@ -123,55 +124,54 @@ test("formatage : milliers, tailles tronquées vers le bas, valeurs invalides", 
 });
 
 test("le lien mailto ne contient que l'adresse de contact, objet encodé strictement", () => {
-  assert.equal(contactMailtoHref(), "mailto:sirius.data.contact@gmail.com");
-  assert.equal(contactMailtoHref("   "), "mailto:sirius.data.contact@gmail.com");
-  assert.equal(contactMailtoHref("Model quality"), "mailto:sirius.data.contact@gmail.com?subject=Model%20quality");
+  assert.equal(contactHref(), "https://github.com/alibenyezza/sirius-mezo/issues/new");
+  assert.equal(contactHref("   "), "https://github.com/alibenyezza/sirius-mezo/issues/new");
+  assert.equal(contactHref("Model quality"), "https://github.com/alibenyezza/sirius-mezo/issues/new?title=Model%20quality");
   const hostile = 'x&cc=evil@example.com&bcc=evil@example.com?body=<script>\r\nBcc: evil@example.com';
-  const href = contactMailtoHref(hostile);
+  const href = contactHref(hostile);
   const url = new URL(href);
-  assert.equal(url.protocol, "mailto:");
-  assert.equal(url.pathname, CONTACT_EMAIL);
-  assert.deepEqual([...url.searchParams.keys()], ["subject"], "aucun paramètre ajouté");
+  assert.equal(url.origin + url.pathname, CONTACT_URL);
+  assert.deepEqual([...url.searchParams.keys()], ["title"], "aucun paramètre ajouté");
   assert.doesNotMatch(href, /[\r\n<>& ]|\?.*\?/);
-  assert.match(href.slice(href.indexOf("?")), /^\?subject=[A-Za-z0-9%._~!*'()-]*$/);
+  assert.match(href.slice(href.indexOf("?")), /^\?title=[A-Za-z0-9%._~!*'()-]*$/);
   assert.ok(href.length < 800);
-  assert.ok(contactMailtoHref("😀".repeat(5000)).length < 200 * 12 + 100, "objet borné à 200 caractères");
+  assert.ok(contactHref("😀".repeat(5000)).length < 200 * 12 + 100, "objet borné à 200 caractères");
 });
 
 test("le lien mailto ne lève jamais d'exception, même avec des substituts UTF-16 isolés ou coupés", () => {
-  const sans = "mailto:sirius.data.contact@gmail.com?subject=";
+  const sans = "https://github.com/alibenyezza/sirius-mezo/issues/new?title=";
   // Substituts isolés (JSON les admet) : remplacés par U+FFFD.
-  assert.equal(contactMailtoHref("\ud800"), `${sans}%EF%BF%BD`);
-  assert.equal(contactMailtoHref("a\udc00b"), `${sans}a%EF%BF%BDb`);
+  assert.equal(contactHref("\ud800"), `${sans}%EF%BF%BD`);
+  assert.equal(contactHref("a\udc00b"), `${sans}a%EF%BF%BDb`);
   // Emoji à cheval sur la limite de 200 : coupé sur des points de code, jamais en deux.
-  const href = contactMailtoHref("a".repeat(199) + "😀😀");
+  const href = contactHref("a".repeat(199) + "😀😀");
   assert.equal(href, `${sans}${"a".repeat(199)}%F0%9F%98%80`);
   assert.equal(decodeURIComponent(href.slice(sans.length)), "a".repeat(199) + "😀");
-  assert.equal(Array.from(decodeURIComponent(contactMailtoHref("é".repeat(500)).slice(sans.length))).length, 200);
+  assert.equal(Array.from(decodeURIComponent(contactHref("é".repeat(500)).slice(sans.length))).length, 200);
   // Un objet réduit à un substitut puis à du blanc ne produit pas de paramètre vide.
-  assert.equal(contactMailtoHref(" \t\n "), "mailto:sirius.data.contact@gmail.com");
+  assert.equal(contactHref(" \t\n "), "https://github.com/alibenyezza/sirius-mezo/issues/new");
 });
 
 test("le lien mailto : bornes exactes des substituts UTF-16 (D800–DFFF) et des contrôles", () => {
-  const sans = "mailto:sirius.data.contact@gmail.com?subject=";
-  assert.equal(contactMailtoHref("\ud7ff"), `${sans}%ED%9F%BF`, "juste sous D800 : conservé");
-  assert.equal(contactMailtoHref("\ud800"), `${sans}%EF%BF%BD`);
-  assert.equal(contactMailtoHref("\udfff"), `${sans}%EF%BF%BD`, "borne haute DFFF remplacée");
-  assert.equal(contactMailtoHref("\ue000"), `${sans}%EE%80%80`, "juste au-dessus de DFFF : conservé");
-  assert.equal(contactMailtoHref("a\u001fb"), `${sans}a%20b`, "0x1f est un contrôle");
-  assert.equal(contactMailtoHref("a b"), `${sans}a%20b`, "0x20 est une espace ordinaire");
-  assert.equal(contactMailtoHref("a\u009fb"), `${sans}a%20b`, "0x9f est un contrôle C1");
-  assert.equal(contactMailtoHref("a\u00a0b"), `${sans}a%C2%A0b`, "0xa0 n'est pas un contrôle");
-  assert.equal(contactMailtoHref("  x  "), `${sans}x`, "espaces retirés");
-  assert.equal(contactMailtoHref("a".repeat(199) + " b"), `${sans}${"a".repeat(199)}`, "espace finale retirée après coupure");
+  const sans = "https://github.com/alibenyezza/sirius-mezo/issues/new?title=";
+  assert.equal(contactHref("\ud7ff"), `${sans}%ED%9F%BF`, "juste sous D800 : conservé");
+  assert.equal(contactHref("\ud800"), `${sans}%EF%BF%BD`);
+  assert.equal(contactHref("\udfff"), `${sans}%EF%BF%BD`, "borne haute DFFF remplacée");
+  assert.equal(contactHref("\ue000"), `${sans}%EE%80%80`, "juste au-dessus de DFFF : conservé");
+  assert.equal(contactHref("a\u001fb"), `${sans}a%20b`, "0x1f est un contrôle");
+  assert.equal(contactHref("a b"), `${sans}a%20b`, "0x20 est une espace ordinaire");
+  assert.equal(contactHref("a\u009fb"), `${sans}a%20b`, "0x9f est un contrôle C1");
+  assert.equal(contactHref("a\u00a0b"), `${sans}a%C2%A0b`, "0xa0 n'est pas un contrôle");
+  assert.equal(contactHref("  x  "), `${sans}x`, "espaces retirés");
+  assert.equal(contactHref("a".repeat(199) + " b"), `${sans}${"a".repeat(199)}`, "espace finale retirée après coupure");
 });
 
 test("le lien mailto retire les contrôles : CR, LF, tabulation, DEL et contrôles C1", () => {
-  const sans = "mailto:sirius.data.contact@gmail.com?subject=";
-  const href = contactMailtoHref("a\r\nBcc: x");
+  const sans = "https://github.com/alibenyezza/sirius-mezo/issues/new?title=";
+  const href = contactHref("a\r\nBcc: x");
   assert.equal(href, `${sans}a%20%20Bcc%3A%20x`);
   assert.doesNotMatch(href, /%0D|%0A|%09/i);
-  assert.equal(contactMailtoHref("a\u007fb\u0085c\u0000d"), `${sans}a%20b%20c%20d`);
+  assert.equal(contactHref("a\u007fb\u0085c\u0000d"), `${sans}a%20b%20c%20d`);
 });
 
 // --- Les constantes lues par les textes doivent pouvoir être importées côté client. ---

@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { test } from "node:test";
-import { CONTACT_EMAIL } from "@/lib/copy/disclaimers";
+import { CONTACT_LABEL, CONTACT_URL } from "@/lib/copy/disclaimers";
 
 /**
  * Tests par inspection de source : la page des conditions est un composant serveur, on
@@ -52,8 +52,8 @@ test("conditions : nature bêta, modèles de base, date de mise à jour et conta
   const date = /Last updated \{LAST_UPDATED\}/.test(terms) && /const LAST_UPDATED = "(\d{1,2} [A-Z][a-z]+ \d{4})"/.exec(terms);
   assert.ok(date, "une date de mise à jour est affichée");
   assert.ok(Number.isFinite(Date.parse(`${date[1]} UTC`)), "la date est lisible");
-  assert.match(terms, /CONTACT_EMAIL/);
-  assert.match(CONTACT_EMAIL, /^[^@\s]+@[^@\s]+$/);
+  assert.match(terms, /CONTACT_LABEL/);
+  assert.match(CONTACT_URL, /^https:\/\/github\.com\/alibenyezza\/sirius-mezo\/issues\/new$/);
 });
 
 test("conditions : aucune promesse absolue sur les modèles ou la sécurité des fonds", () => {

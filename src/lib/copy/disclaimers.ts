@@ -21,8 +21,11 @@ import { formatCount, formatLimitBytes } from "./numbers";
  * `disclaimers.test.ts` vérifie ce point et que les textes suivent les constantes.
  */
 
-/** Adresse de contact affichée dans les textes et utilisée par les liens `mailto:`. */
-export const CONTACT_EMAIL = "sirius.data.contact@gmail.com";
+/** Contact affiché dans les textes : les issues du dépôt public. */
+export const CONTACT_LABEL = "github.com/alibenyezza/sirius-mezo/issues";
+
+/** Page d'ouverture d'une issue, cible des liens de contact. */
+export const CONTACT_URL = "https://github.com/alibenyezza/sirius-mezo/issues/new";
 
 export const DISCLAIMER_IDS = [
   "modelQuality",
@@ -65,7 +68,7 @@ export const DISCLAIMERS: Readonly<Record<DisclaimerId, DisclaimerCopy>> = {
   },
   contactUs: {
     key: "Besoin d’un modèle plus puissant ou de données précises ? Contactez-nous à {email}.",
-    variables: { email: CONTACT_EMAIL },
+    variables: { email: CONTACT_LABEL },
   },
   betaLimits: {
     key: "Bêta : vérification on-chain instantanée du wallet, montants plafonnés par prêt et au total.",
@@ -95,14 +98,13 @@ export function disclaimerText(id: DisclaimerId, t: Translate): string {
 }
 
 /**
- * Lien `mailto:` vers le contact. L'objet éventuel est encodé strictement : un objet
- * construit à partir d'un nom de dataset ne peut ni ajouter d'en-tête (`%0D%0A`), ni de
- * destinataire, ni de paramètre (`&`, `?`, `cc=`).
+ * Lien vers une nouvelle issue du dépôt. Le titre éventuel est encodé strictement : un titre
+ * construit à partir d'un nom de dataset ne peut ajouter aucun paramètre (`&`, `?`, `body=`).
  */
-export function contactMailtoHref(subject?: string): string {
-  const base = `mailto:${CONTACT_EMAIL}`;
+export function contactHref(subject?: string): string {
+  const base = CONTACT_URL;
   const cleaned = subject === undefined ? "" : sanitizeSubject(subject, 200);
-  return cleaned ? `${base}?subject=${encodeURIComponent(cleaned)}` : base;
+  return cleaned ? `${base}?title=${encodeURIComponent(cleaned)}` : base;
 }
 
 /**

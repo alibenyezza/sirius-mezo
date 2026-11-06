@@ -19,7 +19,8 @@ import {
   showsInvitationForm,
   type KybView as KybState,
 } from "./kyb-state";
-import { KYB_CONTACT_EMAIL, kybSoonItems } from "./settings-logic";
+import { KYB_CONTACT_LABEL, kybSoonItems } from "./settings-logic";
+import { contactHref } from "@/lib/copy/disclaimers";
 
 /** Page /kyb : état KYB du wallet (lu sur le contrat), invitation et fonctions à venir. */
 export function KybView() {
@@ -181,7 +182,7 @@ function KybStatusCard({ address, authenticated, instantAccess, onInstantAccess 
           )}
           <p className="text-sm text-muted" data-testid="kyb-contact">
             {t("No invitation? Write to us:")}{" "}
-            <a href={`mailto:${KYB_CONTACT_EMAIL}`} className="font-medium text-accent underline-offset-2 hover:underline">{KYB_CONTACT_EMAIL}</a>
+            <a href={contactHref()} className="font-medium text-accent underline-offset-2 hover:underline">{KYB_CONTACT_LABEL}</a>
           </p>
         </Card>
       )}

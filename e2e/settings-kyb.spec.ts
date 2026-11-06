@@ -97,8 +97,8 @@ test("/kyb non vérifié : formulaire d'invitation et adresse de contact", async
   await expect(page.getByTestId("kyb-status")).toContainText("Not verified");
   await expect(page.getByLabel("Invitation code")).toBeVisible();
   await expect(page.getByTestId("kyb-contact")).toContainText("No invitation? Write to us:");
-  await expect(page.getByRole("link", { name: "sirius.data.contact@gmail.com" }))
-    .toHaveAttribute("href", "mailto:sirius.data.contact@gmail.com");
+  await expect(page.getByRole("link", { name: "github.com/alibenyezza/sirius-mezo/issues" }))
+    .toHaveAttribute("href", "https://github.com/alibenyezza/sirius-mezo/issues/new");
 });
 
 test("/kyb vérifié : date d'expiration affichée, pas de formulaire", async ({ page }) => {

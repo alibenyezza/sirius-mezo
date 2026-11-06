@@ -4,7 +4,7 @@ import type { EvmNetwork } from "@/lib/evm/networks";
 export const TESTNET_SITE_URL = "https://sirius-mezo-staging.vercel.app";
 
 /** Adresse d'écriture pour une entreprise sans invitation KYB. */
-export const KYB_CONTACT_EMAIL = "sirius.data.contact@gmail.com";
+export { CONTACT_LABEL as KYB_CONTACT_LABEL } from "@/lib/copy/disclaimers";
 
 export interface NetworkInfo {
   /** Clé de traduction du libellé. */
