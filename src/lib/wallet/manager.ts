@@ -11,6 +11,7 @@ import {
   selectedWalletRdns,
 } from "@/lib/wallet/discovery";
 import { displayAddress } from "@/lib/evm/address";
+import { typedDataJsonForWallet } from "./typed-data-wire";
 
 export interface Eip1193Provider {
   request(args: { method: string; params?: unknown[] | object }): Promise<unknown>;
@@ -216,7 +217,7 @@ export async function signTypedDataExternal(payload: unknown, address: string): 
   await ensureExpectedChain(wallet);
   const signature = await wallet.request({
     method: "eth_signTypedData_v4",
-    params: [pourLeWallet(address), JSON.stringify(payload)],
+    params: [pourLeWallet(address), typedDataJsonForWallet(payload)],
   });
   if (typeof signature !== "string" || !/^0x[0-9a-fA-F]+$/.test(signature)) {
     throw new Error("Signature EIP-712 refusée par le wallet.");
