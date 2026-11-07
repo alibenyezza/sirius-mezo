@@ -73,7 +73,6 @@ Demo dataset title minted by the provider `0xeeD8eC97B94613a765639Ea72a9410CCb82
 | Pay with BTC: BTC swapped on the Mezo Pools BTC/MUSD pool and locked, in one transaction | [`0xd8ee0d28…c07054`](https://explorer.test.mezo.org/tx/0xd8ee0d284929078d7ffe7600282bb8ee733957a9dc9812c518cf0ed6f5c07054) |
 | Fees distributed: 0.02 MUSD to the treasury, 0.02 MUSD posted on the BTC/MUSD gauge for veBTC voters | [`0x9b25782b…d9607c`](https://explorer.test.mezo.org/tx/0x9b25782bb823c9f43660478b3a90ac40745fd84cd03fe19d42579707c1d9607c) |
 | Provider earnings into Mezo's MUSD Stability Pool (`provideToSP`, 1 MUSD) | [`0xa3c31f31…b9676e`](https://explorer.test.mezo.org/tx/0xa3c31f31067d650b0d0908ec75bc0a5eb5a03849b473f73fba8e46271ab9676e) |
-
 | Through the web app with MetaMask: three datasets published by three provider wallets, a fourth wallet pays 2 MUSD with one signature, the model is trained and the escrow released ([certificate](https://sirius-mezo.vercel.app/certificate/cmw46yuc1000008jthcuy2vdx)) | [`0xf0ca9216…438c04`](https://explorer.test.mezo.org/tx/0xf0ca92165954bd7a280c91df9d685d829990a0fcf5553705b5083c3f4f438c04) |
 
 These were run with throwaway team wallets, the first ones by [`scripts/mezo-team-flows.ts`](scripts/mezo-team-flows.ts), the last one by hand on the live site; `/proof` lists them under team wallets, apart from external buyers.
