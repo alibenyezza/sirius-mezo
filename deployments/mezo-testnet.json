@@ -176,7 +176,7 @@
       "label": "Marketplace purchase through the web app",
       "kind": "tx",
       "value": "0xf0ca92165954bd7a280c91df9d685d829990a0fcf5553705b5083c3f4f438c04",
-      "note": "Full cycle on the live site with MetaMask: three datasets published by three provider wallets, a fourth wallet paid 2 MUSD with one signature (no gas), the logistic model was trained and this settlement released the escrow. Certificate: /certificate/cmw46yuc1000008jthcuy2vdx",
+      "note": "Full cycle on the live site with MetaMask: three datasets published by three provider wallets, a fourth wallet paid 2 MUSD (approve, then lock), the logistic model was trained and this settlement released the escrow. Certificate: /certificate/cmw46yuc1000008jthcuy2vdx",
       "date": "2026-11-05",
       "party": "team"
     },
