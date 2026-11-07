@@ -10,6 +10,9 @@ import { resolveServerNetwork } from "@/lib/evm/networks";
 import { USDC_DECIMALS } from "@/lib/evm/usdc";
 import { deciderDistribution, MONTANT_BTC, MONTANT_MUSD, montantBtcWei, montantMusdAtomic } from "./faucet-policy";
 
+/** Plafond de gas d'un transfert MUSD : large au-dessus du réel (≈ 35–52 k), jamais sous le plancher EIP-7623. */
+const FAUCET_MUSD_GAS = BigInt(120_000);
+
 /**
  * Distribution de fonds de test, réservée aux instances de démonstration.
  *
@@ -104,6 +107,8 @@ async function distribuerFondsDeTestEnSerie(destinataire: string): Promise<Fauce
 
   let usdcTxHash: Hex | null = null;
   if (decision.envoyerMusd) {
+    // Gas fixé : le RPC de Mezo estime un transfert MUSD sous le plancher EIP-7623
+    // (≈ 21,6 k contre 22,6 k), et l'envoi était alors refusé avant même d'être diffusé.
     usdcTxHash = await wallet.writeContract({
       address: musd,
       abi: erc20Abi,
@@ -111,6 +116,7 @@ async function distribuerFondsDeTestEnSerie(destinataire: string): Promise<Fauce
       args: [address, montantMusdAtomic(USDC_DECIMALS)],
       chain,
       account,
+      gas: FAUCET_MUSD_GAS,
     });
     const usdcReceipt = await publicClient.waitForTransactionReceipt({ hash: usdcTxHash, confirmations: 1 });
     if (usdcReceipt.status !== "success") throw new AppError("Transfert MUSD rejeté par la chaîne", 502);

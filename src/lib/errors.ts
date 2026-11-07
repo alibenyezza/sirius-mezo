@@ -16,6 +16,11 @@ export function errorResponse(err: unknown): NextResponse {
   if (err instanceof AppError) {
     return NextResponse.json({ error: err.message }, { status: err.status });
   }
-  console.error(`[api] erreur interne (${err instanceof Error ? err.name : typeof err})`);
+  // Les trois premières lignes `at …` de la pile : des emplacements de code, jamais le
+  // message, qui peut porter un secret. Sans elles, un TypeError en production ne dit pas où.
+  const frames = err instanceof Error && typeof err.stack === "string"
+    ? err.stack.split("\n").filter((line) => line.trim().startsWith("at ")).slice(0, 3).map((line) => line.trim()).join(" | ")
+    : "";
+  console.error(`[api] erreur interne (${err instanceof Error ? err.name : typeof err})${frames ? ` ${frames}` : ""}`);
   return NextResponse.json({ error: "Erreur interne — réessaye." }, { status: 500 });
 }
