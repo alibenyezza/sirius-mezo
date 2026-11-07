@@ -76,3 +76,15 @@ export function parseLockRelayBody(body: unknown): LockRelayBody {
     permitSignature: permitSignature as `0x${string}` | undefined,
   };
 }
+
+/**
+ * Données typées EIP-712 prêtes pour une réponse JSON : les entiers du message en chaînes
+ * décimales. `JSON.stringify` refuse les bigint (la route rendait un 500 « TypeError ») et
+ * les wallets attendent de toute façon des chaînes dans `eth_signTypedData_v4`.
+ */
+export function typedDataForWallet<T extends { message: Record<string, unknown> }>(typedData: T) {
+  const message = Object.fromEntries(
+    Object.entries(typedData.message).map(([key, value]) => [key, typeof value === "bigint" ? value.toString() : value]),
+  );
+  return { ...typedData, message };
+}

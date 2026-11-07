@@ -1,7 +1,8 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
 import { AppError } from "@/lib/app-error";
-import { parseLockRelayBody, serializeLockRequest } from "./gasless-lock-policy";
+import { lockRequestTypedData } from "@/lib/evm/lock-request";
+import { parseLockRelayBody, serializeLockRequest, typedDataForWallet } from "./gasless-lock-policy";
 
 const request = {
   borrower: `0x${"11".repeat(20)}`,
@@ -41,4 +42,13 @@ test("le permit est facultatif, tout le reste est obligatoire et typé", () => {
   ]) {
     assert.throws(() => parseLockRelayBody(broken), (error: unknown) => error instanceof AppError && error.status === 400);
   }
+});
+
+test("charges à signer : sérialisables en JSON, entiers en chaînes décimales pour le wallet", () => {
+  const typed = typedDataForWallet(lockRequestTypedData({ chainId: 31611, escrow: `0x${"77".repeat(20)}`, request }));
+  const wire = JSON.parse(JSON.stringify(typed)) as { message: Record<string, unknown>; domain: { chainId: unknown } };
+  assert.equal(wire.message.amount, "2000000000000000000");
+  assert.equal(wire.message.nonce, "3");
+  assert.equal(wire.message.challengeDays, 7);
+  assert.equal(wire.domain.chainId, 31611);
 });

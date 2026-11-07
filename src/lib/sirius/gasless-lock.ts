@@ -17,7 +17,7 @@ import {
 import { mezoFeatures } from "@/lib/mezo/features";
 import { finalizeLoan, renewLoanLock } from "./borrower";
 import { musdPermitDomainAbi } from "./gasless-lock-abi";
-import { parseLockRelayBody, serializeLockRequest, type LockRelayBody } from "./gasless-lock-policy";
+import { parseLockRelayBody, serializeLockRequest, typedDataForWallet, type LockRelayBody } from "./gasless-lock-policy";
 
 /**
  * Paiement d'un prêt en une signature : `SiriusEscrow.lockWithSignature` (v6).
@@ -116,11 +116,11 @@ export async function prepareLockWithSignature(loanId: string, borrower: string)
     escrow,
     token: permit.token,
     request: serializeLockRequest(request),
-    lockRequest: lockRequestTypedData({ chainId: chain.id, escrow, request }),
-    permit: musdPermitTypedData({
+    lockRequest: typedDataForWallet(lockRequestTypedData({ chainId: chain.id, escrow, request })),
+    permit: typedDataForWallet(musdPermitTypedData({
       chainId: chain.id, token: permit.token, tokenName: permit.name, tokenVersion: permit.version,
       owner: borrowerAddress, spender: escrow, value: terms.amount, nonce: permit.nonce, deadline,
-    }),
+    })),
     // Une allowance déjà suffisante dispense du permit : une signature de moins.
     permitRequired: allowance < terms.amount,
     expiresAt: authorizationDeadline,
