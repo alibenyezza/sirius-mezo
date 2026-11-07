@@ -195,6 +195,22 @@
       "note": "The linear model was trained for 0xafce…d739 and the escrow paid the provider, net of the 2 % fee.",
       "date": "2026-11-06",
       "party": "external"
+    },
+    {
+      "label": "Second external buyer: approve and lock from the wallet",
+      "kind": "tx",
+      "value": "0xed3280f0d6e545cac0e0667796c1c16d5cc0fd8c55f2163e0c8e349e6a1cdec0",
+      "note": "Wallet 0xd7271f0fd996b63cc7d0113d50e36b5c1f72931c, outside the team, paid 2 MUSD for \"Retail store demand – daily units sold\" on the live site with MetaMask (Borrow: approve, then lock).",
+      "date": "2026-11-06",
+      "party": "external"
+    },
+    {
+      "label": "Second external buyer: model delivered, escrow released",
+      "kind": "tx",
+      "value": "0xc2fc263a08fcb0a46af3e335a62381ba47266bb00b1b0cad7c260ff3550df9ab",
+      "note": "The model was trained for 0xd727…931c and the escrow paid the provider, net of the 2 % fee.",
+      "date": "2026-11-06",
+      "party": "external"
     }
   ]
 }
