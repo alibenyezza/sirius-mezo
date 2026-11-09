@@ -211,6 +211,22 @@
       "note": "The model was trained for 0xd727…931c and the escrow paid the provider, net of the 2 % fee.",
       "date": "2026-11-06",
       "party": "external"
+    },
+    {
+      "label": "Third external buyer: approve and lock from the wallet",
+      "kind": "tx",
+      "value": "0x995c3734552a097747cb6a1957ab9c594d1f57a41a86554840aeefede5489a74",
+      "note": "Wallet 0xe5d6be32c0acbc8bea6d21770d1aaefa0d436d66, outside the team, paid 2 MUSD for \"Consumer credit default – 480 borrowers\" on the live site with MetaMask (approve, then lock).",
+      "date": "2026-11-07",
+      "party": "external"
+    },
+    {
+      "label": "Third external buyer: model delivered, escrow released",
+      "kind": "tx",
+      "value": "0x2e032f38e6279d4f5c608843a55414c93492bb1fd3ac7568108777e8297b741a",
+      "note": "The model was trained for 0xe5d6…6d66 and the escrow paid the provider, net of the 2 % fee.",
+      "date": "2026-11-07",
+      "party": "external"
     }
   ]
 }
