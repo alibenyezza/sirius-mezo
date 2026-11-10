@@ -4,7 +4,7 @@ import { recoverTypedDataAddress } from "viem";
 import { handleRunnerOp } from "@/runner/handler";
 import { getPublicClient } from "@/lib/evm/client";
 import { runnerSettlementAddress } from "@/lib/evm/escrow";
-import { lockAuthorizationTypedData, type LockAuthorization } from "@/lib/evm/lock-authorization";
+import { LOCK_AUTHORIZATION_TTL_SECONDS, lockAuthorizationTypedData, type LockAuthorization } from "@/lib/evm/lock-authorization";
 import { loanIdHash } from "@/lib/evm/loan-key";
 import { issueDatasetReceipt } from "@/lib/runner/receipt";
 import { trainingProfileHash } from "@/lib/models/registry";
@@ -81,4 +81,13 @@ test("les permis restent courts et un renouvellement ne dépasse jamais la rése
   assert.ok(deadline > afterApproval);
   assert.ok(deadline <= created.getTime() + PENDING_REAPER_TTL_MS - 60_000);
   assert.throws(() => lockAuthorizationDeadline(created, created.getTime() + PENDING_REAPER_TTL_MS), /expirée/);
+});
+
+test("échéance sous le plafond du contrat même si le dernier bloc retarde sur l’horloge", () => {
+  const now = 1_800_000_000_000;
+  const deadline = lockAuthorizationDeadline(new Date(now), now);
+  // Le contrat refuse deadline > block.timestamp + 5 min ; un bloc vieux de 20 s doit passer.
+  const lateBlockTimestamp = Math.floor(now / 1_000) - 20;
+  assert.ok(deadline <= lateBlockTimestamp + LOCK_AUTHORIZATION_TTL_SECONDS);
+  assert.ok(deadline > Math.floor(now / 1_000) + 60);
 });
