@@ -63,7 +63,8 @@ export async function relayWithdrawMusd(borrower: string, body: unknown) {
   }
   const wallet = createWalletClient({ account: relayer, chain, transport: http(rpcUrl) });
   const txHash: Hex = await wallet.writeContract(simulation.request);
-  const receipt = await publicClient.waitForTransactionReceipt({ hash: txHash, confirmations: 1 });
+  // Pas de recherche de remplacement : Mezo sert la transaction avant son reçu (voir finalizeLoan).
+  const receipt = await publicClient.waitForTransactionReceipt({ hash: txHash, confirmations: 1, checkReplacement: false, timeout: 50_000 });
   if (receipt.status !== "success") throw new AppError("Tirage rejeté par la chaîne", 502);
   const after = await readDrawQuote(account, BigInt(0), network);
   return {

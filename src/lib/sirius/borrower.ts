@@ -291,7 +291,12 @@ export async function finalizeLoan(loanId: string, borrower: string, lockTxHash?
   if (!lockedModel) throw new AppError("Profil d’entraînement du loan invalide", 409);
 
   const publicClient = getPublicClient();
-  const receipt = await publicClient.waitForTransactionReceipt({ hash: submittedLockTxHash as Hex, confirmations: 1 });
+  // Mezo sert la transaction minée quelques secondes avant son reçu : la recherche de
+  // remplacement de viem lit alors un reçu absent et abandonne (TransactionReceiptNotFoundError,
+  // lock pourtant réussi). Sans elle, viem continue simplement d'attendre le reçu.
+  const receipt = await publicClient.waitForTransactionReceipt({
+    hash: submittedLockTxHash as Hex, confirmations: 1, checkReplacement: false, timeout: 50_000,
+  });
   const [transaction, onChain] = await Promise.all([
     publicClient.getTransaction({ hash: submittedLockTxHash as Hex }),
     readLoan(loan.evmLoanKey as Hex),
