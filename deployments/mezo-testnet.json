@@ -227,6 +227,30 @@
       "note": "The model was trained for 0xe5d6…6d66 and the escrow paid the provider, net of the 2 % fee.",
       "date": "2026-11-07",
       "party": "external"
+    },
+    {
+      "label": "Borrow & Buy: MUSD drawn from the buyer's trove",
+      "kind": "tx",
+      "value": "0xf0d083cddd2a48775e05d29507a73c1bf172fef3753441120cfdb78d27971263",
+      "note": "On the live site with MetaMask, 0xE0f6…3cFd5 held a trove but too little MUSD. It signed a WithdrawMUSD message; Sirius relayed withdrawMUSDWithSignature and paid the gas. The trove minted the MUSD to the buyer and the BTC stayed as collateral.",
+      "date": "2026-11-10",
+      "party": "team"
+    },
+    {
+      "label": "Borrow & Buy: one-signature lock",
+      "kind": "tx",
+      "value": "0xbd4ed9cd46302d16823646230833ac8f7a6dd844ed11b01977e71cff2343550a",
+      "note": "The same buyer signed once; Sirius submitted lockWithSignature, paid the gas, and 10 MUSD went into the escrow for the Hourly energy demand dataset.",
+      "date": "2026-11-10",
+      "party": "team"
+    },
+    {
+      "label": "Borrow & Buy: model delivered, escrow released",
+      "kind": "tx",
+      "value": "0xce1f4469f6ebd49d3b1bf532b785dc438694978561bd438b2c3d088750e9343f",
+      "note": "The model was trained for 0xE0f6…3cFd5 and the escrow paid the provider, net of the 2 % fee.",
+      "date": "2026-11-10",
+      "party": "team"
     }
   ]
 }

@@ -74,8 +74,11 @@ Demo dataset title minted by the provider `0xeeD8eC97B94613a765639Ea72a9410CCb82
 | Fees distributed: 0.02 MUSD to the treasury, 0.02 MUSD posted on the BTC/MUSD gauge for veBTC voters | [`0x9b25782b…d9607c`](https://explorer.test.mezo.org/tx/0x9b25782bb823c9f43660478b3a90ac40745fd84cd03fe19d42579707c1d9607c) |
 | Provider earnings into Mezo's MUSD Stability Pool (`provideToSP`, 1 MUSD) | [`0xa3c31f31…b9676e`](https://explorer.test.mezo.org/tx/0xa3c31f31067d650b0d0908ec75bc0a5eb5a03849b473f73fba8e46271ab9676e) |
 | Through the web app with MetaMask: three datasets published by three provider wallets, a fourth wallet pays 2 MUSD (approve, then lock), the model is trained and the escrow released ([certificate](https://sirius-mezo.vercel.app/certificate/cmw46yuc1000008jthcuy2vdx)) | [`0xf0ca9216…438c04`](https://explorer.test.mezo.org/tx/0xf0ca92165954bd7a280c91df9d685d829990a0fcf5553705b5083c3f4f438c04) |
+| Borrow & Buy, on the live site with MetaMask: a buyer with a trove and too little MUSD signs a `WithdrawMUSD` message; Sirius relays `withdrawMUSDWithSignature` and the trove mints the MUSD to the buyer, BTC stays as collateral | [`0xf0d083cd…971263`](https://explorer.test.mezo.org/tx/0xf0d083cddd2a48775e05d29507a73c1bf172fef3753441120cfdb78d27971263) |
+| Same buyer, one signature: Sirius submits `lockWithSignature` and pays the gas, 10 MUSD locked | [`0xbd4ed9cd…43550a`](https://explorer.test.mezo.org/tx/0xbd4ed9cd46302d16823646230833ac8f7a6dd844ed11b01977e71cff2343550a) |
+| Same loan: model trained, escrow released ([certificate](https://sirius-mezo.vercel.app/certificate/cmwaqp7bb000008l3bn6e8wgg)) | [`0xce1f4469…e9343f`](https://explorer.test.mezo.org/tx/0xce1f4469f6ebd49d3b1bf532b785dc438694978561bd438b2c3d088750e9343f) |
 
-These were run with throwaway team wallets, the first ones by [`scripts/mezo-team-flows.ts`](scripts/mezo-team-flows.ts), the last one by hand on the live site; `/proof` lists them under team wallets, apart from external buyers.
+These were run with throwaway team wallets, the first ones by [`scripts/mezo-team-flows.ts`](scripts/mezo-team-flows.ts), the last four by hand on the live site; `/proof` lists them under team wallets, apart from external buyers.
 
 **External buyers** (wallets outside the team, on the live site with MetaMask):
 
