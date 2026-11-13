@@ -6,7 +6,7 @@ Sirius is a data marketplace on Mezo. A data provider keeps their dataset encryp
 
 Built for the **Mezo Buildathon** (October 2026), Wave 1 then Wave 2, in **Track 1 (DeFi) and Track 2 (Access and Distribution)**. MUSD is the escrow currency and the only settlement asset.
 
-**Pitch deck (PDF):** [docs/Sirius-on-Mezo-Wave2-Deck.pdf](docs/Sirius-on-Mezo-Wave2-Deck.pdf)
+**Pitch deck (PDF):** [docs/Sirius-on-Mezo-Wave2-Deck.pdf](docs/Sirius-on-Mezo-Wave2-Deck.pdf) · **Demo video (1:52):** https://youtu.be/ZPMUj_xRgbc
 
 ## Why MUSD
 
